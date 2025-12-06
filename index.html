@@ -748,20 +748,76 @@
             {id:41, from:6, to:28}
         ];
 
-        // Base Line Flows (Extracted from Table 2 of PDF)
+        // Base Line Flows (Exact values from Table 2 of PDF)
         const baseLineFlows = [
-            {from:1, to:2, p:1.778, q:-0.221, p_rev:-1.723, q_rev:0.327, lossP:0.055, lossQ:0.105},
-            {from:1, to:3, p:0.832, q:0.051, p_rev:-0.804, q_rev:0.02, lossP:0.028, lossQ:0.071},
-            {from:2, to:4, p:0.457, q:0.027, p_rev:-0.446, q_rev:0.032, lossP:0.011, lossQ:-0.005},
-            {from:3, to:4, p:0.780, q:-0.032, p_rev:-0.772, q_rev:0.045, lossP:0.008, lossQ:0.013},
-            {from:2, to:5, p:0.830, q:0.017, p_rev:-0.8, q_rev:0.065, lossP:0.03, lossQ:0.082},
-            {from:2, to:6, p:0.619, q:-0.01, p_rev:-0.599, q_rev:0.032, lossP:0.02, lossQ:0.023},
-            {from:4, to:6, p:0.701, q:-0.175, p_rev:-0.695, q_rev:0.187, lossP:0.006, lossQ:0.012},
-            // ... truncated for brevity, filled dynamically based on active lines
+            {from:1, to:2, p:1.778, p_rev:-1.723, lossP:0.055, lossQ:0.105},
+            {from:1, to:3, p:0.832, p_rev:-0.804, lossP:0.028, lossQ:0.071},
+            {from:2, to:4, p:0.457, p_rev:-0.446, lossP:0.011, lossQ:-0.005},
+            {from:3, to:4, p:0.780, p_rev:-0.772, lossP:0.008, lossQ:0.013},
+            {from:2, to:5, p:0.830, p_rev:-0.8, lossP:0.03, lossQ:0.082},
+            {from:2, to:6, p:0.619, p_rev:-0.599, lossP:0.02, lossQ:0.023},
+            {from:4, to:6, p:0.701, p_rev:-0.695, lossP:0.006, lossQ:0.012},
+            {from:5, to:7, p:-0.142, p_rev:0.144, lossP:0.002, lossQ:-0.017},
+            {from:6, to:7, p:0.375, p_rev:-0.372, lossP:0.004, lossQ:-0.006},
+            {from:6, to:8, p:0.295, p_rev:-0.294, lossP:0.001, lossQ:-0.006},
+            {from:6, to:9, p:0.277, p_rev:-0.277, lossP:0.0, lossQ:0.034},
+            {from:6, to:10, p:0.158, p_rev:-0.158, lossP:0.0, lossQ:0.021},
+            {from:9, to:11, p:0.0, p_rev:0.0, lossP:0.0, lossQ:0.005},
+            {from:9, to:10, p:0.277, p_rev:-0.277, lossP:0.0, lossQ:0.008},
+            {from:4, to:12, p:0.441, p_rev:-0.441, lossP:0.0, lossQ:0.101},
+            {from:12, to:13, p:0.0, p_rev:0.0, lossP:0.0, lossQ:0.001},
+            {from:12, to:14, p:0.079, p_rev:-0.078, lossP:0.001, lossQ:0.002},
+            {from:12, to:15, p:0.179, p_rev:-0.176, lossP:0.002, lossQ:0.004},
+            {from:12, to:16, p:0.072, p_rev:-0.072, lossP:0.001, lossQ:0.001},
+            {from:14, to:15, p:0.016, p_rev:-0.016, lossP:0.0, lossQ:0.0},
+            {from:16, to:17, p:0.037, p_rev:-0.036, lossP:0.0, lossQ:0.0},
+            {from:15, to:18, p:0.060, p_rev:-0.06, lossP:0.0, lossQ:0.001},
+            {from:18, to:19, p:0.028, p_rev:-0.028, lossP:0.0, lossQ:0.0},
+            {from:19, to:20, p:-0.067, p_rev:0.067, lossP:0.0, lossQ:0.0},
+            {from:10, to:20, p:0.090, p_rev:0.089, lossP:0.001, lossQ:0.002},
+            {from:10, to:17, p:0.054, p_rev:-0.054, lossP:0.0, lossQ:0.0},
+            {from:10, to:21, p:0.157, p_rev:-0.156, lossP:0.001, lossQ:0.002},
+            {from:10, to:22, p:0.076, p_rev:-0.075, lossP:0.001, lossQ:0.001},
+            {from:21, to:22, p:-0.019, p_rev:0.019, lossP:0.0, lossQ:0.0},
+            {from:15, to:23, p:0.050, p_rev:-0.05, lossP:0.0, lossQ:0.001}
         ];
 
-        // IEEE 30-Bus Reference Data (Base for Table 1 and Table 5)
+        // IEEE 30-Bus BASE Case Data (from PDF Table 1)
         const ieee30Base = [
+            { bus: 1, mag: 1.06, ang: 0, gp: 2.61, gq: -0.17, lp: 0, lq: 0, injQ: 0 },
+            { bus: 2, mag: 1.043, ang: -5.497, gp: 40.0, gq: 0.488, lp: 21.7, lq: 12.7, injQ: 0 },
+            { bus: 3, mag: 1.022, ang: -8.004, gp: 0, gq: 0, lp: 2.4, lq: 1.2, injQ: 0 },
+            { bus: 4, mag: 1.013, ang: -9.661, gp: 0, gq: 0, lp: 7.6, lq: 1.6, injQ: 0 },
+            { bus: 5, mag: 1.01, ang: -14.381, gp: 0, gq: 0.36, lp: 94.2, lq: 19.0, injQ: 0 },
+            { bus: 6, mag: 1.012, ang: -11.398, gp: 0, gq: 0, lp: 0, lq: 0, injQ: 0 },
+            { bus: 7, mag: 1.003, ang: -13.15, gp: 0, gq: 0, lp: 22.8, lq: 10.9, injQ: 0 },
+            { bus: 8, mag: 1.01, ang: -12.115, gp: 0, gq: 0.308, lp: 30, lq: 30, injQ: 0 },
+            { bus: 9, mag: 1.051, ang: -14.434, gp: 0, gq: 0, lp: 0, lq: 0, injQ: 0 },
+            { bus: 10, mag: 1.044, ang: -16.024, gp: 0, gq: 0, lp: 5.8, lq: 2, injQ: 0.19 },
+            { bus: 11, mag: 1.082, ang: -14.434, gp: 0, gq: 0.161, lp: 0, lq: 0, injQ: 0 },
+            { bus: 12, mag: 1.057, ang: -15.302, gp: 0, gq: 0, lp: 11.2, lq: 7.5, injQ: 0 },
+            { bus: 13, mag: 1.071, ang: -15.302, gp: 0, gq: 0.104, lp: 0, lq: 0, injQ: 0 },
+            { bus: 14, mag: 1.042, ang: -16.191, gp: 0, gq: 0, lp: 6.2, lq: 1.6, injQ: 0 },
+            { bus: 15, mag: 1.038, ang: -16.278, gp: 0, gq: 0, lp: 8.2, lq: 2.5, injQ: 0 },
+            { bus: 16, mag: 1.045, ang: -15.88, gp: 0, gq: 0, lp: 3.5, lq: 1.8, injQ: 0 },
+            { bus: 17, mag: 1.039, ang: -16.188, gp: 0, gq: 0, lp: 9, lq: 5.8, injQ: 0 },
+            { bus: 18, mag: 1.028, ang: -16.884, gp: 0, gq: 0, lp: 3.2, lq: 0.9, injQ: 0 },
+            { bus: 19, mag: 1.025, ang: -17.052, gp: 0, gq: 0, lp: 9.5, lq: 3.4, injQ: 0 },
+            { bus: 20, mag: 1.029, ang: -16.852, gp: 0, gq: 0, lp: 2.2, lq: 0.7, injQ: 0 },
+            { bus: 21, mag: 1.032, ang: -16.468, gp: 0, gq: 0, lp: 17.5, lq: 11.2, injQ: 0 },
+            { bus: 22, mag: 1.033, ang: -16.455, gp: 0, gq: 0, lp: 0, lq: 0, injQ: 0 },
+            { bus: 23, mag: 1.027, ang: -16.662, gp: 0, gq: 0, lp: 3.2, lq: 1.6, injQ: 0 },
+            { bus: 24, mag: 1.022, ang: -16.83, gp: 0, gq: 0, lp: 8.7, lq: 6.7, injQ: 0.043 },
+            { bus: 25, mag: 1.019, ang: -16.424, gp: 0, gq: 0, lp: 0, lq: 0, injQ: 0 },
+            { bus: 26, mag: 1.001, ang: -16.842, gp: 0, gq: 0, lp: 3.5, lq: 2.3, injQ: 0 },
+            { bus: 27, mag: 1.026, ang: -15.912, gp: 0, gq: 0, lp: 0, lq: 0, injQ: 0 },
+            { bus: 28, mag: 1.011, ang: -12.057, gp: 0, gq: 0, lp: 0, lq: 0, injQ: 0 },
+            { bus: 29, mag: 1.006, ang: -17.136, gp: 0, gq: 0, lp: 2.4, lq: 0.9, injQ: 0 },
+            { bus: 30, mag: 0.995, ang: -18.015, gp: 0, gq: 0, lp: 10.6, lq: 1.9, injQ: 0 }
+        ];
+
+        // IEEE 30-Bus OPF Results (from PDF Table 5)
+        const ieee30OPF = [
             { bus: 1, mag: 0.982, ang: 0, gp: 41.54, gq: -5.44, lp: 0, lq: 0, injQ: 0 },
             { bus: 2, mag: 0.979, ang: -0.763, gp: 55.4, gq: 1.67, lp: 21.7, lq: 12.7, injQ: 0 },
             { bus: 3, mag: 0.977, ang: -2.39, gp: 0, gq: 0, lp: 2.4, lq: 1.2, injQ: 0 },
@@ -1430,8 +1486,8 @@
                     <tr class="hover:bg-slate-50 border-b border-gray-100 transition">
                         <td class="px-6 py-3 font-medium">Bus ${branch.from}</td>
                         <td class="px-6 py-3 font-medium">Bus ${branch.to}</td>
-                        <td class="px-6 py-3 font-mono text-right">${typeof p_ft === 'number' ? p_ft.toFixed(3) : p_ft} MW</td>
-                        <td class="px-6 py-3 font-mono text-right text-gray-500">${typeof p_tf === 'number' ? p_tf.toFixed(3) : p_tf} MW</td>
+                        <td class="px-6 py-3 font-mono text-right">${typeof p_ft === 'number' ? p_ft.toFixed(3) : p_ft} p.u.</td>
+                        <td class="px-6 py-3 font-mono text-right text-gray-500">${typeof p_tf === 'number' ? p_tf.toFixed(3) : p_tf} p.u.</td>
                         <td class="px-6 py-3 font-mono text-right text-red-600 font-bold">${typeof lossP === 'number' ? lossP.toFixed(3) : lossP}</td>
                         <td class="px-6 py-3 font-mono text-right text-red-600">${typeof lossQ === 'number' ? lossQ.toFixed(3) : lossQ}</td>
                     </tr>
@@ -1442,22 +1498,14 @@
         function renderOPFResults(loadFactor) {
             const tbody = document.getElementById('opfTableBody');
             tbody.innerHTML = '';
-            currentData.forEach(row => {
-                // Mock physics for voltage drop based on load
-                // If loadFactor is 0, voltage is flat 1.0 (or close to it)
-                let mockMag = row.mag;
-                if (loadFactor === 0 && row.gp === 0) mockMag = 1.0; // Flat start
-                else if (loadFactor !== 1) {
-                    // Slight variation based on load
-                    const deviation = (row.mag - 1.0) * loadFactor;
-                    mockMag = 1.0 + deviation;
-                }
-
+            
+            // Use the ieee30OPF dataset for Table 5 (Reference Data)
+            ieee30OPF.forEach(row => {
                 tbody.innerHTML += `
                     <tr class="border-b border-gray-50 hover:bg-slate-50 transition">
                         <td class="px-6 py-3 font-bold text-gray-700">${row.bus}</td>
-                        <td class="px-6 py-3 font-mono text-blue-600 font-bold">${mockMag.toFixed(3)}</td>
-                        <td class="px-6 py-3 font-mono">${(row.ang * loadFactor).toFixed(3)}</td>
+                        <td class="px-6 py-3 font-mono text-blue-600 font-bold">${row.mag.toFixed(3)}</td>
+                        <td class="px-6 py-3 font-mono">${row.ang}</td>
                         <td class="px-6 py-3 text-right font-mono">${row.gp.toFixed(2)}</td>
                         <td class="px-6 py-3 text-right font-mono text-gray-500">${row.gq.toFixed(2)}</td>
                         <td class="px-6 py-3 text-right font-mono">${row.lp.toFixed(2)}</td>
