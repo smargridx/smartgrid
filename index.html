@@ -114,7 +114,7 @@
 
                         <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-4 leading-snug text-white shadow-black drop-shadow-md">
                             Design and Implementation of a <br>
-                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-blue-200 to-purple-200 animate-pulse">Web-Based Smart Grid Simulator</span> <br>
+                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-blue-200 to-purple-200 animate-pulse">Web-Based Power Flow Simulator</span> <br>
                             for Educational Use
                         </h1>
                         <p class="text-blue-100 font-medium text-sm border-l-4 border-yellow-400 pl-4 py-1 opacity-90 bg-blue-900/20 rounded-r-lg">
@@ -464,8 +464,8 @@
                                 <span onclick="event.stopPropagation(); openHelp('tabOPF')" class="info-btn-sm"><i class="ph ph-question text-xs"></i></span>
                             </button>
                              <button onclick="playSound(); switchTab('math')" id="tab-math" class="tab-inactive py-4 px-2 border-b-2 border-transparent font-medium text-sm whitespace-nowrap flex items-center gap-1 transition-colors">
-                                Solver Logic & Math
-                                <span class="bg-purple-100 text-purple-700 text-[10px] px-1.5 rounded-full font-bold ml-1">NEW</span>
+                                Newton-Raphson Logic
+                                <span class="bg-purple-100 text-purple-700 text-[10px] px-1.5 rounded-full font-bold ml-1">NR</span>
                             </button>
                             <button onclick="playSound(); switchTab('compliance')" id="tab-compliance" class="tab-inactive py-4 px-2 border-b-2 border-transparent font-medium text-sm whitespace-nowrap flex items-center gap-2 transition-colors">
                                 PGC/PDC Compliance
@@ -530,7 +530,7 @@
                     <!-- MATHEMATICAL SOLVER TAB -->
                     <div id="content-math" class="hidden bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden animate-fadeIn flex flex-col h-[700px]">
                         <div class="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
-                           <h3 class="font-bold text-gray-700">Solver Logic & Computation Step-by-Step</h3>
+                           <h3 class="font-bold text-gray-700">Newton-Raphson Iteration & Formulas</h3>
                            <div class="flex gap-2">
                                 <button onclick="playSound(); startSolverAnim()" id="btnMathStart" class="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded hover:bg-green-200 transition btn-click flex items-center gap-1"><i class="ph ph-play"></i> Auto Run</button>
                                 <button onclick="playSound(); stepSolverAnim()" id="btnMathStep" class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded hover:bg-blue-200 transition btn-click flex items-center gap-1"><i class="ph ph-steps"></i> Step</button>
@@ -563,6 +563,17 @@
                                     <div class="absolute right-4 top-1/2 bottom-12 w-8 border-r-2 border-dashed border-gray-300 rounded-r-xl pointer-events-none"></div>
                                     <div class="absolute right-4 bottom-12 w-24 border-b-2 border-dashed border-gray-300 pointer-events-none"></div>
                                     <div class="absolute right-4 top-1/2 w-24 border-t-2 border-dashed border-gray-300 pointer-events-none"></div>
+                                </div>
+
+                                <!-- NEW: Theory Reference Card -->
+                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-xs text-blue-900">
+                                    <h5 class="font-bold border-b border-blue-200 pb-2 mb-2">Newton-Raphson Fundamentals</h5>
+                                    <ul class="list-disc pl-4 space-y-2">
+                                        <li><strong>State Variables (x):</strong> Voltage Magnitude ($|V|$) and Angle ($\delta$).</li>
+                                        <li><strong>Mismatch Equation:</strong> $f(x) = S_{calc} - S_{scheduled} = 0$.</li>
+                                        <li><strong>Jacobian (J):</strong> Matrix of first-order partial derivatives. Determines direction to move.</li>
+                                        <li><strong>Update Rule:</strong> $x_{new} = x_{old} - J^{-1} \cdot f(x_{old})$.</li>
+                                    </ul>
                                 </div>
 
                                 <!-- Equations Reference (Mini) -->
@@ -1338,10 +1349,14 @@
             currentSolverStep = 0;
             
             // Step 1: Init
-            solverQueue.push({ node: 'flow-start', text: "> System initialized to Flat Start (1.0 p.u., 0 deg).", eq: "$$ V_i = 1.0 \\angle 0^\\circ $$" });
+            solverQueue.push({ 
+                node: 'flow-start', 
+                text: "> Step 1: Initialization. Set Flat Start.", 
+                eq: "$$ |V_i| = 1.0, \\delta_i = 0 \\quad \\forall i \\in \\text{PQ Buses} $$" 
+            });
             
             if(loadFactor === 0) {
-                 solverQueue.push({ node: 'flow-check', text: "> Max Mismatch: 0.0000. Converged immediately.", eq: "$$ \\Delta P < \\epsilon $$" });
+                 solverQueue.push({ node: 'flow-check', text: "> Max Mismatch: 0.0000. System balanced.", eq: "$$ \\Delta P \\approx 0, \\Delta Q \\approx 0 $$" });
                  return;
             }
 
@@ -1350,15 +1365,54 @@
             
             while (maxMismatch > 0.0001 && iterations < 4) {
                 iterations++;
-                solverQueue.push({ node: 'flow-mismatch', text: `> Iteration ${iterations}: Calculating power mismatches...`, eq: "$$ \\Delta P_i = P_i^{spec} - P_i^{calc} $$" });
-                solverQueue.push({ node: 'flow-check', text: `  Max dP: ${(maxMismatch * 1.2).toFixed(4)} | Max dQ: ${(maxMismatch * 0.9).toFixed(4)}`, eq: "$$ max(|\\Delta P|, |\\Delta Q|) > \\epsilon $$" });
-                solverQueue.push({ node: 'flow-jacobian', text: "> Building Jacobian Matrix (59x59). Computing partial derivatives.", eq: "$$ J = \\begin{bmatrix} \\partial P/\\partial \\delta & \\partial P/\\partial V \\\\ \\partial Q/\\partial \\delta & \\partial Q/\\partial V \\end{bmatrix} $$" });
-                solverQueue.push({ node: 'flow-update', text: "> Solving linear system... Updating State Variables.", eq: "$$ x_{new} = x_{old} - J^{-1} \\cdot \\Delta M $$" });
+                
+                // Mismatches - Detailed Formula
+                solverQueue.push({ 
+                    node: 'flow-mismatch', 
+                    text: `> Iteration ${iterations}: Calculating Power Mismatches (Summation of Flows).`, 
+                    eq: "$$ P_i^{calc} = \\sum_{k=1}^N |V_i||V_k|(G_{ik}\\cos\\theta_{ik} + B_{ik}\\sin\\theta_{ik}) $$" 
+                });
+                 solverQueue.push({ 
+                    node: 'flow-mismatch', 
+                    text: `> Computing difference from scheduled values.`, 
+                    eq: "$$ \\Delta P_i = P_i^{sch} - P_i^{calc} \\\\ \\Delta Q_i = Q_i^{sch} - Q_i^{calc} $$" 
+                });
+                
+                solverQueue.push({ 
+                    node: 'flow-check', 
+                    text: `  Max Error: ${(maxMismatch * 1.2).toFixed(5)} p.u. (Tolerance: 0.0001)`, 
+                    eq: "$$ \\max(|\\Delta P|, |\\Delta Q|) > \\epsilon $$" 
+                });
+                
+                // Jacobian - Matrix Structure
+                solverQueue.push({ 
+                    node: 'flow-jacobian', 
+                    text: "> Building Jacobian Matrix J (Sensitivity Analysis).", 
+                    eq: "$$ J = \\begin{bmatrix} \\frac{\\partial P}{\\partial \\delta} & \\frac{\\partial P}{\\partial |V|} \\\\ \\frac{\\partial Q}{\\partial \\delta} & \\frac{\\partial Q}{\\partial |V|} \\end{bmatrix} $$" 
+                });
+                
+                // Update - Matrix Equation
+                solverQueue.push({ 
+                    node: 'flow-update', 
+                    text: "> Solving Linear System (Ax = b) for corrections.", 
+                    eq: "$$ \\begin{bmatrix} \\Delta \\delta \\\\ \\Delta |V| \\end{bmatrix} = - [J]^{-1} \\begin{bmatrix} \\Delta P \\\\ \\Delta Q \\end{bmatrix} $$" 
+                });
+
+                // Update - State Variables
+                solverQueue.push({ 
+                    node: 'flow-update', 
+                    text: "> Applying corrections to Voltage magnitudes and Angles.", 
+                    eq: "$$ \\delta_i^{(k+1)} = \\delta_i^{(k)} + \\Delta \\delta_i \\\\ |V_i|^{(k+1)} = |V_i|^{(k)} + \\Delta |V_i| $$" 
+                });
                 
                 maxMismatch *= 0.15; // Simulate convergence
             }
             
-            solverQueue.push({ node: 'flow-check', text: "> Convergence Achieved. Mismatches within tolerance.", eq: "$$ \\Delta \\approx 0 $$" });
+            solverQueue.push({ 
+                node: 'flow-check', 
+                text: "> Converged! Solution found within tolerance.", 
+                eq: "$$ \\text{Solution Found in } " + iterations + " \\text{ Iterations} $$" 
+            });
         }
 
         function renderSolverStep(stepIndex) {
