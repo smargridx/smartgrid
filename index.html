@@ -10,6 +10,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Vis.js Network (For Single Line Diagram) -->
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <!-- HTML2PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <!-- MathJax for nice equations -->
@@ -84,6 +86,15 @@
         }
         .flow-arrow-active {
             color: #3b82f6;
+        }
+        
+        /* Network Graph Styles */
+        #sld-container {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            background-color: #fff;
         }
     </style>
 </head>
@@ -487,6 +498,10 @@
                                 Newton-Raphson Logic
                                 <span class="bg-purple-100 text-purple-700 text-[10px] px-1.5 rounded-full font-bold ml-1">NR</span>
                             </button>
+                            <button onclick="playSound(); switchTab('sld')" id="tab-sld" class="tab-inactive py-4 px-2 border-b-2 border-transparent font-medium text-sm whitespace-nowrap flex items-center gap-1 transition-colors">
+                                Single Line Diagram
+                                <span onclick="event.stopPropagation(); openHelp('tabSLD')" class="info-btn-sm"><i class="ph ph-question text-xs"></i></span>
+                            </button>
                             <button onclick="playSound(); switchTab('compliance')" id="tab-compliance" class="tab-inactive py-4 px-2 border-b-2 border-transparent font-medium text-sm whitespace-nowrap flex items-center gap-2 transition-colors">
                                 PGC/PDC Compliance
                                 <span onclick="event.stopPropagation(); openHelp('compliance')" class="info-btn-sm" title="Compliance Help">
@@ -545,6 +560,24 @@
                                 <tbody id="opfTableBody" class="divide-y divide-gray-100"></tbody>
                             </table>
                         </div>
+                    </div>
+
+                    <!-- SINGLE LINE DIAGRAM TAB -->
+                    <div id="content-sld" class="hidden bg-white p-6 rounded-xl border border-gray-200 shadow-sm animate-fadeIn">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h3 class="font-bold text-gray-700">Single Line Diagram</h3>
+                                <p class="text-xs text-gray-500">IEEE Standard Representation (Auto-Generated)</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <div class="flex items-center gap-2 text-xs text-gray-600">
+                                    <span class="flex items-center gap-1"><span class="w-4 h-1 bg-black inline-block"></span> Bus</span>
+                                    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-100 border border-blue-600 inline-block"></span> Gen</span>
+                                    <span class="flex items-center gap-1"><span class="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[6px] border-t-purple-600 inline-block"></span> Load</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="sld-container"></div>
                     </div>
 
                     <!-- MATHEMATICAL SOLVER TAB -->
@@ -658,6 +691,7 @@
         </main>
     </div>
 
+    <!-- ... (Previous Author/Help/AddLine Modals remain unchanged) ... -->
     <!-- Author Modal -->
     <div id="authorModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-[fadeIn_0.3s_ease-out]">
@@ -889,6 +923,7 @@
         let currentData = JSON.parse(JSON.stringify(zeroData));
         let activeBranches = JSON.parse(JSON.stringify(baseBranchData));
         let chartInstance = null;
+        let network = null; // Vis.js instance
 
         // --- APP FLOW ---
         function startApp() {
@@ -996,6 +1031,19 @@
                         </div>
                     </div>
                     <p class="mt-4 text-sm text-gray-500"><strong>p.u. (Per Unit):</strong> A normalized value. 1.0 p.u. represents the ideal rated voltage (e.g., 230 kV). 0.95 p.u. means 95% of rated voltage.</p>
+                `
+            },
+            tabSLD: {
+                title: "Single Line Diagram",
+                content: `
+                    <p class="mb-3">This tab visualizes the electrical network topology using standard symbols.</p>
+                    <ul class="list-disc ml-5 space-y-2">
+                        <li><strong>Black Bar:</strong> Represents a Bus (Node).</li>
+                        <li><strong>Circle:</strong> Represents a Generator.</li>
+                        <li><strong>Triangle (Arrow):</strong> Represents a Load.</li>
+                        <li><strong>Lines:</strong> Represent transmission lines connecting buses.</li>
+                    </ul>
+                    <p class="mt-2 text-sm text-gray-500">You can drag nodes to rearrange the view. The layout updates automatically if you add/remove buses.</p>
                 `
             },
             // --- NEW TOPICS ---
@@ -1575,6 +1623,10 @@
                 document.getElementById('loadingState').classList.add('hidden');
                 document.getElementById('loadingState').classList.remove('flex');
                 document.getElementById('resultsState').classList.remove('hidden');
+                
+                // Render SLD
+                renderSLD();
+                
                 switchTab('line-flows');
             }, 1200);
         }
@@ -1734,8 +1786,215 @@
             });
         }
 
+        // --- SINGLE LINE DIAGRAM RENDERER ---
+        function renderSLD() {
+            const container = document.getElementById('sld-container');
+            const nodes = new vis.DataSet();
+            const edges = new vis.DataSet();
+
+            // 1. Calculate Levels using BFS (Breadth-First Search) starting from Slack Bus (1)
+            const busLevels = {};
+            const queue = [{ bus: 1, level: 0 }];
+            const visited = new Set([1]);
+            busLevels[1] = 0;
+
+            // Build adjacency list for BFS
+            const adj = {};
+            currentData.forEach(d => adj[d.bus] = []);
+            activeBranches.forEach(b => {
+                if(adj[b.from]) adj[b.from].push(b.to);
+                if(adj[b.to]) adj[b.to].push(b.from);
+            });
+
+            // Run BFS
+            while(queue.length > 0) {
+                const { bus, level } = queue.shift();
+                const neighbors = adj[bus] || [];
+                neighbors.forEach(n => {
+                    if(!visited.has(n)) {
+                        visited.add(n);
+                        busLevels[n] = level + 1;
+                        queue.push({ bus: n, level: level + 1 });
+                    }
+                });
+            }
+            
+            currentData.forEach(d => {
+                if(busLevels[d.bus] === undefined) busLevels[d.bus] = 0;
+            });
+
+
+            // 2. Create Bus Nodes (Bars) & Components
+            currentData.forEach(bus => {
+                const level = busLevels[bus.bus] * 2; 
+
+                // Bus Node (Black Bar) with Voltage Info
+                nodes.add({
+                    id: `B-${bus.bus}`,
+                    label: `Bus ${bus.bus}\n${bus.mag.toFixed(3)} p.u.\n${bus.ang.toFixed(1)}°`,
+                    level: level, 
+                    shape: 'box',
+                    color: { 
+                        background: 'black', 
+                        border: 'black', 
+                        highlight: { background: '#333', border: '#333' } 
+                    },
+                    font: { 
+                        color: 'black', 
+                        vadjust: -35, 
+                        size: 12, 
+                        face: 'monospace',
+                        align: 'center',
+                        background: 'white' // Better readability
+                    },
+                    widthConstraint: { minimum: 120, maximum: 120 },
+                    heightConstraint: { minimum: 6, maximum: 6 },
+                    shapeProperties: { borderRadius: 0 },
+                    margin: 5
+                });
+
+                // Generator Node (Source -> Feeds INTO Bus)
+                if (bus.gp > 0 || bus.gq !== 0) {
+                    nodes.add({
+                        id: `G-${bus.bus}`,
+                        label: `Gen\n${bus.gp.toFixed(1)} MW\n${bus.gq.toFixed(1)} Mvar`, 
+                        level: level - 1, 
+                        shape: 'circle',
+                        color: { 
+                            background: '#dcfce7', // Green tint
+                            border: '#166534', 
+                            highlight: { background: '#bbf7d0', border: '#15803d' } 
+                        },
+                        font: { size: 10, color: '#14532d', face: 'monospace' },
+                        size: 25,
+                        borderWidth: 2,
+                        shadow: false
+                    });
+                    
+                    edges.add({ 
+                        from: `G-${bus.bus}`, 
+                        to: `B-${bus.bus}`, 
+                        width: 2, 
+                        color: 'black', 
+                        arrows: { to: { enabled: false } },
+                        smooth: { enabled: false } // Rigid connection
+                    });
+                }
+
+                // Load Node (Load -> Draws FROM Bus)
+                if (bus.lp > 0 || bus.lq !== 0) {
+                    nodes.add({
+                        id: `L-${bus.bus}`,
+                        label: `Load\n${bus.lp.toFixed(1)} MW\n${bus.lq.toFixed(1)} Mvar`, 
+                        level: level + 1, 
+                        shape: 'triangleDown',
+                        color: { 
+                            background: '#f3e8ff', 
+                            border: '#7e22ce', 
+                            highlight: { background: '#e9d5ff', border: '#6b21a8' } 
+                        },
+                        font: { size: 10, color: '#581c87', face: 'monospace', vadjust: 20 },
+                        size: 15,
+                        shadow: false
+                    });
+                    
+                    edges.add({ 
+                        from: `B-${bus.bus}`, 
+                        to: `L-${bus.bus}`, 
+                        width: 2, 
+                        color: 'black',
+                        arrows: { to: { enabled: true, scaleFactor: 0.5, type: 'arrow' } },
+                        smooth: { enabled: false } // Rigid connection
+                    });
+                }
+            });
+
+            // 3. Create Transmission Lines with Data
+            activeBranches.forEach(branch => {
+                // Find flow data
+                let flowData = baseLineFlows.find(f => (f.from === branch.from && f.to === branch.to) || (f.from === branch.to && f.to === branch.from));
+                
+                // Calculate Approx Amps (I = S / V, assume S ~ P for simplified display or calculate full S)
+                // S = sqrt(P^2 + Q^2). Base MVA = 100.
+                let label = "";
+                if(flowData) {
+                    const p = Math.abs(flowData.p); // Use absolute for label
+                    const q = Math.abs(flowData.q);
+                    const s = Math.sqrt(p*p + q*q); // p.u.
+                    const i_pu = s / 1.0; // Approx I = S/V (V~1.0)
+                    // Convert to physical units (Base Current depends on Voltage level, simplified here to p.u. flow)
+                    const mw = (p * 100).toFixed(1); // 100 MVA Base
+                    // label = `${mw} MW\nLoss: ${(flowData.lossP * 100).toFixed(2)} MW`;
+                    label = `${mw} MW`;
+                }
+
+                edges.add({
+                    from: `B-${branch.from}`,
+                    to: `B-${branch.to}`,
+                    label: label,
+                    font: { align: 'horizontal', size: 9, background: 'rgba(255,255,255,0.8)', strokeWidth: 0 },
+                    color: { color: '#3b82f6' }, // Blue lines
+                    width: 1.5,
+                    // Orthogonal-ish style using Vertical Cubic Bezier with roundness
+                    smooth: { 
+                        type: 'cubicBezier', 
+                        forceDirection: 'vertical',
+                        roundness: 0.4
+                    },
+                    arrows: { to: { enabled: false } } 
+                });
+            });
+
+            // 4. Configuration
+            const data = { nodes: nodes, edges: edges };
+            const options = {
+                nodes: {
+                    borderWidth: 0,
+                    shadow: false
+                },
+                edges: {
+                    shadow: false,
+                    color: { inherit: false }
+                },
+                layout: {
+                    hierarchical: {
+                        enabled: true,
+                        direction: 'UD', // Up-Down
+                        sortMethod: 'directed', 
+                        nodeSpacing: 200, // Wider for labels
+                        levelSeparation: 150, // More vertical space
+                        treeSpacing: 220,
+                        blockShifting: true,
+                        edgeMinimization: true,
+                        parentCentralization: true,
+                        shakeTowards: 'roots'
+                    }
+                },
+                physics: {
+                    enabled: false 
+                },
+                interaction: { 
+                    dragNodes: false,
+                    zoomView: true, 
+                    dragView: true,
+                    hover: true
+                }
+            };
+
+            if (network) {
+                network.destroy();
+            }
+            network = new vis.Network(container, data, options);
+            
+            network.once("afterDrawing", function() {
+                network.fit({
+                    animation: false
+                });
+            });
+        }
+
         function switchTab(id) {
-            ['line-flows', 'opf', 'compliance', 'voltage', 'math'].forEach(t => {
+            ['line-flows', 'opf', 'compliance', 'voltage', 'math', 'sld'].forEach(t => {
                 const content = document.getElementById(`content-${t}`);
                 const tab = document.getElementById(`tab-${t}`);
                 if(content && tab) {
@@ -1747,6 +2006,11 @@
             document.getElementById(`content-${id}`).classList.remove('hidden');
             document.getElementById(`tab-${id}`).classList.add('tab-active');
             document.getElementById(`tab-${id}`).classList.remove('tab-inactive', 'border-transparent');
+            
+            // If switching to SLD, ensure it redraws to fit container
+            if (id === 'sld' && network) {
+                network.fit();
+            }
         }
     </script>
 </body>
