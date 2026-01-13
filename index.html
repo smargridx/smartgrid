@@ -343,8 +343,14 @@
                         </div>
 
                         <!-- Bus Data Input Table -->
-                        <div id="input-bus-data" class="overflow-x-auto h-[600px] scroll-custom">
-                            <table class="min-w-full text-sm text-left text-gray-600">
+                        <div id="input-bus-data" class="overflow-x-auto h-[600px] scroll-custom p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-gray-700">System Bus Configuration</h3>
+                                <button onclick="playSound(); addBus()" class="px-3 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded border border-blue-200 text-sm font-semibold flex items-center gap-2 btn-click">
+                                    <i class="ph ph-plus"></i> Add New Bus
+                                </button>
+                            </div>
+                            <table class="min-w-full text-sm text-left text-gray-600 border border-gray-200 rounded-lg overflow-hidden">
                                 <thead class="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0 z-10 shadow-sm">
                                     <tr>
                                         <th class="px-4 py-3 bg-gray-100 w-20">Bus <span onclick="playSound(); openHelp('busColumn')" class="info-btn-sm"><i class="ph ph-info text-xs"></i></span></th>
@@ -357,6 +363,7 @@
                                         <th class="px-4 py-3 bg-gray-100 text-center border-l border-gray-200">
                                             Injection <span onclick="playSound(); openHelp('injColumn')" class="info-btn-sm"><i class="ph ph-info text-xs"></i></span>
                                         </th>
+                                        <th class="px-4 py-3 bg-gray-100 text-right border-l border-gray-200">Action</th>
                                     </tr>
                                     <tr>
                                         <th class="px-4 py-2 bg-gray-50 text-gray-400 font-normal">ID</th>
@@ -365,6 +372,7 @@
                                         <th class="px-4 py-2 bg-gray-50 text-right font-normal border-l border-gray-200">P (MW)</th>
                                         <th class="px-4 py-2 bg-gray-50 text-right font-normal">Q (Mvar)</th>
                                         <th class="px-4 py-2 bg-gray-50 text-right font-normal border-l border-gray-200">Q (Mvar)</th>
+                                        <th class="px-4 py-2 bg-gray-50 border-l border-gray-200"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="inputTableBody" class="divide-y divide-gray-100"></tbody>
@@ -1207,6 +1215,11 @@
             const tbody = document.getElementById('inputTableBody');
             tbody.innerHTML = '';
             currentData.forEach((row, index) => {
+                const isSlack = row.bus === 1;
+                const deleteBtn = isSlack 
+                    ? `<span class="text-gray-300 cursor-not-allowed" title="Slack Bus cannot be removed"><i class="ph ph-trash"></i></span>`
+                    : `<button onclick="playSound(); deleteBus(${index})" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 btn-click" title="Remove Bus"><i class="ph ph-trash"></i></button>`;
+
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 border-b border-gray-100 transition">
                         <td class="px-4 py-2 font-bold text-gray-700 bg-gray-50/50">${row.bus}</td>
@@ -1218,6 +1231,7 @@
                         <td class="px-4 py-2"><input type="number" class="input-edit ${row.lq === 0 ? 'text-gray-300' : 'text-gray-700'}" value="${row.lq}" onchange="updateData(${index}, 'lq', this.value)"></td>
                         
                         <td class="px-4 py-2 border-l border-gray-100"><input type="number" class="input-edit text-blue-600 font-bold ${row.injQ === 0 ? 'opacity-50' : 'opacity-100'}" value="${row.injQ}" onchange="updateData(${index}, 'injQ', this.value)"></td>
+                        <td class="px-4 py-2 text-right border-l border-gray-100">${deleteBtn}</td>
                     </tr>
                 `;
             });
@@ -1247,6 +1261,31 @@
             currentData[index][field] = parseFloat(val) || 0;
         }
 
+        function addBus() {
+            const newBusId = currentData.length > 0 ? Math.max(...currentData.map(d => d.bus)) + 1 : 1;
+            currentData.push({ bus: newBusId, mag: 1.0, ang: 0, gp: 0, gq: 0, lp: 0, lq: 0, injQ: 0 });
+            renderInputTable();
+            initAddLineModal(); // Refresh modal options
+        }
+
+        function deleteBus(index) {
+            const busId = currentData[index].bus;
+            if (busId === 1) return; // Guard for Slack Bus
+            
+            // Remove Bus
+            currentData.splice(index, 1);
+            
+            // Remove associated lines automatically
+            const initialCount = activeBranches.length;
+            activeBranches = activeBranches.filter(b => b.from !== busId && b.to !== busId);
+            
+            // UI Updates
+            renderInputTable();
+            renderTopologyInput();
+            renderSidebarTopology();
+            initAddLineModal();
+        }
+
         function removeLine(index) {
             activeBranches.splice(index, 1);
             renderTopologyInput();
@@ -1257,7 +1296,7 @@
         function initAddLineModal() {
             const fromSelect = document.getElementById('newFromBus');
             const toSelect = document.getElementById('newToBus');
-            const buses = ieee30Base.map(b => b.bus);
+            const buses = currentData.map(b => b.bus); // Use currentData instead of ieee30Base
             
             // Populate Dropdowns
             [fromSelect, toSelect].forEach(sel => {
@@ -1312,6 +1351,7 @@
             renderInputTable();
             renderTopologyInput();
             renderSidebarTopology();
+            initAddLineModal(); // Reset modal options to base
             
             // Visual Feedback
             const btn = document.getElementById('resetBtn');
