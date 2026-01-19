@@ -539,112 +539,128 @@
         <nav class="bg-slate-900 text-white shadow-xl z-10">
             <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
                 <div class="flex items-center space-x-3">
+                    <button onclick="playSound(); toggleSidebar()"
+                        class="lg:hidden text-slate-400 hover:text-white transition p-1">
+                        <i class="ph ph-list text-2xl"></i>
+                    </button>
                     <div
                         class="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center font-bold text-xl text-slate-900 shadow-inner hover:scale-110 transition cursor-pointer">
                         PH</div>
                     <div>
-                        <h1 class="text-xl font-bold tracking-tight">Web-Based Power Flow Simulator</h1>
-                        <p class="text-xs text-slate-400 font-medium">IEEE 30-Bus • PGC Compliant • IEEE Validated</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2 md:gap-3">
-                    <!-- Operator Badge -->
-                    <div class="hidden md:flex flex-col items-end mr-1">
-                        <span class="text-[10px] text-slate-400 font-bold tracking-wider uppercase">Operator</span>
-                        <div class="flex items-center gap-1.5">
-                            <i class="ph ph-user-circle text-blue-400"></i>
-                            <span class="text-sm font-medium text-blue-100" id="displayUserName">Guest</span>
+                        <div>
+                            <h1 class="text-xl font-bold tracking-tight"><span class="hidden md:inline">Web-Based Power
+                                    Flow Simulator</span><span class="md:hidden">PowerSim</span></h1>
+                            <p class="text-xs text-slate-400 font-medium">IEEE 30-Bus • PGC Compliant</p>
                         </div>
                     </div>
+                    <div class="flex items-center gap-2 md:gap-3">
+                        <!-- Operator Badge -->
+                        <div class="hidden md:flex flex-col items-end mr-1">
+                            <span class="text-[10px] text-slate-400 font-bold tracking-wider uppercase">Operator</span>
+                            <div class="flex items-center gap-1.5">
+                                <i class="ph ph-user-circle text-blue-400"></i>
+                                <span class="text-sm font-medium text-blue-100" id="displayUserName">Guest</span>
+                            </div>
+                        </div>
 
-                    <!-- Vertical Divider -->
-                    <div class="h-6 w-px bg-slate-700 mx-1 hidden lg:block"></div>
+                        <!-- Vertical Divider -->
+                        <div class="h-6 w-px bg-slate-700 mx-1 hidden lg:block"></div>
 
-                    <!-- Tour Button (High Visibility) -->
-                    <button onclick="playSound(); startTour()"
-                        class="h-9 px-3 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold text-sm rounded-md transition flex items-center gap-2 btn-click shadow-sm">
-                        <i class="ph ph-flag-checkered"></i> <span class="hidden xl:inline">Tour</span>
-                    </button>
-
-                    <!-- View Group (Manual, SLD) -->
-                    <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700/50">
-                        <button onclick="playSound(); openHelp('procedure')"
-                            class="h-7 px-2.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-md transition flex items-center gap-2 text-sm"
-                            title="User Manual">
-                            <i class="ph ph-book-open"></i> <span class="hidden xl:inline">Manual</span>
+                        <!-- Tour Button (High Visibility) -->
+                        <button onclick="playSound(); startTour()"
+                            class="h-9 px-3 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold text-sm rounded-md transition flex items-center gap-2 btn-click shadow-sm">
+                            <i class="ph ph-flag-checkered"></i> <span class="hidden xl:inline">Tour</span>
                         </button>
-                        <div class="w-px h-4 bg-slate-700 mx-1"></div>
-                        <button onclick="playSound(); openSLDModal()"
-                            class="h-7 px-2.5 text-cyan-400 hover:text-white hover:bg-cyan-900/30 rounded-md transition flex items-center gap-2 text-sm"
-                            title="View Single Line Diagram">
-                            <i class="ph ph-share-network"></i> <span class="hidden xl:inline">SLD</span>
+
+                        <!-- View Group (Manual, SLD) -->
+                        <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700/50">
+                            <button onclick="playSound(); openHelp('procedure')"
+                                class="h-7 px-2.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-md transition flex items-center gap-2 text-sm"
+                                title="User Manual">
+                                <i class="ph ph-book-open"></i> <span class="hidden xl:inline">Manual</span>
+                            </button>
+                            <div class="w-px h-4 bg-slate-700 mx-1"></div>
+                            <button onclick="playSound(); openSLDModal()"
+                                class="h-7 px-2.5 text-cyan-400 hover:text-white hover:bg-cyan-900/30 rounded-md transition flex items-center gap-2 text-sm"
+                                title="View Single Line Diagram">
+                                <i class="ph ph-share-network"></i> <span class="hidden xl:inline">SLD</span>
+                            </button>
+                        </div>
+
+                        <!-- File Group (Save, Load) -->
+                        <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700/50">
+                            <button onclick="playSound(); exportScenario()"
+                                class="h-7 w-8 flex items-center justify-center text-emerald-400 hover:text-white hover:bg-emerald-900/30 rounded-md transition"
+                                title="Save Scenario">
+                                <i class="ph ph-download-simple"></i>
+                            </button>
+                            <div class="w-px h-4 bg-slate-700 mx-1"></div>
+                            <input type="file" id="importFile" accept=".json" class="hidden"
+                                onchange="importScenario(this)">
+                            <button onclick="playSound(); document.getElementById('importFile').click()"
+                                class="h-7 w-8 flex items-center justify-center text-purple-400 hover:text-white hover:bg-purple-900/30 rounded-md transition"
+                                title="Load Scenario">
+                                <i class="ph ph-upload-simple"></i>
+                            </button>
+                        </div>
+
+                        <!-- Vertical Divider -->
+                        <div class="h-6 w-px bg-slate-700 mx-1 hidden lg:block"></div>
+
+                        <!-- Utility Group (Reset, Theme, Info) -->
+                        <div class="flex items-center gap-1">
+                            <button onclick="playSound(); goToLanding()"
+                                class="h-9 px-3 flex items-center justify-center gap-2 text-red-300 hover:bg-red-900/20 hover:text-red-200 rounded-md transition btn-click"
+                                title="Reset">
+                                <i class="ph ph-house text-lg"></i>
+                                <span class="font-bold text-sm">Reset</span>
+                            </button>
+
+                            <button onclick="playSound(); toggleTheme()" id="themeToggleBtn"
+                                class="h-9 w-9 flex items-center justify-center text-yellow-400 hover:bg-slate-800 rounded-md transition btn-click">
+                                <i class="ph ph-sun text-lg"></i>
+                            </button>
+
+                            <button onclick="playSound(); openAuthorModal()"
+                                class="h-9 w-9 flex items-center justify-center text-slate-400 hover:bg-slate-800 hover:text-white rounded-md transition btn-click"
+                                title="About Authors">
+                                <i class="ph ph-info text-lg"></i>
+                            </button>
+                        </div>
+
+                        <!-- Primary Action -->
+                        <button onclick="playSound(); runSimulation()" id="runBtn"
+                            class="ml-2 h-10 px-5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-lg transition transform hover:scale-105 shadow-md flex items-center gap-2 btn-click ring-2 ring-blue-500/20">
+                            <i class="ph ph-play-circle text-xl"></i>
+                            <span class="hidden sm:inline">Run Simulation</span>
                         </button>
                     </div>
-
-                    <!-- File Group (Save, Load) -->
-                    <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700/50">
-                        <button onclick="playSound(); exportScenario()"
-                            class="h-7 w-8 flex items-center justify-center text-emerald-400 hover:text-white hover:bg-emerald-900/30 rounded-md transition"
-                            title="Save Scenario">
-                            <i class="ph ph-download-simple"></i>
-                        </button>
-                        <div class="w-px h-4 bg-slate-700 mx-1"></div>
-                        <input type="file" id="importFile" accept=".json" class="hidden"
-                            onchange="importScenario(this)">
-                        <button onclick="playSound(); document.getElementById('importFile').click()"
-                            class="h-7 w-8 flex items-center justify-center text-purple-400 hover:text-white hover:bg-purple-900/30 rounded-md transition"
-                            title="Load Scenario">
-                            <i class="ph ph-upload-simple"></i>
-                        </button>
-                    </div>
-
-                    <!-- Vertical Divider -->
-                    <div class="h-6 w-px bg-slate-700 mx-1 hidden lg:block"></div>
-
-                    <!-- Utility Group (Reset, Theme, Info) -->
-                    <div class="flex items-center gap-1">
-                        <button onclick="playSound(); goToLanding()"
-                            class="h-9 px-3 flex items-center justify-center gap-2 text-red-300 hover:bg-red-900/20 hover:text-red-200 rounded-md transition btn-click"
-                            title="Reset">
-                            <i class="ph ph-house text-lg"></i>
-                            <span class="font-bold text-sm">Reset</span>
-                        </button>
-
-                        <button onclick="playSound(); toggleTheme()" id="themeToggleBtn"
-                            class="h-9 w-9 flex items-center justify-center text-yellow-400 hover:bg-slate-800 rounded-md transition btn-click">
-                            <i class="ph ph-sun text-lg"></i>
-                        </button>
-
-                        <button onclick="playSound(); openAuthorModal()"
-                            class="h-9 w-9 flex items-center justify-center text-slate-400 hover:bg-slate-800 hover:text-white rounded-md transition btn-click"
-                            title="About Authors">
-                            <i class="ph ph-info text-lg"></i>
-                        </button>
-                    </div>
-
-                    <!-- Primary Action -->
-                    <button onclick="playSound(); runSimulation()" id="runBtn"
-                        class="ml-2 h-10 px-5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-lg transition transform hover:scale-105 shadow-md flex items-center gap-2 btn-click ring-2 ring-blue-500/20">
-                        <i class="ph ph-play-circle text-xl"></i>
-                        <span class="hidden sm:inline">Run Simulation</span>
-                    </button>
                 </div>
-            </div>
         </nav>
 
         <!-- Main Content Area -->
         <main class="flex-1 overflow-hidden flex relative">
 
+            <!-- Sidebar Overlay (Mobile) -->
+            <div id="sidebarOverlay" onclick="toggleSidebar()"
+                class="fixed inset-0 z-30 bg-slate-900/50 backdrop-blur-sm hidden lg:hidden transition-opacity"></div>
+
             <!-- Sidebar (Visual Topology List) -->
-            <aside
-                class="w-64 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-800 overflow-y-auto scroll-custom hidden lg:block z-0 shadow-inner">
+            <aside id="mobileSidebar"
+                class="fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-800 overflow-y-auto scroll-custom transform -translate-x-full transition-transform duration-300 lg:translate-x-0 lg:static lg:block shadow-inner h-full pt-16 lg:pt-0">
                 <div class="p-4">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Active Topology</h2>
-                        <button onclick="playSound(); openHelp('topology')" class="info-btn"
-                            title="Learn about Grid Topology">
-                            <i class="ph ph-info text-sm"></i>
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button onclick="playSound(); openHelp('topology')" class="info-btn"
+                                title="Learn about Grid Topology">
+                                <i class="ph ph-info text-sm"></i>
+                            </button>
+                            <button onclick="toggleSidebar()"
+                                class="lg:hidden text-gray-400 hover:text-red-500 transition">
+                                <i class="ph ph-x text-lg"></i>
+                            </button>
+                        </div>
                     </div>
                     <div
                         class="bg-slate-50 dark:bg-slate-800/80 p-3 rounded-lg border border-slate-100 dark:border-slate-700 mb-4 relative hover-scale">
@@ -4307,6 +4323,13 @@
             btn.innerHTML = isDark
                 ? '<i class="ph ph-moon-stars text-lg"></i>'
                 : '<i class="ph ph-sun text-lg"></i>';
+        }
+
+        function toggleSidebar() {
+            const sb = document.getElementById('mobileSidebar');
+            const ov = document.getElementById('sidebarOverlay');
+            sb.classList.toggle('-translate-x-full');
+            ov.classList.toggle('hidden');
         }
 
         function updateChartTheme() {
