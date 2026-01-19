@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -604,9 +605,10 @@
                     <!-- Utility Group (Reset, Theme, Info) -->
                     <div class="flex items-center gap-1">
                         <button onclick="playSound(); goToLanding()"
-                            class="h-9 w-9 flex items-center justify-center text-red-300 hover:bg-red-900/20 hover:text-red-200 rounded-md transition btn-click"
-                            title="Reset to Home">
+                            class="h-9 px-3 flex items-center justify-center gap-2 text-red-300 hover:bg-red-900/20 hover:text-red-200 rounded-md transition btn-click"
+                            title="Reset">
                             <i class="ph ph-house text-lg"></i>
+                            <span class="font-bold text-sm">Reset</span>
                         </button>
 
                         <button onclick="playSound(); toggleTheme()" id="themeToggleBtn"
@@ -4250,7 +4252,7 @@
         }
 
         function switchTab(id) {
-            ['line-flows', 'opf', 'compliance', 'voltage', 'math', 'sld', 'contingency'].forEach(t => {
+            ['line-flows', 'opf', 'compliance', 'voltage', 'math', 'sld', 'contingency', 'pv-curve'].forEach(t => {
                 const content = document.getElementById(`content-${t}`);
                 const tab = document.getElementById(`tab-${t}`);
                 if (content && tab) {
