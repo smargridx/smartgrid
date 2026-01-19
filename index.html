@@ -599,8 +599,8 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2 md:gap-3">
-                        <!-- Operator Badge -->
-                        <div class="hidden md:flex flex-col items-end mr-1">
+                        <!-- Operator Badge (Hidden on Mobile) -->
+                        <div class="hidden lg:flex flex-col items-end mr-1">
                             <span class="text-[10px] text-slate-400 font-bold tracking-wider uppercase">Operator</span>
                             <div class="flex items-center gap-1.5">
                                 <i class="ph ph-user-circle text-blue-400"></i>
@@ -617,36 +617,35 @@
                             <i class="ph ph-flag-checkered"></i> <span class="hidden xl:inline">Tour</span>
                         </button>
 
-                        <!-- View Group (Manual, SLD) -->
-                        <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700/50">
-                            <button onclick="playSound(); openHelp('procedure')"
-                                class="h-7 px-2.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-md transition flex items-center gap-2 text-sm"
-                                title="User Manual">
-                                <i class="ph ph-book-open"></i> <span class="hidden xl:inline">Manual</span>
-                            </button>
-                            <div class="w-px h-4 bg-slate-700 mx-1"></div>
-                            <button onclick="playSound(); openSLDModal()"
-                                class="h-7 px-2.5 text-cyan-400 hover:text-white hover:bg-cyan-900/30 rounded-md transition flex items-center gap-2 text-sm"
-                                title="View Single Line Diagram">
-                                <i class="ph ph-share-network"></i> <span class="hidden xl:inline">SLD</span>
-                            </button>
-                        </div>
+                        <!-- File/View Group (Hidden on Mobile, Visible on LG) -->
+                        <div class="hidden lg:flex items-center gap-2">
+                            <!-- View Group -->
+                            <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700/50">
+                                <button onclick="playSound(); openHelp('procedure')"
+                                    class="h-7 px-2.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-md transition flex items-center gap-2 text-sm">
+                                    <i class="ph ph-book-open"></i> <span class="hidden xl:inline">Manual</span>
+                                </button>
+                                <div class="w-px h-4 bg-slate-700 mx-1"></div>
+                                <button onclick="playSound(); openSLDModal()"
+                                    class="h-7 px-2.5 text-cyan-400 hover:text-white hover:bg-cyan-900/30 rounded-md transition flex items-center gap-2 text-sm">
+                                    <i class="ph ph-share-network"></i> <span class="hidden xl:inline">SLD</span>
+                                </button>
+                            </div>
 
-                        <!-- File Group (Save, Load) -->
-                        <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700/50">
-                            <button onclick="playSound(); exportScenario()"
-                                class="h-7 w-8 flex items-center justify-center text-emerald-400 hover:text-white hover:bg-emerald-900/30 rounded-md transition"
-                                title="Save Scenario">
-                                <i class="ph ph-download-simple"></i>
-                            </button>
-                            <div class="w-px h-4 bg-slate-700 mx-1"></div>
-                            <input type="file" id="importFile" accept=".json" class="hidden"
-                                onchange="importScenario(this)">
-                            <button onclick="playSound(); document.getElementById('importFile').click()"
-                                class="h-7 w-8 flex items-center justify-center text-purple-400 hover:text-white hover:bg-purple-900/30 rounded-md transition"
-                                title="Load Scenario">
-                                <i class="ph ph-upload-simple"></i>
-                            </button>
+                            <!-- File Group -->
+                            <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700/50">
+                                <button onclick="playSound(); exportScenario()"
+                                    class="h-7 w-8 flex items-center justify-center text-emerald-400 hover:text-white hover:bg-emerald-900/30 rounded-md transition">
+                                    <i class="ph ph-download-simple"></i>
+                                </button>
+                                <div class="w-px h-4 bg-slate-700 mx-1"></div>
+                                <input type="file" id="importFile" accept=".json" class="hidden"
+                                    onchange="importScenario(this)">
+                                <button onclick="playSound(); document.getElementById('importFile').click()"
+                                    class="h-7 w-8 flex items-center justify-center text-purple-400 hover:text-white hover:bg-purple-900/30 rounded-md transition">
+                                    <i class="ph ph-upload-simple"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Vertical Divider -->
@@ -658,7 +657,7 @@
                                 class="h-9 px-3 flex items-center justify-center gap-2 text-red-300 hover:bg-red-900/20 hover:text-red-200 rounded-md transition btn-click"
                                 title="Reset">
                                 <i class="ph ph-house text-lg"></i>
-                                <span class="font-bold text-sm">Reset</span>
+                                <span class="hidden md:inline font-bold text-sm">Reset</span>
                             </button>
 
                             <button onclick="playSound(); toggleTheme()" id="themeToggleBtn"
@@ -746,7 +745,7 @@
                             <p class="text-sm text-gray-500">Configure Bus Data. Values default to 0. Load IEEE Defaults
                                 to populate.</p>
                         </div>
-                        <div class="flex items-center gap-3">
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                             <!-- Bus Count Selection -->
                             <div class="flex items-center gap-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 shadow-sm"
                                 title="Current Bus Count">
