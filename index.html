@@ -1082,21 +1082,21 @@
                         <nav class="-mb-px flex space-x-6 overflow-x-auto px-4">
                             <button onclick="playSound(); switchTab('line-flows')" id="tab-line-flows"
                                 class="tab-active py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap flex items-center gap-1 transition-colors">
-                                Line Flows & Losses
+                                Line Flows <span class="hidden sm:inline">& Losses</span>
                                 <span onclick="event.stopPropagation(); openHelp('tabLineFlows')" class="info-btn-sm"><i
                                         class="ph ph-question text-xs"></i></span>
                             </button>
 
                             <button onclick="playSound(); switchTab('math')" id="tab-math"
                                 class="tab-inactive py-4 px-2 border-b-2 border-transparent font-medium text-sm whitespace-nowrap flex items-center gap-1 transition-colors">
-                                Newton-Raphson Logic
+                                <span class="hidden sm:inline">Newton-Raphson</span> Logic
                                 <span
                                     class="bg-purple-100 text-purple-700 text-[10px] px-1.5 rounded-full font-bold ml-1">NR</span>
                             </button>
 
                             <button onclick="playSound(); switchTab('compliance')" id="tab-compliance"
                                 class="tab-inactive py-4 px-2 border-b-2 border-transparent font-medium text-sm whitespace-nowrap flex items-center gap-2 transition-colors">
-                                PGC/PDC Compliance
+                                <span class="hidden sm:inline">PGC/PDC</span> Compliance
                                 <span onclick="event.stopPropagation(); openHelp('compliance')" class="info-btn-sm"
                                     title="Compliance Help">
                                     <i class="ph ph-question text-xs"></i>
@@ -1109,13 +1109,14 @@
                             </button>
                             <button onclick="playSound(); switchTab('voltage')" id="tab-voltage"
                                 class="tab-inactive py-4 px-2 border-b-2 border-transparent font-medium text-sm whitespace-nowrap flex items-center gap-1 transition-colors">
-                                Voltage Profile
+                                <span class="hidden sm:inline">Voltage</span> Profile
                                 <span onclick="event.stopPropagation(); openHelp('tabVoltage')" class="info-btn-sm"><i
                                         class="ph ph-question text-xs"></i></span>
                             </button>
                             <button onclick="playSound(); switchTab('pv-curve')" id="tab-pv-curve"
                                 class="tab-inactive py-4 px-2 border-b-2 border-transparent font-medium text-sm whitespace-nowrap flex items-center gap-1 transition-colors">
-                                <i class="ph ph-chart-line-down"></i> Voltage Stability
+                                <i class="ph ph-chart-line-down"></i> <span class="hidden sm:inline">Voltage</span>
+                                Stability
                             </button>
                         </nav>
                     </div>
