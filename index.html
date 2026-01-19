@@ -2748,6 +2748,26 @@
         }
 
         function openAddLineModal() {
+            // Repopulate Dropdowns dynamically
+            const fromSelect = document.getElementById('newFromBus');
+            const toSelect = document.getElementById('newToBus');
+
+            if (fromSelect && toSelect && currentData) {
+                fromSelect.innerHTML = '';
+                toSelect.innerHTML = '';
+                currentData.forEach(bus => {
+                    const opt1 = document.createElement('option');
+                    opt1.value = bus.bus;
+                    opt1.text = `Bus ${bus.bus} (${bus.type || 'Load'})`;
+                    fromSelect.appendChild(opt1);
+
+                    const opt2 = document.createElement('option');
+                    opt2.value = bus.bus;
+                    opt2.text = `Bus ${bus.bus} (${bus.type || 'Load'})`;
+                    toSelect.appendChild(opt2);
+                });
+            }
+
             document.getElementById('addLineModal').classList.remove('hidden');
             document.getElementById('addLineError').classList.add('hidden');
         }
