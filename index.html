@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -2382,7 +2381,7 @@
             genColumn: {
                 title: "Generation (P & Q)",
                 content: `
-            < p > <strong>P (Active Power):</strong> The actual energy doing work(Megawatts).Supplied by turbines.</p >
+            <p><strong>P (Active Power):</strong> The actual energy doing work (Megawatts). Supplied by turbines.</p>
                 <p class="mt-2"><strong>Q (Reactive Power):</strong> The power required to maintain magnetic fields (Megavars). Supplied by exciters.</p>
         `
             },
@@ -2406,32 +2405,32 @@
             topologyList: {
                 title: "Topology List",
                 content: `
-            < p > This table defines the physical wires connecting the buses.You can delete lines to simulate faults(N - 1 Contingency Analysis).</p >
+            <p>This table defines the physical wires connecting the buses. You can delete lines to simulate faults (N-1 Contingency Analysis).</p>
                 `
             },
             addLine: {
                 title: "Add Transmission Line",
                 content: `
-                < p > Opens a tool to build new connections.Adding parallel lines increases capacity and reliability but reduces the total impedance between buses.</p >
+                <p>Opens a tool to build new connections. Adding parallel lines increases capacity and reliability but reduces the total impedance between buses.</p>
                     `
             },
             kpiGen: {
                 title: "Total Generation",
                 content: `
-                    < p class="text-2xl font-bold text-blue-600 mb-2" > Σ Gen = Σ Load + Σ Losses</p >
+                    <p class="text-2xl font-bold text-blue-600 mb-2">Σ Gen = Σ Load + Σ Losses</p>
                         <p>The sum of all power produced by generators. This value is calculated <strong>after</strong> the simulation to ensure it exactly meets demand plus system inefficiencies.</p>
         `
             },
             kpiLoad: {
                 title: "Total System Load",
                 content: `
-            < p > The total power demand requested by consumers across all 30 buses.This is your independent variable—the system must work to meet this target.</p >
+            <p>The total power demand requested by consumers across all 30 buses. This is your independent variable—the system must work to meet this target.</p>
                 `
             },
             kpiLoss: {
                 title: "System Losses (I²R)",
                 content: `
-                < p > Energy wasted as heat in the transmission lines.</p >
+                <p>Energy wasted as heat in the transmission lines.</p>
                     <p class="mt-2"><strong>Formula:</strong> Loss = I² × R</p>
                     <p>High losses mean the grid is inefficient, often caused by transmitting power over long distances or overloading lines.</p>
         `
@@ -2439,7 +2438,7 @@
             kpiStatus: {
                 title: "Grid Code Status",
                 content: `
-            < p > A quick summary of regulatory compliance.</p >
+            <p>A quick summary of regulatory compliance.</p>
                 <ul class="list-disc ml-5 mt-2 space-y-1">
                     <li><strong>COMPLIANT:</strong> All bus voltages are within limits.</li>
                     <li><strong>NON-COMPLIANT:</strong> At least one bus is experiencing under-voltage or over-voltage.</li>
@@ -2449,28 +2448,28 @@
             tabLineFlows: {
                 title: "Table 2: Line Flows",
                 content: `
-            < p > Detailed breakdown of power movement through every line.</p >
+            <p>Detailed breakdown of power movement through every line.</p>
                 <p class="mt-2">Allows you to spot <strong>Congestion</strong> (overloaded lines) and identify where the most power is being lost.</p>
         `
             },
             tabOPF: {
                 title: "Table 5: OPF Results",
                 content: `
-            < p > <strong>Optimal Power Flow (OPF)</strong> results showing the final state of every bus after the Newton - Raphson solver converges.</p >
+            <p><strong>Optimal Power Flow (OPF)</strong> results showing the final state of every bus after the Newton-Raphson solver converges.</p>
                 <p class="mt-2">This is the "Answer Key" to your simulation configuration.</p>
         `
             },
             tabVoltage: {
                 title: "Voltage Profile Chart",
                 content: `
-            < p > A visual graph of voltage stability.</p >
+            <p>A visual graph of voltage stability.</p>
                 <p class="mt-2">Look for the line dipping below <strong>0.95</strong> (Sag) or rising above <strong>1.05</strong> (Swell). A flat line near 1.0 is ideal.</p>
         `
             },
             flowColumn: {
                 title: "Power Flow Direction",
                 content: `
-            < p > Power can flow from Bus A to B, or B to A, depending on voltage angles.</p >
+            <p>Power can flow from Bus A to B, or B to A, depending on voltage angles.</p>
                     <p class="mt-2"><strong>From&rarr;To:</strong> Power leaving the first bus.</p>
                     <p><strong>To&rarr;From:</strong> Power arriving at the second bus (usually slightly less due to losses).</p>
         `
@@ -2478,21 +2477,21 @@
             lossColumn: {
                 title: "Line Loss (P & Q)",
                 content: `
-            < p > The difference between power sent and power received.</p >
+            <p>The difference between power sent and power received.</p>
                 <p class="mt-2">This energy heats up the aluminum conductors in the transmission lines.</p>
         `
             },
             opfMag: {
                 title: "Voltage Magnitude (p.u.)",
                 content: `
-            < p > The pressure of electricity at the bus, normalized to a base value(Per Unit).</p >
+            <p>The pressure of electricity at the bus, normalized to a base value (Per Unit).</p>
                 <p class="mt-2"><strong>1.0 p.u. = 100% Rated Voltage</strong> (e.g., 230 kV).</p>
         `
             },
             opfAngle: {
                 title: "Voltage Angle (deg)",
                 content: `
-            < p > The phase shift of the AC waveform relative to the Slack Bus(0°).</p >
+            <p>The phase shift of the AC waveform relative to the Slack Bus (0°).</p>
                 <p class="mt-2">Power flows from <strong>Higher Angle</strong> to <strong>Lower Angle</strong>. Larger differences mean heavier power flow.</p>
         `
             },
@@ -2808,7 +2807,7 @@
             [fromSelect, toSelect].forEach(sel => {
                 sel.innerHTML = '';
                 buses.forEach(b => {
-                    sel.innerHTML += `< option value = "${b}" > Bus ${b}</option > `;
+                    sel.innerHTML += `<option value="${b}">Bus ${b}</option>`;
                 });
             });
         }
