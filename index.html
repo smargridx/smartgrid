@@ -1981,9 +1981,11 @@
         function initCustomSystem() {
             let count = parseInt(document.getElementById('setupBusCount').value) || 5;
 
-            // Validate Range
-            if (count < 5) count = 5;
-            if (count > 30) count = 30;
+            // Validate Range (Prompt Warning as requested)
+            if (count < 5 || count > 30) {
+                alert("Invalid Input: Grid size must be between 5 and 30 buses.");
+                return;
+            }
 
             document.getElementById('setupModal').classList.add('hidden');
 
