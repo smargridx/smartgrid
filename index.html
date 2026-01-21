@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -576,6 +577,43 @@
             </div>
         </div>
     </div>
+
+    <!-- CUSTOM WARNING MODAL -->
+    <div id="warningModal"
+        class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden transform transition-all duration-300 scale-95 opacity-0"
+            id="warningModalContent">
+            <!-- Header with Gradient -->
+            <div class="bg-gradient-to-r from-red-500 to-rose-600 p-1"></div>
+
+            <div class="p-6 text-center">
+                <!-- Icon with Pulse Effect -->
+                <div class="relative w-16 h-16 mx-auto mb-4">
+                    <div class="absolute inset-0 bg-red-100 dark:bg-red-900/30 rounded-full animate-ping opacity-75">
+                    </div>
+                    <div
+                        class="relative w-16 h-16 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center border-2 border-red-50 dark:border-red-800">
+                        <i class="ph ph-warning text-3xl text-red-600 dark:text-red-400"></i>
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Invalid Grid Size</h3>
+
+                <p class="text-gray-600 dark:text-gray-300 text-sm mb-6 leading-relaxed">
+                    Please enter a value between <span class="font-bold text-gray-900 dark:text-white">5</span> and
+                    <span class="font-bold text-gray-900 dark:text-white">30</span> buses.
+                </p>
+
+                <div class="flex justify-center">
+                    <button onclick="closeWarningModal()"
+                        class="min-w-[120px] bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5 btn-click">
+                        Understand
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- MAIN APP CONTAINER (Hidden initially) -->
     <div id="mainApp" class="hidden h-full flex flex-col">
@@ -1981,9 +2019,18 @@
         function initCustomSystem() {
             let count = parseInt(document.getElementById('setupBusCount').value) || 5;
 
-            // Validate Range (Prompt Warning as requested)
+            // Validate Range (Prompt Custom Warning)
             if (count < 5 || count > 30) {
-                alert("Invalid Input: Grid size must be between 5 and 30 buses.");
+                const modal = document.getElementById('warningModal');
+                const content = document.getElementById('warningModalContent');
+                modal.classList.remove('hidden');
+                // Force reflow
+                void modal.offsetWidth;
+
+                // Animate In
+                modal.classList.remove('opacity-0');
+                content.classList.remove('opacity-0', 'scale-95');
+                content.classList.add('opacity-100', 'scale-100');
                 return;
             }
 
@@ -2032,6 +2079,21 @@
                     // Also remove on click (event listener overkill but safer to just timeout)
                 }
             });
+        }
+
+        // --- WARNING MODAL LOGIC ---
+        function closeWarningModal() {
+            const modal = document.getElementById('warningModal');
+            const content = document.getElementById('warningModalContent');
+
+            // Animate Out
+            modal.classList.add('opacity-0');
+            content.classList.remove('opacity-100', 'scale-100');
+            content.classList.add('opacity-0', 'scale-95');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
         }
 
         // --- RESET TO LANDING ---
