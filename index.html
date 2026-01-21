@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -573,6 +572,30 @@
                 <button onclick="playSound(); initStandardSystem()"
                     class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg shadow-lg hover:shadow-blue-500/30 transition btn-click flex items-center justify-center gap-2">
                     <i class="ph ph-lightning"></i> Load IEEE 30-Bus Standard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION MODAL -->
+    <div id="notificationModal"
+        class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300">
+        <div
+            class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden transform transition-all scale-100 ring-1 ring-slate-900/5 dark:ring-slate-700/50 animate-[fadeIn_0.2s_ease-out]">
+            <div id="notifyHeader" class="h-1.5 w-full bg-red-500"></div>
+            <div class="p-6 text-center">
+                <div id="notifyIcon"
+                    class="w-12 h-12 mx-auto bg-red-50 dark:bg-red-900/20 text-red-500 rounded-full flex items-center justify-center mb-4 text-2xl transition-colors">
+                    <i class="ph ph-warning-octagon"></i>
+                </div>
+                <h3 id="notifyTitle" class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2">Invalid Input
+                </h3>
+                <p id="notifyMessage" class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-6">
+                    Grid size must be between 5 and 30 buses.
+                </p>
+                <button onclick="playSound(); closeNotification()"
+                    class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-bold rounded-lg transition-colors shadow-lg active:scale-95 btn-click">
+                    Okay, Got it
                 </button>
             </div>
         </div>
@@ -2020,12 +2043,49 @@
             launchMainApp();
         }
 
+        // --- NOTIFICATION SYSTEM ---
+        function showNotification(title, message, type = 'error') {
+            const modal = document.getElementById('notificationModal');
+            const iconEl = document.getElementById('notifyIcon');
+            const headerEl = document.getElementById('notifyHeader');
+            const titleEl = document.getElementById('notifyTitle');
+            const msgEl = document.getElementById('notifyMessage');
+
+            // Configure Theme
+            let colorHeader = 'bg-red-500';
+            let colorIcon = 'bg-red-50 dark:bg-red-900/20 text-red-500';
+            let iconHtml = '<i class="ph ph-warning-octagon"></i>';
+
+            if (type === 'success') {
+                colorHeader = 'bg-emerald-500';
+                colorIcon = 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600';
+                iconHtml = '<i class="ph ph-check-circle"></i>';
+            } else if (type === 'info') {
+                colorHeader = 'bg-blue-500';
+                colorIcon = 'bg-blue-50 dark:bg-blue-900/20 text-blue-600';
+                iconHtml = '<i class="ph ph-info"></i>';
+            }
+
+            headerEl.className = `h-1.5 w-full ${colorHeader}`;
+            iconEl.className = `w-12 h-12 mx-auto rounded-full flex items-center justify-center mb-4 text-2xl transition-colors ${colorIcon}`;
+            iconEl.innerHTML = iconHtml;
+
+            titleEl.innerText = title;
+            msgEl.innerText = message;
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeNotification() {
+            document.getElementById('notificationModal').classList.add('hidden');
+        }
+
         function initCustomSystem() {
             let count = parseInt(document.getElementById('setupBusCount').value) || 5;
 
-            // Validate Range (Prompt Warning as requested)
+            // Validate Range with new Modal
             if (count < 5 || count > 30) {
-                alert("Invalid Input: Grid size must be between 5 and 30 buses.");
+                showNotification("Invalid Grid Size", "Please enter a value between 5 and 30 buses to ensure stable simulation boundaries.", "error");
                 return;
             }
 
@@ -2044,7 +2104,6 @@
             renderSidebarTopology();
             initAddLineModal(); // Refresh dropdowns with new buses
 
-            // Update Bus Count Input in Dashboard
             // Update Bus Count Input in Dashboard
             const dashDisplay = document.getElementById('busCountDisplay');
             if (dashDisplay) dashDisplay.innerText = count;
