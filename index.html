@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -2725,9 +2726,9 @@
                         <td class="px-3 py-2 font-mono text-xs text-gray-500 dark:text-gray-400">L${b.id}</td>
                         <td class="px-3 py-2 font-bold text-gray-700 dark:text-gray-200">Bus ${b.from}</td>
                         <td class="px-3 py-2 font-bold text-gray-700 dark:text-gray-200">Bus ${b.to}</td>
-                        <td class="px-3 py-2"><input type="number" step="0.0001" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-20 focus:outline-none" value="${b.r !== undefined ? b.r : 0.01}" onchange="updateBranchData(${index}, 'r', this.value)"></td>
-                        <td class="px-3 py-2"><input type="number" step="0.0001" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-20 focus:outline-none" value="${b.x !== undefined ? b.x : 0.08}" onchange="updateBranchData(${index}, 'x', this.value)"></td>
-                        <td class="px-3 py-2"><input type="number" step="0.0001" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-20 focus:outline-none" value="${b.b !== undefined ? b.b : 0}" onchange="updateBranchData(${index}, 'b', this.value)"></td>
+                        <td class="px-3 py-2"><input type="number" step="0.0001" placeholder="R" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-20 focus:outline-none placeholder-gray-300" value="${(b.r !== null && b.r !== undefined && !isNaN(b.r)) ? b.r : ''}" onchange="updateBranchData(${index}, 'r', this.value)"></td>
+                        <td class="px-3 py-2"><input type="number" step="0.0001" placeholder="X" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-20 focus:outline-none placeholder-gray-300" value="${(b.x !== null && b.x !== undefined && !isNaN(b.x)) ? b.x : ''}" onchange="updateBranchData(${index}, 'x', this.value)"></td>
+                        <td class="px-3 py-2"><input type="number" step="0.0001" placeholder="B" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-20 focus:outline-none placeholder-gray-300" value="${(b.b !== null && b.b !== undefined && !isNaN(b.b)) ? b.b : ''}" onchange="updateBranchData(${index}, 'b', this.value)"></td>
                         <td class="px-3 py-2"><input type="number" step="0.01" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-16 focus:outline-none" value="${b.tap !== undefined ? b.tap : 1.0}" onchange="updateBranchData(${index}, 'tap', this.value)"></td>
                         <td class="px-3 py-2"><input type="number" step="0.1" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-16 focus:outline-none" value="${b.shift !== undefined ? b.shift : 0}" onchange="updateBranchData(${index}, 'shift', this.value)"></td>
                         <td class="px-3 py-2 text-right">
@@ -2740,7 +2741,8 @@
 
         function updateBranchData(index, field, val) {
             if (activeBranches[index]) {
-                activeBranches[index][field] = parseFloat(val);
+                const parsed = parseFloat(val);
+                activeBranches[index][field] = isNaN(parsed) ? null : parsed;
             }
         }
 
@@ -2966,9 +2968,9 @@
                 id: newId,
                 from: from,
                 to: to,
-                r: parseFloat((0.01 + Math.random() * 0.05).toFixed(4)),
-                x: parseFloat((0.04 + Math.random() * 0.12).toFixed(4)),
-                b: parseFloat((0.0 + Math.random() * 0.02).toFixed(4)),
+                r: null,
+                x: null,
+                b: null,
                 tap: 1.0,
                 shift: 0
             });
