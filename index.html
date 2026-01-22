@@ -1189,6 +1189,10 @@
                                 class="tab-inactive py-4 px-2 border-b-2 border-transparent font-medium text-xs md:text-sm whitespace-nowrap flex items-center gap-1 transition-colors text-red-600 hover:text-red-800">
                                 <i class="ph ph-warning-circle"></i> N-1 Contingency
                             </button>
+                            <button onclick="playSound(); switchTab('fault')" id="tab-fault"
+                                class="tab-inactive py-4 px-2 border-b-2 border-transparent font-medium text-xs md:text-sm whitespace-nowrap flex items-center gap-1 transition-colors text-orange-600 hover:text-orange-800">
+                                <i class="ph ph-lightning"></i> Fault Analysis
+                            </button>
                             <button onclick="playSound(); switchTab('voltage')" id="tab-voltage"
                                 class="tab-inactive py-4 px-2 border-b-2 border-transparent font-medium text-xs md:text-sm whitespace-nowrap flex items-center gap-1 transition-colors">
                                 <span class="hidden sm:inline">Voltage</span> Profile
@@ -1469,21 +1473,50 @@
                             </div>
                         </div>
 
+                    </div>
+
+                    <!-- Fault Analysis Results Tab (NEW) -->
+                    <div id="content-fault"
+                        class="hidden p-6 bg-white rounded-lg border border-gray-200 shadow-sm animate-fadeIn">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                    <i class="ph ph-lightning text-orange-500"></i> Short Circuit Analysis
+                                </h3>
+                                <p class="text-sm text-gray-500 mt-1">Calculates the 3-Phase Bolted Fault Current
+                                    using Z-Bus Matrix Inversion.</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="playSound(); runFaultAnalysis()"
+                                    class="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-lg shadow-md transition transform hover:scale-105 btn-click flex items-center gap-2">
+                                    <i class="ph ph-lightning text-xl"></i> Calculate Faults
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6 text-sm text-orange-800">
+                            <p><strong>Safety Check:</strong> Simulates a solid short-circuit at every bus to verify
+                                if equipment ratings (Circuit Breakers) are sufficient.</p>
+                            <p class="mt-1">Assumes System Base: <span class="font-mono bg-orange-100 px-1 rounded">100
+                                    MVA</span>, <span class="font-mono bg-orange-100 px-1 rounded">115 kV</span>.</p>
+                        </div>
+
                         <div class="overflow-x-auto rounded-lg border border-gray-200">
                             <table class="w-full text-sm text-left text-gray-600">
-                                <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-100 text-center">
                                     <tr>
-                                    <tr>
-                                        <th class="px-6 py-3">Tripped Line</th>
-                                        <th class="px-6 py-3">Result</th>
-                                        <th class="px-6 py-3">Recommendation</th>
+                                        <th class="px-6 py-3">Bus ID</th>
+                                        <th class="px-6 py-3">Pre-Fault Voltage (p.u.)</th>
+                                        <th class="px-6 py-3">Thevenin Z (p.u.)</th>
+                                        <th class="px-6 py-3">Fault Current (kA)</th>
+                                        <th class="px-6 py-3">Short Circuit MVA</th>
+                                        <th class="px-6 py-3">Breaker Status (40kA)</th>
                                     </tr>
                                 </thead>
-                                <tbody id="n1TableBody" class="divide-y divide-gray-100">
+                                <tbody id="faultTableBody" class="divide-y divide-gray-100 text-center">
                                     <tr>
-                                        <td colspan="4" class="px-6 py-8 text-center text-gray-400 italic">
-                                            Click "Run Analysis" to simulate contingencies for all <span
-                                                id="n1-line-count">...</span> lines.
+                                        <td colspan="6" class="px-6 py-8 text-center text-gray-400 italic">
+                                            Click "Calculate Faults" to perform Short Circuit Study.
                                         </td>
                                     </tr>
                                 </tbody>
@@ -1491,68 +1524,89 @@
                         </div>
                     </div>
 
-                    <!-- TAB: PV Curve (Voltage Stability) -->
-                    <div id="content-pv-curve" class="hidden animate-fadeIn">
-                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <div class="flex justify-between items-start mb-6">
-                                <div>
-                                    <h3 class="text-lg font-bold text-slate-800">PV Curve Analysis (Voltage
-                                        Stability)
-                                    </h3>
-                                    <p class="text-sm text-gray-500 mt-1">Simulates increasing system load until
-                                        voltage
-                                        collapse (Nose Curve).</p>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button onclick="playSound(); runPVCurveAnalysis()"
-                                        class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md transition flex items-center gap-2 btn-click">
-                                        <i class="ph ph-play"></i> Run PV Analysis
-                                    </button>
-                                </div>
-                            </div>
+                    <div class="overflow-x-auto rounded-lg border border-gray-200">
+                        <table class="w-full text-sm text-left text-gray-600">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                                <tr>
+                                <tr>
+                                    <th class="px-6 py-3">Tripped Line</th>
+                                    <th class="px-6 py-3">Result</th>
+                                    <th class="px-6 py-3">Recommendation</th>
+                                </tr>
+                            </thead>
+                            <tbody id="n1TableBody" class="divide-y divide-gray-100">
+                                <tr>
+                                    <td colspan="4" class="px-6 py-8 text-center text-gray-400 italic">
+                                        Click "Run Analysis" to simulate contingencies for all <span
+                                            id="n1-line-count">...</span> lines.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
-                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                <div
-                                    class="lg:col-span-2 h-80 relative bg-slate-50 rounded-lg border border-slate-200 p-2">
-                                    <canvas id="pvCurveChart"></canvas>
-                                </div>
-                                <div class="space-y-4">
-                                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                                        <h5 class="text-xs font-bold text-blue-800 uppercase mb-2">Analysis Results
-                                        </h5>
-                                        <div class="space-y-3">
-                                            <div class="flex justify-between items-center">
-                                                <span class="text-sm text-gray-600">Current Load:</span>
-                                                <span id="pvCurrentLoad" class="font-mono font-bold text-blue-700">-
-                                                    MW</span>
-                                            </div>
-                                            <div class="flex justify-between items-center">
-                                                <span class="text-sm text-gray-600">Max Load (P_max):</span>
-                                                <span id="pvMaxLoad" class="font-mono font-bold text-purple-700">-
-                                                    MW</span>
-                                            </div>
-                                            <div class="flex justify-between items-center">
-                                                <span class="text-sm text-gray-600">Collapse Voltage:</span>
-                                                <span id="pvCriticalV" class="font-mono font-bold text-red-600">-
-                                                    p.u.</span>
-                                            </div>
+                <!-- TAB: PV Curve (Voltage Stability) -->
+                <div id="content-pv-curve" class="hidden animate-fadeIn">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-800">PV Curve Analysis (Voltage
+                                    Stability)
+                                </h3>
+                                <p class="text-sm text-gray-500 mt-1">Simulates increasing system load until
+                                    voltage
+                                    collapse (Nose Curve).</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="playSound(); runPVCurveAnalysis()"
+                                    class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md transition flex items-center gap-2 btn-click">
+                                    <i class="ph ph-play"></i> Run PV Analysis
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="lg:col-span-2 h-80 relative bg-slate-50 rounded-lg border border-slate-200 p-2">
+                                <canvas id="pvCurveChart"></canvas>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                                    <h5 class="text-xs font-bold text-blue-800 uppercase mb-2">Analysis Results
+                                    </h5>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-gray-600">Current Load:</span>
+                                            <span id="pvCurrentLoad" class="font-mono font-bold text-blue-700">-
+                                                MW</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-gray-600">Max Load (P_max):</span>
+                                            <span id="pvMaxLoad" class="font-mono font-bold text-purple-700">-
+                                                MW</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-gray-600">Collapse Voltage:</span>
+                                            <span id="pvCriticalV" class="font-mono font-bold text-red-600">-
+                                                p.u.</span>
                                         </div>
                                     </div>
-                                    <div
-                                        class="bg-yellow-50 p-3 rounded border border-yellow-100 text-xs text-yellow-800 leading-relaxed">
-                                        <strong class="block mb-1"><i class="ph ph-lightbulb"></i> Understanding the
-                                            Curve:</strong>
-                                        The "Nose Point" represents the maximum power transfer capability. operating
-                                        beyond this point leads to voltage collapse.
-                                    </div>
+                                </div>
+                                <div
+                                    class="bg-yellow-50 p-3 rounded border border-yellow-100 text-xs text-yellow-800 leading-relaxed">
+                                    <strong class="block mb-1"><i class="ph ph-lightbulb"></i> Understanding the
+                                        Curve:</strong>
+                                    The "Nose Point" represents the maximum power transfer capability. operating
+                                    beyond this point leads to voltage collapse.
                                 </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
+
             </div>
-        </main>
+    </div>
+    </main>
     </div>
 
     <!-- ... (Previous Author/Help/AddLine Modals remain unchanged) ... -->
@@ -4502,7 +4556,7 @@
         }
 
         function switchTab(id) {
-            ['line-flows', 'opf', 'compliance', 'voltage', 'math', 'sld', 'contingency', 'pv-curve'].forEach(t => {
+            ['line-flows', 'opf', 'compliance', 'voltage', 'math', 'sld', 'contingency', 'pv-curve', 'fault'].forEach(t => {
                 const content = document.getElementById(`content-${t}`);
                 const tab = document.getElementById(`tab-${t}`);
                 if (content && tab) {
@@ -4520,6 +4574,165 @@
                 renderSLD(); // Force re-render to apply current toggle states
             }
         }
+        // --- FAULT ANALYSIS (SHORT CIRCUIT) ---
+        // Complex Number Class for Calculation
+        class Complex {
+            constructor(r, i) { this.r = r; this.i = i; }
+            add(c) { return new Complex(this.r + c.r, this.i + c.i); }
+            sub(c) { return new Complex(this.r - c.r, this.i - c.i); }
+            mul(c) { return new Complex(this.r * c.r - this.i * c.i, this.r * c.i + this.i * c.r); }
+            div(c) {
+                const d = c.r * c.r + c.i * c.i;
+                return new Complex((this.r * c.r + this.i * c.i) / d, (this.i * c.r - this.r * c.i) / d);
+            }
+            abs() { return Math.sqrt(this.r * this.r + this.i * this.i); }
+            toString() { return `${this.r.toFixed(4)} + j${this.i.toFixed(4)}`; }
+        }
+
+        function runFaultAnalysis() {
+            const tbody = document.getElementById('faultTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4"><i class="ph ph-spinner animate-spin text-2xl text-orange-500"></i><br>Inverting Z-Bus Matrix...</td></tr>';
+
+            // 0. Use small timeout to allow UI to render the spinner
+            setTimeout(() => {
+                try {
+                    // 1. Build Admittance Matrix (Y-Bus) in Complex Form
+                    const buses = currentData.map(b => b.bus);
+                    const size = buses.length;
+                    let Y = Array.from({ length: size }, () => Array.from({ length: size }, () => new Complex(0, 0)));
+
+                    activeBranches.forEach(br => {
+                        const i = buses.indexOf(br.from);
+                        const k = buses.indexOf(br.to);
+                        if (i === -1 || k === -1) return;
+
+                        // Line Admittance y = 1 / (r + jx)
+                        const denom = br.r ** 2 + br.x ** 2;
+                        const y_ik = new Complex(br.r / denom, -br.x / denom);
+
+                        // Charging Susceptance (b/2) -> j(b/2)
+                        const b_half = (br.b || 0) / 2;
+                        const y_shunt = new Complex(0, b_half);
+
+                        // Off-Diagonal: -y_ik
+                        Y[i][k] = Y[i][k].sub(y_ik);
+                        Y[k][i] = Y[k][i].sub(y_ik);
+
+                        // Diagonal: Sum(y_ik) + y_shunt
+                        Y[i][i] = Y[i][i].add(y_ik).add(y_shunt);
+                        Y[k][k] = Y[k][k].add(y_ik).add(y_shunt);
+                    });
+
+                    // Add Shunt Elements (Generators/Loads modelled as Impedance? For Faults usually just Gen reactance)
+                    // Simplified: Assuming infinite grid at Slack and typical Xd" for others or just using network Z.
+                    // Standard approach: Invert Y-bus as is (Thevenin equivalent seen from bus).
+                    // NOTE: We need a reference. Slack bus is usually treated as a voltage source behind impedance.
+                    // For this sim, we will just invert the network Y and assume Prefault V.
+
+                    // 2. Invert Y-Bus to get Z-Bus (Gaussian Elimination)
+                    const Z = invertComplexMatrix(Y);
+
+                    // 3. Calculate Fault Currents
+                    const baseMVA = 100;
+                    const basekV = 115;
+                    const baseI = (baseMVA * 1000) / (Math.sqrt(3) * basekV); // Amps ~ 502 A
+
+                    if (!tbody) {
+                        console.error("Fault Analysis Table Body not found!");
+                        return;
+                    }
+                    tbody.innerHTML = '';
+
+                    currentData.forEach((bus, idx) => {
+                        // pre-fault voltage (use solved mag if available, else 1.0)
+                        const v_pre = bus.mag || 1.0;
+
+                        // Thevenin Impedance at bus k is Z[k][k]
+                        const z_th = Z[idx][idx];
+                        const z_mag = z_th.abs();
+
+                        // If-sc (p.u.) = V_pre / |Z_th|
+                        let i_sc_pu = 0;
+                        if (z_mag > 0.0001) i_sc_pu = v_pre / z_mag;
+
+                        // Physical Units
+                        const i_sc_ka = (i_sc_pu * baseI) / 1000;
+                        const mva_sc = Math.sqrt(3) * basekV * i_sc_ka;
+
+                        // Breaker Check (Limit 40kA)
+                        const limit = 40;
+                        const status = i_sc_ka < limit
+                            ? '<span class="px-2 py-1 rounded bg-emerald-100 text-emerald-700 font-bold text-xs border border-emerald-200">PASS</span>'
+                            : '<span class="px-2 py-1 rounded bg-red-100 text-red-700 font-bold text-xs border border-red-200 animate-pulse">FAIL (EXPLOSION RISK)</span>';
+
+                        tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50 border-b border-gray-100 transition">
+                            <td class="px-6 py-3 font-bold">${bus.bus}</td>
+                            <td class="px-6 py-3">${v_pre.toFixed(3)}</td>
+                            <td class="px-6 py-3 font-mono text-xs text-gray-500">${z_th.r.toFixed(4)} + j${z_th.i.toFixed(4)}<br>(|Z|=${z_mag.toFixed(4)})</td>
+                            <td class="px-6 py-3 font-bold text-slate-700">${i_sc_ka.toFixed(2)} kA</td>
+                            <td class="px-6 py-3 text-orange-600 font-bold">${mva_sc.toFixed(1)} MVA</td>
+                            <td class="px-6 py-3">${status}</td>
+                        </tr>
+                    `;
+                    });
+
+                } catch (err) {
+                    console.error(err);
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-red-500 py-4">Calculation Failed: System Matrix Singular or Unstable.<br>Ensure grid is connected (not islanded).</td></tr>`;
+                }
+            }, 100);
+        }
+
+        // Gaussian Elimination for Complex Matrix Inversion
+        function invertComplexMatrix(A) {
+            const n = A.length;
+            // Create augmented matrix [A | I]
+            let M = Array.from({ length: n }, (_, i) =>
+                Array.from({ length: 2 * n }, (_, j) =>
+                    j < n ? A[i][j] : (j === n + i ? new Complex(1, 0) : new Complex(0, 0))
+                )
+            );
+
+            // Forward Elimination
+            for (let i = 0; i < n; i++) {
+                // Find Pivot
+                let pivot = M[i][i];
+                if (pivot.abs() < 1e-10) {
+                    // Simple swap search if pivot is zero (not full partial pivoting for brevity, usually efficient enough)
+                    for (let k = i + 1; k < n; k++) {
+                        if (M[k][i].abs() > 1e-10) {
+                            [M[i], M[k]] = [M[k], M[i]];
+                            pivot = M[i][i];
+                            break;
+                        }
+                    }
+                    if (pivot.abs() < 1e-10) throw new Error("Singular Matrix");
+                }
+
+                // Normalize Row i
+                for (let j = i; j < 2 * n; j++) {
+                    M[i][j] = M[i][j].div(pivot);
+                }
+
+                // Eliminate other rows
+                for (let k = 0; k < n; k++) {
+                    if (k !== i) {
+                        const factor = M[k][i];
+                        for (let j = i; j < 2 * n; j++) {
+                            M[k][j] = M[k][j].sub(factor.mul(M[i][j]));
+                        }
+                    }
+                }
+            }
+
+            // Extract Inverse (Right half)
+            let Inv = Array.from({ length: n }, (_, i) =>
+                M[i].slice(n, 2 * n)
+            );
+            return Inv;
+        }
+
         // --- DARK MODE LOGIC ---
         function toggleTheme() {
             const isDark = document.documentElement.classList.toggle('dark');
