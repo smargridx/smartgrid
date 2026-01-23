@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -1171,7 +1172,7 @@
                                                 class="text-[9px] font-normal">[p.u.] / [MW]</div>
                                         </th>
                                         <th class="px-6 py-3 text-right text-blue-600 w-[20%]">Current (I) <div
-                                                class="text-[9px] font-normal">[p.u.] / [Amperes]</div>
+                                                class="text-[9px] font-normal">[p.u.] / [Amperes] / [Angle&deg;]</div>
                                         </th>
                                         <th class="px-6 py-3 text-right text-red-600 w-[15%]">Loss P <div
                                                 class="text-[9px] font-normal">[p.u.] / [MW]</div>
@@ -3619,6 +3620,11 @@
                 const i_pu = s_ft_mag / v1;
                 const i_amps = i_pu * iBaseAmps;
 
+                // Angle of I = angle(P-jQ) + angle(V)
+                // angle(P-jQ) = atan2(-q_ft, p_ft)
+                const i_ang_rad = Math.atan2(-q_ft, p_ft) + a1;
+                const i_ang_deg = i_ang_rad * 180 / Math.PI;
+
                 const lossP = (p_ft + p_tf);
                 const lossQ = (q_ft + q_tf);
 
@@ -3627,8 +3633,16 @@
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 border-b border-gray-100 transition">
-                        <td class="px-6 py-3 font-medium">Bus ${branch.from} ${branch.from === 1 ? '<span class="text-[9px] text-amber-600 font-bold ml-1 px-1 bg-amber-50 rounded border border-amber-200 uppercase">Slack</span>' : ''}</td>
-                        <td class="px-6 py-3 font-medium">Bus ${branch.to} ${branch.to === 1 ? '<span class="text-[9px] text-amber-600 font-bold ml-1 px-1 bg-amber-50 rounded border border-amber-200 uppercase">Slack</span>' : ''}</td>
+                        <td class="px-6 py-3 font-medium">
+                            Bus ${branch.from} 
+                            <div class="text-[10px] text-gray-400">${busFrom.ang.toFixed(1)}&deg;</div>
+                            ${branch.from === 1 ? '<span class="text-[9px] text-amber-600 font-bold px-1 bg-amber-50 rounded border border-amber-200 uppercase">Slack</span>' : ''}
+                        </td>
+                        <td class="px-6 py-3 font-medium">
+                            Bus ${branch.to} 
+                            <div class="text-[10px] text-gray-400">${busTo.ang.toFixed(1)}&deg;</div>
+                            ${branch.to === 1 ? '<span class="text-[9px] text-amber-600 font-bold px-1 bg-amber-50 rounded border border-amber-200 uppercase">Slack</span>' : ''}
+                        </td>
                         <td class="px-6 py-3 font-mono text-right">
                             <div class="font-bold">${p_ft.toFixed(4)} p.u.</div>
                             <div class="text-[10px] text-gray-400">${(p_ft * baseMVA).toFixed(1)} MW</div>
@@ -3639,7 +3653,7 @@
                         </td>
                         <td class="px-6 py-3 font-mono text-right text-blue-600">
                             <div class="font-bold">${i_pu.toFixed(5)} p.u.</div>
-                            <div class="text-[10px] text-blue-400">${i_amps.toFixed(2)} A</div>
+                            <div class="text-[10px] text-blue-400 font-medium">${i_amps.toFixed(2)} A &ang; ${i_ang_deg.toFixed(1)}&deg;</div>
                         </td>
                         <td class="px-6 py-3 font-mono text-right text-red-600">
                             <div class="font-bold">${Math.abs(lossP).toFixed(5)} p.u.</div>
