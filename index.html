@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -419,7 +418,7 @@
                         </h1>
                         <p
                             class="text-blue-100 font-medium text-sm border-l-4 border-yellow-400 pl-4 py-1 opacity-90 bg-blue-900/20 rounded-r-lg">
-                            Advanced IEEE 30-Bus System Analysis Platform
+                            Advanced Power System Analysis Platform
                         </p>
                     </div>
 
@@ -549,33 +548,19 @@
                 </div>
 
                 <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg border border-gray-200 dark:border-slate-700">
-                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">Custom Bus
-                        Network</label>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">Configure
+                        Network Size</label>
                     <div class="flex items-center justify-center gap-2">
-                        <input type="number" id="setupBusCount" value="5" min="5" max="30"
-                            title="Enter a value between 5 and 30"
+                        <input type="number" id="setupBusCount" value="5" min="3" max="15"
+                            title="Enter a value between 3 and 15"
                             class="w-24 text-center border border-gray-300 rounded px-3 py-2 font-bold text-lg focus:outline-none focus:border-blue-500">
                         <span class="text-gray-500 font-medium">Buses</span>
                     </div>
                     <button onclick="playSound(); initCustomSystem()"
-                        class="mt-4 w-full bg-white border-2 border-blue-600 text-blue-700 font-bold py-2 rounded-lg hover:bg-blue-50 transition btn-click">
-                        Create Empty System
+                        class="mt-4 w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg shadow-lg hover:shadow-blue-500/30 transition btn-click flex items-center justify-center gap-2">
+                        <i class="ph ph-lightning"></i> Initialize Custom Grid
                     </button>
                 </div>
-
-                <div class="relative">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-200"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-white text-gray-400">OR</span>
-                    </div>
-                </div>
-
-                <button onclick="playSound(); initStandardSystem()"
-                    class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg shadow-lg hover:shadow-blue-500/30 transition btn-click flex items-center justify-center gap-2">
-                    <i class="ph ph-lightning"></i> Load IEEE 30-Bus Standard
-                </button>
             </div>
         </div>
     </div>
@@ -594,7 +579,7 @@
                 <h3 id="notifyTitle" class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2">Invalid Input
                 </h3>
                 <p id="notifyMessage" class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-6">
-                    Grid size must be between 5 and 30 buses.
+                    Grid size must be between 3 and 15 buses.
                 </p>
                 <button onclick="playSound(); closeNotification()"
                     class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-bold rounded-lg transition-colors shadow-lg active:scale-95 btn-click">
@@ -776,8 +761,8 @@
                                 </button>
                             </div>
                             <p class="text-sm font-medium text-slate-500 dark:text-slate-400 max-w-xl">
-                                Configure bus data and solver parameters. Load standard benchmarks or define custom
-                                topologies.
+                                Configure bus data and grid topology. Define your system parameters and transmission
+                                lines manually or use auto-populate tools.
                             </p>
                         </div>
 
@@ -820,15 +805,15 @@
                             </div>
 
                             <!-- 3. Load Defaults Button -->
-                            <button onclick="playSound(); loadIEEDefaults()" id="resetBtn"
-                                class="h-11 flex items-center gap-2 pl-4 pr-5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm text-slate-600 dark:text-slate-300 font-bold text-sm transition-all hover:border-blue-500 hover:text-blue-600 hover:shadow-md active:scale-95 group relative overflow-hidden">
-                                <div class="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/5 transition-colors">
+                            <button onclick="playSound(); resetGrid()" id="resetBtn"
+                                class="h-11 flex items-center gap-2 pl-4 pr-5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm text-slate-600 dark:text-slate-300 font-bold text-sm transition-all hover:border-red-500 hover:text-red-600 hover:shadow-md active:scale-95 group relative overflow-hidden">
+                                <div class="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/5 transition-colors">
                                 </div>
                                 <div
-                                    class="bg-slate-100 dark:bg-slate-700 rounded-full p-1 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
-                                    <i class="ph ph-arrow-counter-clockwise text-lg"></i>
+                                    class="bg-slate-100 dark:bg-slate-700 rounded-full p-1 group-hover:bg-red-100 group-hover:text-red-600 transition-colors">
+                                    <i class="ph ph-trash text-lg"></i>
                                 </div>
-                                <span>Load IEEE 30-Bus</span>
+                                <span>Clear Grid</span>
                             </button>
 
                             <!-- 4. Status Badge -->
@@ -1516,7 +1501,7 @@
                                 </div>
                                 <div class="flex-1 p-4 font-mono text-[11px] text-orange-400 overflow-y-auto scroll-custom space-y-3"
                                     id="faultMathLog">
-                                    <div class="text-slate-500 opacity-50">System: IEEE 30-Bus / Custom Grid</div>
+                                    <div class="text-slate-500 opacity-50">System: Custom Distribution Grid</div>
                                     <div class="text-slate-500 opacity-50">Status: Awaiting Fault Trigger...</div>
                                     <div class="pt-4 border-t border-slate-800">
                                         <span class="text-blue-400">&gt;</span> Use the dropdown to select a fault type.
@@ -2020,86 +2005,14 @@
         // --- DATA MODEL ---
         // MOVED TO TOP to fix ReferenceError
 
-        // Base Topology (From IEEE 30-Bus System)
-        const baseBranchData = [
-            { id: 1, from: 1, to: 2, r: 0.0192, x: 0.0575 }, { id: 2, from: 1, to: 3, r: 0.0452, x: 0.1852 }, { id: 3, from: 2, to: 4, r: 0.057, x: 0.1737 }, { id: 4, from: 3, to: 4, r: 0.0132, x: 0.0379 }, { id: 5, from: 2, to: 5, r: 0.0472, x: 0.1983 },
-            { id: 6, from: 2, to: 6, r: 0.0581, x: 0.1763 }, { id: 7, from: 4, to: 6, r: 0.0119, x: 0.0414 }, { id: 8, from: 5, to: 7, r: 0.046, x: 0.116 }, { id: 9, from: 6, to: 7, r: 0.0267, x: 0.082 }, { id: 10, from: 6, to: 8, r: 0.012, x: 0.042 },
-            { id: 11, from: 6, to: 9, r: 0, x: 0.208 }, { id: 12, from: 6, to: 10, r: 0, x: 0.556 }, { id: 13, from: 9, to: 11, r: 0, x: 0.208 }, { id: 14, from: 9, to: 10, r: 0, x: 0.11 }, { id: 15, from: 4, to: 12, r: 0, x: 0.256 },
-            { id: 16, from: 12, to: 13, r: 0, x: 0.14 }, { id: 17, from: 12, to: 14, r: 0.1231, x: 0.2559 }, { id: 18, from: 12, to: 15, r: 0.0662, x: 0.1304 }, { id: 19, from: 12, to: 16, r: 0.0945, x: 0.1987 }, { id: 20, from: 14, to: 15, r: 0.221, x: 0.1997 },
-            { id: 21, from: 16, to: 17, r: 0.0824, x: 0.1923 }, { id: 22, from: 15, to: 18, r: 0.1073, x: 0.2185 }, { id: 23, from: 18, to: 19, r: 0.0639, x: 0.1292 }, { id: 24, from: 19, to: 20, r: 0.034, x: 0.068 }, { id: 25, from: 10, to: 20, r: 0.0936, x: 0.209 },
-            { id: 26, from: 10, to: 17, r: 0.0324, x: 0.0845 }, { id: 27, from: 10, to: 21, r: 0.0348, x: 0.0749 }, { id: 28, from: 10, to: 22, r: 0.0727, x: 0.1499 }, { id: 29, from: 21, to: 22, r: 0.0116, x: 0.0236 }, { id: 30, from: 15, to: 23, r: 0.1, x: 0.202 },
-            { id: 31, from: 22, to: 24, r: 0.115, x: 0.179 }, { id: 32, from: 23, to: 24, r: 0.132, x: 0.27 }, { id: 33, from: 24, to: 25, r: 0.1885, x: 0.3292 }, { id: 34, from: 25, to: 26, r: 0.2544, x: 0.38 }, { id: 35, from: 25, to: 27, r: 0.1093, x: 0.2087 },
-            { id: 36, from: 28, to: 27, r: 0, x: 0.396 }, { id: 37, from: 27, to: 29, r: 0.2198, x: 0.4153 }, { id: 38, from: 27, to: 30, r: 0.3202, x: 0.6027 }, { id: 39, from: 29, to: 30, r: 0.2399, x: 0.4533 }, { id: 40, from: 8, to: 28, r: 0.0636, x: 0.2 },
-            { id: 41, from: 6, to: 28, r: 0.0169, x: 0.0599 }
-        ];
+        // Base Topology (Removed IEEE 30-Bus)
+        const baseBranchData = [];
 
-        // Base Line Flows (Exact values from Table 2 of PDF)
-        const baseLineFlows = [
-            { from: 1, to: 2, p: 1.778, q: -0.221, p_rev: -1.723, q_rev: 0.327, lossP: 0.055, lossQ: 0.105 },
-            { from: 1, to: 3, p: 0.832, q: 0.051, p_rev: -0.804, q_rev: 0.02, lossP: 0.028, lossQ: 0.071 },
-            { from: 2, to: 4, p: 0.457, q: 0.027, p_rev: -0.446, q_rev: 0.032, lossP: 0.011, lossQ: -0.005 },
-            { from: 3, to: 4, p: 0.780, q: -0.032, p_rev: -0.772, q_rev: 0.045, lossP: 0.008, lossQ: 0.013 },
-            { from: 2, to: 5, p: 0.830, q: 0.017, p_rev: -0.8, q_rev: 0.065, lossP: 0.03, lossQ: 0.082 },
-            { from: 2, to: 6, p: 0.619, q: -0.01, p_rev: -0.599, q_rev: 0.032, lossP: 0.02, lossQ: 0.023 },
-            { from: 4, to: 6, p: 0.701, q: -0.175, p_rev: -0.695, q_rev: 0.187, lossP: 0.006, lossQ: 0.012 },
-            { from: 5, to: 7, p: -0.142, q: 0.105, p_rev: 0.144, q_rev: -0.122, lossP: 0.002, lossQ: -0.017 },
-            { from: 6, to: 7, p: 0.375, q: -0.019, p_rev: -0.372, q_rev: 0.013, lossP: 0.004, lossQ: -0.006 },
-            { from: 6, to: 8, p: 0.295, q: -0.038, p_rev: -0.294, q_rev: 0.032, lossP: 0.001, lossQ: -0.006 },
-            { from: 6, to: 9, p: 0.277, q: -0.297, p_rev: -0.277, q_rev: 0.331, lossP: 0.0, lossQ: 0.034 },
-            { from: 6, to: 10, p: 0.158, q: -0.113, p_rev: -0.158, q_rev: 0.134, lossP: 0.0, lossQ: 0.021 },
-            { from: 9, to: 11, p: 0.0, q: -0.157, p_rev: 0.0, q_rev: 0.161, lossP: 0.0, lossQ: 0.005 },
-            { from: 9, to: 10, p: 0.277, q: 0.067, p_rev: -0.277, q_rev: -0.059, lossP: 0.0, lossQ: 0.008 },
-            { from: 4, to: 12, p: 0.441, q: -0.46, p_rev: -0.441, q_rev: 0.561, lossP: 0.0, lossQ: 0.101 },
-            { from: 12, to: 13, p: 0.0, q: -0.103, p_rev: 0.0, q_rev: 0.104, lossP: 0.0, lossQ: 0.001 },
-            { from: 12, to: 14, p: 0.079, q: 0.024, p_rev: -0.078, q_rev: -0.023, lossP: 0.001, lossQ: 0.002 },
-            { from: 12, to: 15, p: 0.179, q: 0.069, p_rev: -0.176, q_rev: -0.065, lossP: 0.002, lossQ: 0.004 },
-            { from: 12, to: 16, p: 0.072, q: 0.034, p_rev: -0.072, q_rev: -0.033, lossP: 0.001, lossQ: 0.001 },
-            { from: 14, to: 15, p: 0.016, q: 0.007, p_rev: -0.016, q_rev: -0.007, lossP: 0.0, lossQ: 0.0 },
-            { from: 16, to: 17, p: 0.037, q: 0.015, p_rev: -0.036, q_rev: -0.014, lossP: 0.0, lossQ: 0.0 },
-            { from: 15, to: 18, p: 0.060, q: 0.017, p_rev: -0.06, q_rev: -0.017, lossP: 0.0, lossQ: 0.001 },
-            { from: 18, to: 19, p: 0.028, q: 0.008, p_rev: -0.028, q_rev: -0.008, lossP: 0.0, lossQ: 0.0 },
-            { from: 19, to: 20, p: -0.067, q: -0.026, p_rev: 0.067, q_rev: 0.027, lossP: 0.0, lossQ: 0.0 },
-            { from: 10, to: 20, p: 0.090, q: 0.036, p_rev: 0.089, q_rev: -0.034, lossP: 0.001, lossQ: 0.002 },
-            { from: 10, to: 17, p: 0.054, q: 0.044, p_rev: -0.054, q_rev: -0.044, lossP: 0.0, lossQ: 0.0 },
-            { from: 10, to: 21, p: 0.157, q: 0.098, p_rev: -0.156, q_rev: -0.096, lossP: 0.001, lossQ: 0.002 },
-            { from: 10, to: 22, p: 0.076, q: 0.045, p_rev: -0.075, q_rev: -0.044, lossP: 0.001, lossQ: 0.001 },
-            { from: 21, to: 22, p: -0.019, q: -0.016, p_rev: 0.019, q_rev: 0.016, lossP: 0.0, lossQ: 0.0 },
-            { from: 15, to: 23, p: 0.050, q: 0.03, p_rev: -0.05, q_rev: -0.029, lossP: 0.0, lossQ: 0.001 }
-        ];
+        // Base Line Flows (Removed IEEE 30-Bus)
+        const baseLineFlows = [];
 
-        // IEEE 30-Bus OPF Results (from PDF Table 5)
-        const ieee30OPF = [
-            { bus: 1, mag: 0.982, ang: 0, gp: 41.54, gq: -5.44, lp: 0, lq: 0, injQ: 0 },
-            { bus: 2, mag: 0.979, ang: -0.763, gp: 55.4, gq: 1.67, lp: 21.7, lq: 12.7, injQ: 0 },
-            { bus: 3, mag: 0.977, ang: -2.39, gp: 0, gq: 0, lp: 2.4, lq: 1.2, injQ: 0 },
-            { bus: 4, mag: 0.976, ang: -2.839, gp: 0, gq: 0, lp: 7.6, lq: 1.6, injQ: 0 },
-            { bus: 5, mag: 0.971, ang: -2.486, gp: 0, gq: 0, lp: 94.2, lq: 19.0, injQ: 0 },
-            { bus: 6, mag: 0.972, ang: -3.229, gp: 0, gq: 0, lp: 0, lq: 0, injQ: 0 },
-            { bus: 7, mag: 0.962, ang: -3.491, gp: 0, gq: 0, lp: 22.8, lq: 10.9, injQ: 0 },
-            { bus: 8, mag: 0.961, ang: -3.682, gp: 0, gq: 0, lp: 30, lq: 30, injQ: 0 },
-            { bus: 9, mag: 0.99, ang: -4.137, gp: 0, gq: 0, lp: 0, lq: 0, injQ: 0 },
-            { bus: 10, mag: 1.0, ang: -4.6, gp: 0, gq: 0, lp: 5.8, lq: 2, injQ: 0.19 },
-            { bus: 11, mag: 0.99, ang: -4.137, gp: 0, gq: 0, lp: 0, lq: 0, injQ: 0 },
-            { bus: 12, mag: 1.017, ang: -4.498, gp: 0, gq: 0, lp: 11.2, lq: 7.5, injQ: 0 },
-            { bus: 13, mag: 1.064, ang: -3.298, gp: 16.2, gq: 35.93, lp: 0, lq: 0, injQ: 0 },
-            { bus: 14, mag: 1.007, ang: -5.04, gp: 0, gq: 0, lp: 6.2, lq: 1.6, injQ: 0 },
-            { bus: 15, mag: 1.009, ang: -4.814, gp: 0, gq: 0, lp: 8.2, lq: 2.5, injQ: 0 },
-            { bus: 16, mag: 1.003, ang: -4.839, gp: 0, gq: 0, lp: 3.5, lq: 1.8, injQ: 0 },
-            { bus: 17, mag: 0.995, ang: -4.887, gp: 0, gq: 0, lp: 9, lq: 5.8, injQ: 0 },
-            { bus: 18, mag: 0.993, ang: -5.484, gp: 0, gq: 0, lp: 3.2, lq: 0.9, injQ: 0 },
-            { bus: 19, mag: 0.987, ang: -5.688, gp: 0, gq: 0, lp: 9.5, lq: 3.4, injQ: 0 },
-            { bus: 20, mag: 0.99, ang: -5.472, gp: 0, gq: 0, lp: 2.2, lq: 0.7, injQ: 0 },
-            { bus: 21, mag: 1.009, ang: -4.621, gp: 0, gq: 0, lp: 17.5, lq: 11.2, injQ: 0 },
-            { bus: 22, mag: 1.016, ang: -4.503, gp: 22.74, gq: 34.2, lp: 0, lq: 0, injQ: 0 },
-            { bus: 23, mag: 1.026, ang: -3.756, gp: 16.27, gq: 6.96, lp: 3.2, lq: 1.6, injQ: 0 },
-            { bus: 24, mag: 1.017, ang: -3.885, gp: 0, gq: 0, lp: 8.7, lq: 6.7, injQ: 0.043 },
-            { bus: 25, mag: 1.044, ang: -2.072, gp: 0, gq: 0, lp: 0, lq: 0, injQ: 0 },
-            { bus: 26, mag: 1.027, ang: -2.476, gp: 0, gq: 0, lp: 3.5, lq: 2.3, injQ: 0 },
-            { bus: 27, mag: 1.069, ang: -0.715, gp: 39.91, gq: 31.75, lp: 0, lq: 0, injQ: 0 },
-            { bus: 28, mag: 0.982, ang: -3.215, gp: 0, gq: 0, lp: 0, lq: 0, injQ: 0 },
-            { bus: 29, mag: 1.05, ang: -1.849, gp: 0, gq: 0, lp: 2.4, lq: 0.9, injQ: 0 },
-            { bus: 30, mag: 1.039, ang: -2.643, gp: 0, gq: 0, lp: 10.6, lq: 1.9, injQ: 0 }
-        ];
+        // System OPF Results (Removed IEEE 30-Bus)
+        const ieee30OPF = [];
 
         // --- GUIDED TOUR SYSTEM ---
         const tourSteps = [
@@ -2247,39 +2160,8 @@
             showTourStep();
         }
 
-        // IEEE 30-Bus BASE Case Data (from PDF Table 1 - NR Method)
-        const ieee30Base = [
-            { bus: 1, mag: 1.06, ang: 0, gp: 2.61, gq: -0.17, lp: 0, lq: 0, injQ: 0 },
-            { bus: 2, mag: 1.043, ang: -5.497, gp: 40.0, gq: 0.488, lp: 21.7, lq: 12.7, injQ: 0 },
-            { bus: 3, mag: 1.022, ang: -8.004, gp: 0, gq: 0, lp: 2.4, lq: 1.2, injQ: 0 },
-            { bus: 4, mag: 1.013, ang: -9.661, gp: 0, gq: 0, lp: 7.6, lq: 1.6, injQ: 0 },
-            { bus: 5, mag: 1.01, ang: -14.381, gp: 0, gq: 0.36, lp: 0, lq: 0, injQ: 0 },
-            { bus: 6, mag: 1.012, ang: -11.398, gp: 0, gq: 0, lp: 0, lq: 0, injQ: 0 },
-            { bus: 7, mag: 1.003, ang: -13.15, gp: 0, gq: 0, lp: 22.8, lq: 10.9, injQ: 0 },
-            { bus: 8, mag: 1.01, ang: -12.115, gp: 0, gq: 0.308, lp: 30, lq: 30, injQ: 0 },
-            { bus: 9, mag: 1.051, ang: -14.434, gp: 0, gq: 0, lp: 0, lq: 0, injQ: 0 },
-            { bus: 10, mag: 1.044, ang: -16.024, gp: 0, gq: 0, lp: 5.8, lq: 2, injQ: 0.19 },
-            { bus: 11, mag: 1.082, ang: -14.434, gp: 0, gq: 0.161, lp: 0, lq: 0, injQ: 0 },
-            { bus: 12, mag: 1.057, ang: -15.302, gp: 0, gq: 0, lp: 11.2, lq: 7.5, injQ: 0 },
-            { bus: 13, mag: 1.071, ang: -15.302, gp: 0, gq: 0.104, lp: 0, lq: 0, injQ: 0 },
-            { bus: 14, mag: 1.042, ang: -16.191, gp: 0, gq: 0, lp: 6.2, lq: 1.6, injQ: 0 },
-            { bus: 15, mag: 1.038, ang: -16.278, gp: 0, gq: 0, lp: 8.2, lq: 2.5, injQ: 0 },
-            { bus: 16, mag: 1.045, ang: -15.88, gp: 0, gq: 0, lp: 3.5, lq: 1.8, injQ: 0 },
-            { bus: 17, mag: 1.039, ang: -16.188, gp: 0, gq: 0, lp: 9, lq: 5.8, injQ: 0 },
-            { bus: 18, mag: 1.028, ang: -16.884, gp: 0, gq: 0, lp: 3.2, lq: 0.9, injQ: 0 },
-            { bus: 19, mag: 1.025, ang: -17.052, gp: 0, gq: 0, lp: 9.5, lq: 3.4, injQ: 0 },
-            { bus: 20, mag: 1.029, ang: -16.852, gp: 0, gq: 0, lp: 2.2, lq: 0.7, injQ: 0 },
-            { bus: 21, mag: 1.032, ang: -16.468, gp: 0, gq: 0, lp: 17.5, lq: 11.2, injQ: 0 },
-            { bus: 22, mag: 1.033, ang: -16.455, gp: 0, gq: 0, lp: 0, lq: 0, injQ: 0 },
-            { bus: 23, mag: 1.027, ang: -16.662, gp: 0, gq: 0, lp: 3.2, lq: 1.6, injQ: 0 },
-            { bus: 24, mag: 1.022, ang: -16.83, gp: 0, gq: 0, lp: 8.7, lq: 6.7, injQ: 0.043 },
-            { bus: 25, mag: 1.019, ang: -16.424, gp: 0, gq: 0, lp: 0, lq: 0, injQ: 0 },
-            { bus: 26, mag: 1.001, ang: -16.842, gp: 0, gq: 0, lp: 3.5, lq: 2.3, injQ: 0 },
-            { bus: 27, mag: 1.026, ang: -15.912, gp: 0, gq: 0, lp: 0, lq: 0, injQ: 0 },
-            { bus: 28, mag: 1.011, ang: -12.057, gp: 0, gq: 0, lp: 0, lq: 0, injQ: 0 },
-            { bus: 29, mag: 1.006, ang: -17.136, gp: 0, gq: 0, lp: 2.4, lq: 0.9, injQ: 0 },
-            { bus: 30, mag: 0.995, ang: -18.015, gp: 0, gq: 0, lp: 10.6, lq: 1.9, injQ: 0 }
-        ];
+        // Base Case Data (Removed IEEE 30-Bus)
+        const ieee30Base = [];
 
         let userName = "Guest";
 
@@ -2307,12 +2189,8 @@
             document.getElementById('setupModal').classList.remove('hidden');
         }
 
-        // --- SETUP LOGIC ---
-        function initStandardSystem() {
-            document.getElementById('setupModal').classList.add('hidden');
-            loadIEEDefaults();
-            launchMainApp();
-        }
+        // Removed initStandardSystem function
+
 
         // --- NOTIFICATION SYSTEM ---
         function showNotification(title, message, type = 'error') {
@@ -2355,8 +2233,8 @@
             let count = parseInt(document.getElementById('setupBusCount').value) || 5;
 
             // Validate Range with new Modal
-            if (count < 5 || count > 30) {
-                showNotification("Invalid Grid Size", "Please enter a value between 5 and 30 buses to ensure stable simulation boundaries.", "error");
+            if (count < 3 || count > 15) {
+                showNotification("Invalid Grid Size", "Please enter a value between 3 and 15 buses to ensure stable simulation boundaries.", "error");
                 return;
             }
 
@@ -2423,7 +2301,7 @@
 
             // Reset Inputs
             if (document.getElementById('setupBusCount')) document.getElementById('setupBusCount').value = "5";
-            if (document.getElementById('busCountDisplay')) document.getElementById('busCountDisplay').innerText = "30";
+            if (document.getElementById('busCountDisplay')) document.getElementById('busCountDisplay').innerText = "0";
 
             // Clear Result Tables
             const tables = ['lineFlowTableBody', 'complianceTableBody', 'inputTableBody', 'topologyTableBody'];
@@ -2527,12 +2405,12 @@
                 title: "Welcome to the Smart Grid Simulator",
                 content: `
                     <p class="mb-4 text-gray-700 leading-relaxed">
-                        This interactive tool simulates the operation of the <strong>IEEE 30-Bus System</strong>, a standard test case for power system analysis using the Newton-Raphson method. It is designed to help students and engineers understand the complex behavior of electrical grids.
+                        This interactive tool simulates the operation of various electrical network configurations using the Newton-Raphson method. It is designed to help students and engineers understand the complex behavior of electrical grids.
                     </p>
                     
                     <h4 class="font-bold text-gray-800 mb-2 border-b border-gray-200 pb-1">Key Features:</h4>
                     <ul class="list-disc ml-5 mb-5 space-y-2 text-gray-600">
-                        <li><strong>Interactive Configuration:</strong> Create your own grid topology or modify the standard IEEE 30-bus case.</li>
+                        <li><strong>Interactive Configuration:</strong> Create your own grid topology with 3 to 15 buses.</li>
                         <li><strong>Real-Time Solver:</strong> Watch the Newton-Raphson algorithm iterate step-by-step with live MathJax equations.</li>
                         <li><strong>Visual Analytics:</strong> View the Single Line Diagram (SLD), voltage profiles, and line flow heatmaps.</li>
                         <li><strong>Compliance Checking:</strong> Automatically validates results against the Philippine Grid Code (PGC) standards.</li>
@@ -2577,8 +2455,7 @@
                             </h4>
                             <p class="mb-2 text-sm">Choose how you want to start:</p>
                             <ul class="list-disc ml-8 space-y-1 text-sm text-gray-600">
-                                <li><strong>Load IEEE Defaults:</strong> Click the button in the top bar to load the standard 30-bus test case data. This is recommended for first-time users.</li>
-                                <li><strong>Custom System:</strong> Use the "Populate Test Values" or "Add New Bus" buttons to build a system from scratch (5-30 buses).</li>
+                                <li><strong>Custom System:</strong> Use the "Populate Test Values" or "Add New Bus" buttons to build a system from scratch (3-15 buses).</li>
                             </ul>
                         </section>
 
@@ -2634,8 +2511,8 @@
                 title: "System Configuration Guide",
                 content: `
             <p class="mb-3">The configuration section allows you to modify the physical state of the power grid before running a simulation.</p>
-                    <p class="mb-3">The system initializes with <strong>IEEE 30-Bus Standard Data</strong>. You can simulate different scenarios (e.g., peak load, generator failure) by changing the values in the table.</p>
-                    <p class="text-sm text-gray-500 italic">Tip: If you make a mistake or the system becomes unstable, click "Reset IEEE Defaults" to restore the original values.</p>
+                    <p class="mb-3">The system initializes with a custom editable grid. You can simulate different scenarios (e.g., peak load, generator failure) by changing the values in the table.</p>
+                    <p class="text-sm text-gray-500 italic">Tip: If you make a mistake or the system becomes unstable, click "Reset Defaults" to restore the starting point.</p>
         `
             },
             busData: {
@@ -2664,7 +2541,7 @@
             <p class="mb-3">The topology defines how buses are connected. Transmission lines carry power between buses.</p>
                     <ul class="list-disc ml-5 mb-4 space-y-2">
                         <li><strong>Redundancy:</strong> Loops in the grid provide reliability. If one line fails, power can flow through another path.</li>
-                        <li><strong>Radial vs. Meshed:</strong> The IEEE 30-bus system is a meshed network, typical of high-voltage transmission grids.</li>
+                        <li><strong>Radial vs. Meshed:</strong> Transmission systems often use meshed networks for high-reliability energy delivery.</li>
                     </ul>
                     <p class="mb-3"><strong>Simulator Action:</strong> You can "Add Line" to create new paths or click the Trash icon to simulate a line trip/failure.</p>
         `
@@ -2772,7 +2649,7 @@
                 title: "Reset IEEE 30-Bus Defaults",
                 content: `
             <p>Clicking this button completely <strong>discards all your changes</strong> to bus data and topology.</p>
-                <p class="mt-2">It restores the system to the standard <strong>IEEE 30-Bus Test Case</strong> configuration, which is a known stable operating point. Use this if your simulation stops converging.</p>
+                <p class="mt-2">It clears the system and resets all parameters to their initial default state. Use this if your simulation stops converging or you want to start over.</p>
         `
             },
             preSim: {
@@ -3280,29 +3157,28 @@
             document.getElementById('sldModal').classList.add('hidden');
         }
 
-        // --- RESET LOGIC (Changed to Load Defaults) ---
-        function loadIEEDefaults() {
-            if (typeof ieee30Base === 'undefined' || typeof baseBranchData === 'undefined') {
-                console.error("Base data not loaded");
-                return;
-            }
-            currentData = JSON.parse(JSON.stringify(ieee30Base));
-            activeBranches = JSON.parse(JSON.stringify(baseBranchData));
+        // --- RESET LOGIC ---
+        function resetGrid() {
+            currentData.forEach(bus => {
+                bus.mag = 1.0; bus.ang = 0; bus.gp = 0; bus.gq = 0; bus.lp = 0; bus.lq = 0; bus.injQ = 0;
+            });
+            activeBranches = [];
             renderInputTable();
             renderTopologyInput();
             renderSidebarTopology();
-            initAddLineModal(); // Reset modal options to base
+            initAddLineModal();
 
             // Visual Feedback
             const btn = document.getElementById('resetBtn');
             const originalHTML = btn.innerHTML;
-            btn.innerHTML = `<i class="ph ph-check"></i> Loaded!`;
-            btn.classList.add('text-green-600', 'bg-green-50', 'border-green-200');
+            btn.innerHTML = `<i class="ph ph-check"></i> Cleared!`;
+            btn.classList.add('text-red-600', 'bg-red-50', 'border-red-200');
             setTimeout(() => {
                 btn.innerHTML = originalHTML;
-                btn.classList.remove('text-green-600', 'bg-green-50', 'border-green-200');
+                btn.classList.remove('text-red-600', 'bg-red-50', 'border-red-200');
             }, 1000);
         }
+
 
         // --- PDF EXPORT ---
         function exportToPDF() {
@@ -3318,7 +3194,7 @@
             // Generate
             const opt = {
                 margin: 0.5,
-                filename: `IEEE30 - Sim - Report - ${userName.replace(/\s+/g, '-')}.pdf`,
+                filename: `PowerSim - Report - ${userName.replace(/\s+/g, '-')}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2 },
                 jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
@@ -3349,7 +3225,7 @@
             // Use currentData length if available, otherwise fallback to display
             const busCount = (typeof currentData !== 'undefined' && currentData.length > 0)
                 ? currentData.length
-                : (busCountDisplay ? (parseInt(busCountDisplay.innerText) || 30) : 30);
+                : (busCountDisplay ? (parseInt(busCountDisplay.innerText) || 0) : 0);
 
             // Step 1: Init
             solverQueue.push({
@@ -5108,8 +4984,8 @@
                 const tbody = document.getElementById('opfTableBody');
                 tbody.innerHTML = '';
 
-                // Simulate OPF by slightly adjusting currentData or using ieee30OPF
-                const source = (currentData.length === 30) ? ieee30OPF : currentData.map(b => ({
+                // Simulate OPF by slightly adjusting currentData
+                const source = currentData.map(b => ({
                     ...b,
                     mag: 0.98 + (Math.random() * 0.04),
                     ang: b.ang * 0.9,
