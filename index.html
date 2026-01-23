@@ -888,23 +888,23 @@
                                 <thead
                                     class="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-100 dark:bg-slate-900 sticky top-0 z-10 shadow-sm">
                                     <tr>
-                                        <th class="px-4 py-3 bg-gray-100 dark:bg-slate-900 w-20">Bus <span
+                                        <th class="px-4 py-3 bg-gray-100 dark:bg-slate-900 w-[10%]">Bus <span
                                                 onclick="playSound(); openHelp('busColumn')" class="info-btn-sm"><i
                                                     class="ph ph-info text-xs"></i></span></th>
-                                        <th class="px-4 py-3 bg-gray-100 dark:bg-slate-900 text-center border-l border-gray-200 dark:border-slate-700"
+                                        <th class="px-4 py-3 bg-gray-100 dark:bg-slate-900 text-center border-l border-gray-200 dark:border-slate-700 w-[20%]"
                                             colspan="2">Voltage</th>
-                                        <th class="px-4 py-3 bg-gray-100 dark:bg-slate-900 text-center border-l border-gray-200 dark:border-slate-700"
+                                        <th class="px-4 py-3 bg-gray-100 dark:bg-slate-900 text-center border-l border-gray-200 dark:border-slate-700 w-[24%]"
                                             colspan="2">Generation <span onclick="playSound(); openHelp('genColumn')"
                                                 class="info-btn-sm"><i class="ph ph-info text-xs"></i></span></th>
-                                        <th class="px-4 py-3 bg-gray-100 dark:bg-slate-900 text-center border-l border-gray-200 dark:border-slate-700"
+                                        <th class="px-4 py-3 bg-gray-100 dark:bg-slate-900 text-center border-l border-gray-200 dark:border-slate-700 w-[24%]"
                                             colspan="2">Load <span onclick="playSound(); openHelp('loadColumn')"
                                                 class="info-btn-sm"><i class="ph ph-info text-xs"></i></span></th>
                                         <th
-                                            class="px-4 py-3 bg-gray-100 dark:bg-slate-900 text-center border-l border-gray-200 dark:border-slate-700">
+                                            class="px-4 py-3 bg-gray-100 dark:bg-slate-900 text-center border-l border-gray-200 dark:border-slate-700 w-[12%]">
                                             Injection <span onclick="playSound(); openHelp('injColumn')"
                                                 class="info-btn-sm"><i class="ph ph-info text-xs"></i></span></th>
                                         <th
-                                            class="px-4 py-3 bg-gray-100 dark:bg-slate-900 text-right border-l border-gray-200 dark:border-slate-700">
+                                            class="px-4 py-3 bg-gray-100 dark:bg-slate-900 text-right border-l border-gray-200 dark:border-slate-700 w-[10%]">
                                             Action</th>
                                     </tr>
                                     <tr>
@@ -964,17 +964,12 @@
                                 class="w-full text-sm text-left text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden">
                                 <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-slate-900 shadow-sm">
                                     <tr>
-                                        <th class="px-3 py-3">Line ID</th>
-                                        <th class="px-3 py-3">F_BUS</th>
-                                        <th class="px-3 py-3">T_BUS</th>
-                                        <th class="px-3 py-3">r (p.u.)</th>
-                                        <th class="px-3 py-3">x (p.u.)</th>
-                                        <th class="px-3 py-3">b (p.u.)</th>
-                                        <th class="px-3 py-3">TAP <span onclick="playSound(); openHelp('tapParam')"
-                                                class="info-btn-sm"><i class="ph ph-question text-xs"></i></span></th>
-                                        <th class="px-3 py-3">SHIFT <span onclick="playSound(); openHelp('shiftParam')"
-                                                class="info-btn-sm"><i class="ph ph-question text-xs"></i></span></th>
-                                        <th class="px-3 py-3 text-right">Action</th>
+                                        <th class="px-3 py-2 w-[8%]">Line ID</th>
+                                        <th class="px-3 py-2 w-[15%]">F_BUS</th>
+                                        <th class="px-3 py-2 w-[15%]">T_BUS</th>
+                                        <th class="px-3 py-2 w-[26%] text-center">r (p.u.)</th>
+                                        <th class="px-3 py-2 w-[26%] text-center">x (p.u.)</th>
+                                        <th class="px-3 py-2 text-right w-[10%]">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody id="topologyTableBody"
@@ -1143,16 +1138,16 @@
                             <table class="min-w-full text-sm text-left text-gray-600">
                                 <thead class="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0">
                                     <tr>
-                                        <th class="px-6 py-3">From Bus</th>
-                                        <th class="px-6 py-3">To Bus</th>
-                                        <th class="px-6 py-3 text-right">Flow (From&rarr;To) <span
+                                        <th class="px-6 py-3 w-[10%]">From Bus</th>
+                                        <th class="px-6 py-3 w-[10%]">To Bus</th>
+                                        <th class="px-6 py-3 text-right w-[20%]">Flow (From&rarr;To) <span
                                                 onclick="playSound(); openHelp('flowColumn')" class="info-btn-sm"><i
                                                     class="ph ph-info text-xs"></i></span></th>
-                                        <th class="px-6 py-3 text-right">Flow (To&rarr;From)</th>
-                                        <th class="px-6 py-3 text-right text-red-600">Loss P (MW) <span
+                                        <th class="px-6 py-3 text-right w-[20%]">Flow (To&rarr;From)</th>
+                                        <th class="px-6 py-3 text-right text-red-600 w-[20%]">Loss P (MW) <span
                                                 onclick="playSound(); openHelp('lossColumn')" class="info-btn-sm"><i
                                                     class="ph ph-info text-xs"></i></span></th>
-                                        <th class="px-6 py-3 text-right text-red-600">Loss Q (Mvar)</th>
+                                        <th class="px-6 py-3 text-right text-red-600 w-[20%]">Loss Q (Mvar)</th>
                                     </tr>
                                 </thead>
                                 <tbody id="lineFlowTableBody" class="divide-y divide-gray-100"></tbody>
@@ -1310,11 +1305,11 @@
                             <table class="min-w-full text-sm text-left text-gray-600">
                                 <thead class="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0">
                                     <tr>
-                                        <th class="px-6 py-3">Bus ID</th>
-                                        <th class="px-6 py-3">Voltage (p.u.)</th>
-                                        <th class="px-6 py-3">PGC Status (±5%)</th>
-                                        <th class="px-6 py-3">PDC Status (±10%)</th>
-                                        <th class="px-6 py-3">Action Required</th>
+                                        <th class="px-6 py-3 w-[15%]">Bus ID</th>
+                                        <th class="px-6 py-3 w-[20%]">Voltage (p.u.)</th>
+                                        <th class="px-6 py-3 w-[20%]">PGC Status (±5%)</th>
+                                        <th class="px-6 py-3 w-[20%]">PDC Status (±10%)</th>
+                                        <th class="px-6 py-3 w-[25%] text-right">Action Required</th>
                                     </tr>
                                 </thead>
                                 <tbody id="complianceTableBody" class="divide-y divide-gray-100"></tbody>
@@ -1402,9 +1397,9 @@
                             <table class="w-full text-sm text-left text-gray-600">
                                 <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                                     <tr>
-                                        <th class="px-6 py-3">Bus/Line ID</th>
-                                        <th class="px-6 py-3">Status</th>
-                                        <th class="px-6 py-3">Recommendation</th>
+                                        <th class="px-6 py-3 w-[20%]">Bus/Line ID</th>
+                                        <th class="px-6 py-3 w-[20%]">Status</th>
+                                        <th class="px-6 py-3 w-[60%] text-right">Recommendation</th>
                                     </tr>
                                 </thead>
                                 <tbody id="n1TableBody" class="divide-y divide-gray-100">
@@ -1428,10 +1423,26 @@
                                 <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
                                     <i class="ph ph-lightning text-orange-500"></i> Short Circuit Analysis
                                 </h3>
-                                <p class="text-sm text-gray-500 mt-1">Calculates the 3-Phase Bolted Fault Current
-                                    using Z-Bus Matrix Inversion.</p>
+                                <p class="text-sm text-gray-500 mt-1">Calculates fault currents using Z-Bus Matrix
+                                    Inversion.
+                                    <button onclick="playSound(); openHelp('faultAnalysis')" class="info-btn-sm"
+                                        title="Fault Analysis Help">
+                                        <i class="ph ph-question text-xs"></i>
+                                    </button>
+                                </p>
                             </div>
-                            <div class="flex gap-2">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <div
+                                    class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Fault Type:</label>
+                                    <select id="faultTypeSelect"
+                                        class="bg-transparent text-sm font-bold text-slate-700 focus:outline-none">
+                                        <option value="3phase">3-Phase Bolted</option>
+                                        <option value="lg">Line-to-Ground (L-G)</option>
+                                        <option value="ll">Line-to-Line (L-L)</option>
+                                        <option value="llg">Double Line-to-Ground (L-L-G)</option>
+                                    </select>
+                                </div>
                                 <button onclick="playSound(); runFaultAnalysis()"
                                     class="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-lg shadow-md transition transform hover:scale-105 btn-click flex items-center gap-2">
                                     <i class="ph ph-lightning text-xl"></i> Calculate Faults
@@ -1440,32 +1451,65 @@
                         </div>
 
                         <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6 text-sm text-orange-800">
-                            <p><strong>Safety Check:</strong> Simulates a solid short-circuit at every bus to verify
-                                if equipment ratings (Circuit Breakers) are sufficient.</p>
-                            <p class="mt-1">Assumes System Base: <span class="font-mono bg-orange-100 px-1 rounded">100
-                                    MVA</span>, <span class="font-mono bg-orange-100 px-1 rounded">115 kV</span>.</p>
+                            <p><strong>Safety Check:</strong> Simulates a fault at every bus based on the selected type
+                                to verify breaker capacities.</p>
+                            <p class="mt-1">Assumes Sequence Ratios: <span
+                                    class="font-mono bg-orange-100 px-1 rounded">Z2 ≈ Z1</span>, <span
+                                    class="font-mono bg-orange-100 px-1 rounded">Z0 ≈ 2.5×Z1</span>.</p>
                         </div>
 
-                        <div class="overflow-x-auto rounded-lg border border-gray-200">
-                            <table class="w-full text-sm text-left text-gray-600">
-                                <thead class="text-xs text-gray-700 uppercase bg-gray-100 text-center">
-                                    <tr>
-                                        <th class="px-6 py-3">Bus ID</th>
-                                        <th class="px-6 py-3">Pre-Fault Voltage (p.u.)</th>
-                                        <th class="px-6 py-3">Thevenin Z (p.u.)</th>
-                                        <th class="px-6 py-3">Fault Current (kA)</th>
-                                        <th class="px-6 py-3">Short Circuit MVA</th>
-                                        <th class="px-6 py-3">Breaker Status (40kA)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="faultTableBody" class="divide-y divide-gray-100 text-center">
-                                    <tr>
-                                        <td colspan="6" class="px-6 py-8 text-center text-gray-400 italic">
-                                            Click "Calculate Faults" to perform Short Circuit Study.
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <!-- Table Column -->
+                            <div
+                                class="lg:col-span-2 overflow-x-auto rounded-lg border border-gray-200 h-[550px] scroll-custom relative bg-white shadow-sm">
+                                <table class="w-full text-sm text-left text-gray-600">
+                                    <thead
+                                        class="text-xs text-gray-700 uppercase bg-gray-100 text-center sticky top-0 z-10">
+                                        <tr>
+                                            <th class="px-4 py-3 w-[10%]">Bus ID</th>
+                                            <th class="px-4 py-3 w-[15%]">Pre-Fault (V)</th>
+                                            <th class="px-4 py-3 w-[25%]">Thevenin Z1 (p.u.)</th>
+                                            <th class="px-4 py-3 w-[20%]">Fault Current (kA)</th>
+                                            <th class="px-4 py-3 w-[15%]">Fault MVA</th>
+                                            <th class="px-4 py-3 w-[15%] text-right">Breaker Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="faultTableBody" class="divide-y divide-gray-100 text-center">
+                                        <tr>
+                                            <td colspan="6" class="px-6 py-12 text-center text-gray-400 italic">
+                                                <div class="flex flex-col items-center gap-3">
+                                                    <i class="ph ph-lightning-slash text-4xl opacity-20"></i>
+                                                    <span>Click "Calculate Faults" to perform Short Circuit
+                                                        Study.</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Console Column -->
+                            <div
+                                class="flex flex-col h-[550px] bg-slate-900 rounded-xl overflow-hidden shadow-2xl border border-slate-700">
+                                <div
+                                    class="bg-slate-800 px-4 py-2 flex items-center justify-between border-b border-slate-700">
+                                    <div class="flex items-center gap-2">
+                                        <i class="ph ph-terminal-window text-orange-400"></i>
+                                        <span class="text-xs font-bold text-slate-300">Fault Solver Console</span>
+                                    </div>
+                                    <span id="faultConsoleStatus" class="w-2 h-2 bg-slate-600 rounded-full"></span>
+                                </div>
+                                <div class="flex-1 p-4 font-mono text-[11px] text-orange-400 overflow-y-auto scroll-custom space-y-3"
+                                    id="faultMathLog">
+                                    <div class="text-slate-500 opacity-50">System: IEEE 30-Bus / Custom Grid</div>
+                                    <div class="text-slate-500 opacity-50">Status: Awaiting Fault Trigger...</div>
+                                    <div class="pt-4 border-t border-slate-800">
+                                        <span class="text-blue-400">&gt;</span> Use the dropdown to select a fault type.
+                                        <br><span class="text-blue-400">&gt;</span> Click "Calculate Faults" to begin
+                                        inversion.
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -1811,15 +1855,15 @@
 
         // Base Topology (From IEEE 30-Bus System)
         const baseBranchData = [
-            { id: 1, from: 1, to: 2 }, { id: 2, from: 1, to: 3 }, { id: 3, from: 2, to: 4 }, { id: 4, from: 3, to: 4 }, { id: 5, from: 2, to: 5 },
-            { id: 6, from: 2, to: 6 }, { id: 7, from: 4, to: 6 }, { id: 8, from: 5, to: 7 }, { id: 9, from: 6, to: 7 }, { id: 10, from: 6, to: 8 },
-            { id: 11, from: 6, to: 9 }, { id: 12, from: 6, to: 10 }, { id: 13, from: 9, to: 11 }, { id: 14, from: 9, to: 10 }, { id: 15, from: 4, to: 12 },
-            { id: 16, from: 12, to: 13 }, { id: 17, from: 12, to: 14 }, { id: 18, from: 12, to: 15 }, { id: 19, from: 12, to: 16 }, { id: 20, from: 14, to: 15 },
-            { id: 21, from: 16, to: 17 }, { id: 22, from: 15, to: 18 }, { id: 23, from: 18, to: 19 }, { id: 24, from: 19, to: 20 }, { id: 25, from: 10, to: 20 },
-            { id: 26, from: 10, to: 17 }, { id: 27, from: 10, to: 21 }, { id: 28, from: 10, to: 22 }, { id: 29, from: 21, to: 22 }, { id: 30, from: 15, to: 23 },
-            { id: 31, from: 22, to: 24 }, { id: 32, from: 23, to: 24 }, { id: 33, from: 24, to: 25 }, { id: 34, from: 25, to: 26 }, { id: 35, from: 25, to: 27 },
-            { id: 36, from: 28, to: 27 }, { id: 37, from: 27, to: 29 }, { id: 38, from: 27, to: 30 }, { id: 39, from: 29, to: 30 }, { id: 40, from: 8, to: 28 },
-            { id: 41, from: 6, to: 28 }
+            { id: 1, from: 1, to: 2, r: 0.0192, x: 0.0575 }, { id: 2, from: 1, to: 3, r: 0.0452, x: 0.1852 }, { id: 3, from: 2, to: 4, r: 0.057, x: 0.1737 }, { id: 4, from: 3, to: 4, r: 0.0132, x: 0.0379 }, { id: 5, from: 2, to: 5, r: 0.0472, x: 0.1983 },
+            { id: 6, from: 2, to: 6, r: 0.0581, x: 0.1763 }, { id: 7, from: 4, to: 6, r: 0.0119, x: 0.0414 }, { id: 8, from: 5, to: 7, r: 0.046, x: 0.116 }, { id: 9, from: 6, to: 7, r: 0.0267, x: 0.082 }, { id: 10, from: 6, to: 8, r: 0.012, x: 0.042 },
+            { id: 11, from: 6, to: 9, r: 0, x: 0.208 }, { id: 12, from: 6, to: 10, r: 0, x: 0.556 }, { id: 13, from: 9, to: 11, r: 0, x: 0.208 }, { id: 14, from: 9, to: 10, r: 0, x: 0.11 }, { id: 15, from: 4, to: 12, r: 0, x: 0.256 },
+            { id: 16, from: 12, to: 13, r: 0, x: 0.14 }, { id: 17, from: 12, to: 14, r: 0.1231, x: 0.2559 }, { id: 18, from: 12, to: 15, r: 0.0662, x: 0.1304 }, { id: 19, from: 12, to: 16, r: 0.0945, x: 0.1987 }, { id: 20, from: 14, to: 15, r: 0.221, x: 0.1997 },
+            { id: 21, from: 16, to: 17, r: 0.0824, x: 0.1923 }, { id: 22, from: 15, to: 18, r: 0.1073, x: 0.2185 }, { id: 23, from: 18, to: 19, r: 0.0639, x: 0.1292 }, { id: 24, from: 19, to: 20, r: 0.034, x: 0.068 }, { id: 25, from: 10, to: 20, r: 0.0936, x: 0.209 },
+            { id: 26, from: 10, to: 17, r: 0.0324, x: 0.0845 }, { id: 27, from: 10, to: 21, r: 0.0348, x: 0.0749 }, { id: 28, from: 10, to: 22, r: 0.0727, x: 0.1499 }, { id: 29, from: 21, to: 22, r: 0.0116, x: 0.0236 }, { id: 30, from: 15, to: 23, r: 0.1, x: 0.202 },
+            { id: 31, from: 22, to: 24, r: 0.115, x: 0.179 }, { id: 32, from: 23, to: 24, r: 0.132, x: 0.27 }, { id: 33, from: 24, to: 25, r: 0.1885, x: 0.3292 }, { id: 34, from: 25, to: 26, r: 0.2544, x: 0.38 }, { id: 35, from: 25, to: 27, r: 0.1093, x: 0.2087 },
+            { id: 36, from: 28, to: 27, r: 0, x: 0.396 }, { id: 37, from: 27, to: 29, r: 0.2198, x: 0.4153 }, { id: 38, from: 27, to: 30, r: 0.3202, x: 0.6027 }, { id: 39, from: 29, to: 30, r: 0.2399, x: 0.4533 }, { id: 40, from: 8, to: 28, r: 0.0636, x: 0.2 },
+            { id: 41, from: 6, to: 28, r: 0.0169, x: 0.0599 }
         ];
 
         // Base Line Flows (Exact values from Table 2 of PDF)
@@ -2489,6 +2533,31 @@
                     <p class="mt-4 text-sm text-gray-500"><strong>p.u. (Per Unit):</strong> A normalized value. 1.0 p.u. represents the ideal rated voltage (e.g., 230 kV). 0.95 p.u. means 95% of rated voltage.</p>
         `
             },
+            faultAnalysis: {
+                title: "Short Circuit & Fault Analysis",
+                content: `
+                    <p class="mb-4 text-gray-700 leading-relaxed">
+                        Fault analysis determines the maximum currents that flow during an electrical failure. This is critical for sizing <strong>Circuit Breakers</strong> and protection relays.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="bg-orange-50 p-3 rounded border border-orange-100">
+                            <h5 class="font-bold text-orange-900 text-sm">Balanced Fault (3-Phase)</h5>
+                            <p class="text-xs text-orange-800">All three phases are shorted together. Usually produces the highest fault current in transmission systems.</p>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded border border-blue-100">
+                            <h5 class="font-bold text-blue-900 text-sm">Unbalanced Faults</h5>
+                            <ul class="list-disc ml-4 text-xs text-blue-800 space-y-1">
+                                <li><strong>L-G (Line-to-Ground):</strong> One phase hits the ground. Most common fault type.</li>
+                                <li><strong>L-L (Line-to-Line):</strong> Two phases touch each other.</li>
+                                <li><strong>L-L-G (Double Line-to-Ground):</strong> Two phases hit the ground simultaneously.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-xs text-gray-500">
+                        The simulator uses <strong>Sequence Components</strong> (Positive, Negative, and Zero) to compute these unbalanced currents accurately using the Z-Bus matrix.
+                    </p>
+                `
+            },
             tabSLD: {
                 title: "Single Line Diagram",
                 content: `
@@ -2657,25 +2726,6 @@
             <p>The phase shift of the AC waveform relative to the Slack Bus (0°).</p>
                 <p class="mt-2">Power flows from <strong>Higher Angle</strong> to <strong>Lower Angle</strong>. Larger differences mean heavier power flow.</p>
         `
-            },
-            tapParam: {
-                title: "Transformer Tap Ratio",
-                content: `
-                 <p>Adjusts the voltage magnitude transformation ratio.</p>
-                 <ul class="list-disc ml-5 mt-2 space-y-1">
-                    <li><strong>1.0:</strong> Nominal Ratio (No change).</li>
-                    <li><strong>> 1.0:</strong> Steps up voltage on the "From" side.</li>
-                    <li><strong>< 1.0:</strong> Steps down voltage.</li>
-                 </ul>
-                 <p class="mt-2 text-sm text-gray-500">Used to control substantial reactive power flow and bus voltages.</p>
-                `
-            },
-            shiftParam: {
-                title: "Phase Shift Angle (deg)",
-                content: `
-                 <p>Introduce a phase angle difference between the terminals of the transformer.</p>
-                 <p class="mt-2"><strong>Phase Shifting Transformers (PST)</strong> allow control of <em>Active Power (MW)</em> flow independent of generation schedules.</p>
-                `
             }
         };
 
@@ -2785,11 +2835,13 @@
                         <td class="px-3 py-2 font-mono text-xs text-gray-500 dark:text-gray-400">L${b.id}</td>
                         <td class="px-3 py-2 font-bold text-gray-700 dark:text-gray-200">Bus ${b.from}</td>
                         <td class="px-3 py-2 font-bold text-gray-700 dark:text-gray-200">Bus ${b.to}</td>
-                        <td class="px-3 py-2"><input type="number" step="0.0001" placeholder="R" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-20 focus:outline-none placeholder-gray-300" value="${(b.r !== null && b.r !== undefined && !isNaN(b.r)) ? b.r : ''}" onchange="updateBranchData(${index}, 'r', this.value)"></td>
-                        <td class="px-3 py-2"><input type="number" step="0.0001" placeholder="X" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-20 focus:outline-none placeholder-gray-300" value="${(b.x !== null && b.x !== undefined && !isNaN(b.x)) ? b.x : ''}" onchange="updateBranchData(${index}, 'x', this.value)"></td>
-                        <td class="px-3 py-2"><input type="number" step="0.0001" placeholder="B" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-20 focus:outline-none placeholder-gray-300" value="${(b.b !== null && b.b !== undefined && !isNaN(b.b)) ? b.b : ''}" onchange="updateBranchData(${index}, 'b', this.value)"></td>
-                        <td class="px-3 py-2"><input type="number" step="0.01" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-16 focus:outline-none" value="${b.tap !== undefined ? b.tap : 1.0}" onchange="updateBranchData(${index}, 'tap', this.value)"></td>
-                        <td class="px-3 py-2"><input type="number" step="0.1" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-16 focus:outline-none" value="${b.shift !== undefined ? b.shift : 0}" onchange="updateBranchData(${index}, 'shift', this.value)"></td>
+                        <td class="px-3 py-2 text-center">
+                            <input type="number" step="0.0001" placeholder="R" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full max-w-[120px] text-center focus:outline-none placeholder-gray-300 mx-auto" value="${(b.r !== null && b.r !== undefined && !isNaN(b.r)) ? b.r : ''}" onchange="updateBranchData(${index}, 'r', this.value)">
+                        </td>
+                        <td class="px-3 py-2 text-center">
+                            <input type="number" step="0.0001" placeholder="X" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full max-w-[120px] text-center focus:outline-none placeholder-gray-300 mx-auto" value="${(b.x !== null && b.x !== undefined && !isNaN(b.x)) ? b.x : ''}" onchange="updateBranchData(${index}, 'x', this.value)">
+                        </td>
+
                         <td class="px-3 py-2 text-right">
                             <button onclick="playSound(); removeLine(${index})" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 btn-click"><i class="ph ph-trash"></i></button>
                         </td>
@@ -2881,9 +2933,7 @@
                     to: buses[i + 1],
                     r: parseFloat((0.005 + Math.random() * 0.04).toFixed(4)), // 0.005 - 0.045
                     x: parseFloat((0.02 + Math.random() * 0.10).toFixed(4)),  // 0.02 - 0.12
-                    b: parseFloat((0.0 + Math.random() * 0.03).toFixed(4)),   // 0.00 - 0.03
-                    tap: 1.0,
-                    shift: 0
+
                 });
             }
 
@@ -2907,9 +2957,7 @@
                             to: to,
                             r: parseFloat((0.01 + Math.random() * 0.05).toFixed(4)),
                             x: parseFloat((0.04 + Math.random() * 0.15).toFixed(4)),
-                            b: parseFloat((0.0 + Math.random() * 0.04).toFixed(4)),
-                            tap: 1.0,
-                            shift: 0
+
                         });
                     }
                 }
@@ -3029,9 +3077,7 @@
                 to: to,
                 r: null,
                 x: null,
-                b: null,
-                tap: 1.0,
-                shift: 0
+
             });
             renderTopologyInput();
             renderSidebarTopology();
@@ -3158,7 +3204,6 @@
                 // Default values if undefined
                 const r = br.r !== undefined ? br.r : 0.01;
                 const x = br.x !== undefined ? br.x : 0.08;
-                const b_ch = br.b !== undefined ? br.b : 0; // Total Charging Susceptance
 
                 // Series Admittance y = 1/(r+jx) = (r - jx)/(r^2 + x^2)
                 const den = r * r + x * x;
@@ -3175,10 +3220,10 @@
                 // Diagonal: Y_ii = sum(y_ik) + y_shunt
                 // Add series part
                 Ybus[i][i].g += G_s;
-                Ybus[i][i].b += B_s + (b_ch / 2);
+                Ybus[i][i].b += B_s;
 
                 Ybus[k][k].g += G_s;
-                Ybus[k][k].b += B_s + (b_ch / 2);
+                Ybus[k][k].b += B_s;
             });
 
             // Re-calc Diagonals properly
@@ -3511,7 +3556,7 @@
                         <td class="px-6 py-4 font-mono font-bold text-blue-600">${v.toFixed(3)} p.u.</td>
                         <td class="px-6 py-4 text-xs">${pgcStatus}</td>
                         <td class="px-6 py-4 text-xs">${pdcStatus}</td>
-                        <td class="px-6 py-4 flex items-center justify-between">
+                        <td class="px-6 py-4 text-right">
                             ${action}
                         </td>
                     </tr>
@@ -4424,7 +4469,7 @@
                              </div>
                         </td>
                         <td class="px-6 py-3">${statusHtml}</td>
-                        <td class="px-6 py-3 text-xs font-mono text-gray-600">${recommendation}</td>
+                        <td class="px-6 py-3 text-xs font-mono text-gray-600 text-right">${recommendation}</td>
                     `;
                     tableBody.appendChild(row);
                 });
@@ -4475,7 +4520,7 @@
                     id: activeBranches.length + 1,
                     from: line.from,
                     to: line.to, // Parallel
-                    r: line.r, x: line.x, b: line.b, tap: 1, shift: 0
+                    r: line.r, x: line.x, tap: 1, shift: 0
                 });
                 renderTopologyInput();
             } else if (type === 'VOLTAGE') {
@@ -4507,7 +4552,7 @@
                         id: activeBranches.length + 1,
                         from: line.from,
                         to: line.to,
-                        r: line.r, x: line.x, b: line.b, tap: 1, shift: 0
+                        r: line.r, x: line.x, tap: 1, shift: 0
                     });
                 } else if (res.type === 'VOLTAGE') {
                     const busIdx = currentData.findIndex(b => b.bus === line.to);
@@ -4596,12 +4641,19 @@
 
         function runFaultAnalysis() {
             const tbody = document.getElementById('faultTableBody');
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4"><i class="ph ph-spinner animate-spin text-2xl text-orange-500"></i><br>Inverting Z-Bus Matrix...</td></tr>';
+            const faultType = document.getElementById('faultTypeSelect').value;
+            const logEl = document.getElementById('faultMathLog');
+            const statusEl = document.getElementById('faultConsoleStatus');
 
-            // 0. Use small timeout to allow UI to render the spinner
+            tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-orange-500"><i class="ph ph-spinner animate-spin text-4xl mb-2"></i><br>Inverting System Sequence...</td></tr>';
+
+            // Reset Console
+            logEl.innerHTML = `<div class="text-green-400 font-bold mb-2">INITIALIZING SEQUENCE ANALYSIS...</div>`;
+            statusEl.className = "w-2 h-2 bg-orange-500 rounded-full animate-pulse";
+
             setTimeout(() => {
                 try {
-                    // 1. Build Admittance Matrix (Y-Bus) in Complex Form
+                    logEl.innerHTML += `<div class="text-slate-400">&gt; Building Y-Bus [Positive Sequence]</div>`;
                     const buses = currentData.map(b => b.bus);
                     const size = buses.length;
                     let Y = Array.from({ length: size }, () => Array.from({ length: size }, () => new Complex(0, 0)));
@@ -4611,95 +4663,131 @@
                         const k = buses.indexOf(br.to);
                         if (i === -1 || k === -1) return;
 
-                        // Line Admittance y = 1 / (r + jx)
                         const denom = br.r ** 2 + br.x ** 2;
                         const y_ik = new Complex(br.r / denom, -br.x / denom);
 
-                        // Charging Susceptance (b/2) -> j(b/2)
-                        const b_half = (br.b || 0) / 2;
-                        const y_shunt = new Complex(0, b_half);
-
-                        // Off-Diagonal: -y_ik
                         Y[i][k] = Y[i][k].sub(y_ik);
                         Y[k][i] = Y[k][i].sub(y_ik);
-
-                        // Diagonal: Sum(y_ik) + y_shunt
-                        Y[i][i] = Y[i][i].add(y_ik).add(y_shunt);
-                        Y[k][k] = Y[k][k].add(y_ik).add(y_shunt);
+                        Y[i][i] = Y[i][i].add(y_ik);
+                        Y[k][k] = Y[k][k].add(y_ik);
                     });
 
-                    // 1.5 Add Source Impedances (Generator Grounding)
-                    // Without this, the system is floating (Z_th -> high, I_sc -> 0)
                     currentData.forEach((bus, i) => {
-                        // Slack Bus (Bus 1): Strong Grid Connection (Stiff Source)
-                        // Z_source = j0.0001 pu -> Y = -j10000
                         if (bus.bus === 1) {
                             Y[i][i] = Y[i][i].add(new Complex(0, -10000));
-                        }
-                        // Generators (PV Buses): Transient Reactance Xd"
-                        // Z_gen = j0.15 pu (Typical) -> Y = -j6.66
-                        else if (bus.gp > 0) {
+                        } else if (bus.gp > 0) {
                             Y[i][i] = Y[i][i].add(new Complex(0, -6.666));
                         }
                     });
 
-                    // Add Shunt Elements (Generators/Loads modelled as Impedance? For Faults usually just Gen reactance)
-                    // Simplified: Assuming infinite grid at Slack and typical Xd" for others or just using network Z.
-                    // Standard approach: Invert Y-bus as is (Thevenin equivalent seen from bus).
-                    // NOTE: We need a reference. Slack bus is usually treated as a voltage source behind impedance.
-                    // For this sim, we will just invert the network Y and assume Prefault V.
-
-                    // 2. Invert Y-Bus to get Z-Bus (Gaussian Elimination)
-                    const Z = invertComplexMatrix(Y);
-
-                    // 3. Calculate Fault Currents
+                    logEl.innerHTML += `<div class="text-slate-400">&gt; Inverting Y<sub>bus</sub> to find Z<sub>bus</sub> [Thevenin Matrix]</div>`;
+                    const Z1 = invertComplexMatrix(Y);
                     const baseMVA = 100;
                     const basekV = 115;
-                    const baseI = (baseMVA * 1000) / (Math.sqrt(3) * basekV); // Amps ~ 502 A
+                    const baseI = (baseMVA * 1000) / (Math.sqrt(3) * basekV);
 
-                    if (!tbody) {
-                        console.error("Fault Analysis Table Body not found!");
-                        return;
-                    }
+                    logEl.innerHTML += `<div class="text-slate-400">&gt; Applying Sequence Network Assumptions:</div>
+                        <div class="pl-4 text-[10px] text-slate-500 space-y-1">
+                            • Positive Seq (Z1): Calculated from Y<sub>bus</sub><br>
+                            • Negative Seq (Z2): Assumed Z2 ≈ Z1<br>
+                            • Zero Sequence (Z0): Assumed Z0 ≈ 2.5 * Z1
+                        </div>`;
+
                     tbody.innerHTML = '';
 
+                    const a = new Complex(-0.5, 0.8660);
+                    const a2 = new Complex(-0.5, -0.8660);
+
+
+
                     currentData.forEach((bus, idx) => {
-                        // pre-fault voltage (use solved mag if available, else 1.0)
-                        const v_pre = bus.mag || 1.0;
+                        const v_pre_val = bus.mag || 1.0;
+                        const v_pre = new Complex(v_pre_val, 0);
+                        const z1 = Z1[idx][idx];
 
-                        // Thevenin Impedance at bus k is Z[k][k]
-                        const z_th = Z[idx][idx];
-                        const z_mag = z_th.abs();
+                        // Assumed sequence ratios for educational simulation
+                        const z2 = z1;
+                        const z0 = z1.mul(new Complex(2.5, 0));
 
-                        // If-sc (p.u.) = V_pre / |Z_th|
-                        let i_sc_pu = 0;
-                        if (z_mag > 0.0001) i_sc_pu = v_pre / z_mag;
+                        let i_fault_pu = 0;
+                        let faultDesc = "";
+                        let formula = "";
+                        let calcStr = "";
 
-                        // Physical Units
-                        const i_sc_ka = (i_sc_pu * baseI) / 1000;
+                        if (faultType === "3phase") {
+                            i_fault_pu = v_pre.div(z1).abs();
+                            faultDesc = "3-Phase Bolted";
+                            formula = "I<sub>f</sub> = V<sub>f</sub> / Z<sub>1</sub>";
+                            calcStr = `|${v_pre_val.toFixed(3)} / (${z1.r.toFixed(4)} + j${z1.i.toFixed(4)})|`;
+                        } else if (faultType === "lg") {
+                            const denom = z1.add(z2).add(z0);
+                            i_fault_pu = v_pre.mul(new Complex(3, 0)).div(denom).abs();
+                            faultDesc = "L-G Fault";
+                            formula = "I<sub>f</sub> = 3*V<sub>f</sub> / (Z<sub>1</sub> + Z<sub>2</sub> + Z<sub>0</sub>)";
+                            calcStr = `|3 * ${v_pre_val.toFixed(3)} / (${denom.r.toFixed(4)} + j${denom.i.toFixed(4)})|`;
+                        } else if (faultType === "ll") {
+                            const denom = z1.add(z2);
+                            i_fault_pu = v_pre.mul(new Complex(Math.sqrt(3), 0)).div(denom).abs();
+                            faultDesc = "L-L Fault";
+                            formula = "I<sub>f</sub> = √3*V<sub>f</sub> / (Z<sub>1</sub> + Z<sub>2</sub>)";
+                            calcStr = `|1.732 * ${v_pre_val.toFixed(3)} / (${denom.r.toFixed(4)} + j${denom.i.toFixed(4)})|`;
+                        } else if (faultType === "llg") {
+                            const zParallel = z2.mul(z0).div(z2.add(z0));
+                            const ia1 = v_pre.div(z1.add(zParallel));
+                            const ia2 = ia1.mul(new Complex(-1, 0)).mul(z0).div(z2.add(z0));
+                            const ia0 = ia1.mul(new Complex(-1, 0)).mul(z2).div(z2.add(z0));
+                            const ib = a2.mul(ia1).add(a.mul(ia2)).add(ia0);
+                            const ic = a.mul(ia1).add(a2.mul(ia2)).add(ia0);
+                            i_fault_pu = Math.max(ib.abs(), ic.abs());
+                            faultDesc = "L-L-G Fault";
+                            formula = "I<sub>f(max)</sub> = Max(|I<sub>b</sub>|, |I<sub>c</sub>|)";
+                            calcStr = "Symmetrical Component Parallel Inversion";
+                        }
+
+                        const i_sc_ka = (i_fault_pu * baseI) / 1000;
                         const mva_sc = Math.sqrt(3) * basekV * i_sc_ka;
 
-                        // Breaker Check (Limit 40kA)
+                        // Detailed Calculation Logging for EVERY Bus
+                        logEl.innerHTML += `<div class="text-orange-300 mt-6 font-bold tracking-wider border-t border-slate-800 pt-4">BUS ${bus.bus} ANALYSIS</div>`;
+                        logEl.innerHTML += `<div class="pl-2 border-l border-slate-700 text-[10px] text-slate-400">
+                            V<sub>prefault</sub> = ${v_pre_val.toFixed(3)} ∠0° pu<br>
+                            Z<sub>th(1)</sub> = ${z1.r.toFixed(4)} + j${z1.i.toFixed(4)} pu<br>
+                            Z<sub>th(2)</sub> ≈ ${z2.r.toFixed(4)} + j${z1.i.toFixed(4)} pu<br>
+                            Z<sub>th(0)</sub> ≈ ${z0.r.toFixed(4)} + j${z0.i.toFixed(4)} pu
+                        </div>`;
+                        logEl.innerHTML += `<div class="bg-slate-800/50 p-2 rounded mt-1 border border-slate-700 space-y-1">
+                            <div><span class="text-blue-400 font-bold text-[9px] uppercase">Formula:</span> <span class="text-slate-300 text-[10px]">${formula}</span></div>
+                            <div><span class="text-blue-400 font-bold text-[9px] uppercase">Calc:</span> <span class="text-slate-500 text-[9px]">${calcStr}</span></div>
+                            <div><span class="text-blue-400 font-bold text-[9px] uppercase">Result:</span> <span class="text-orange-400 text-[10px]">${i_fault_pu.toFixed(4)} p.u.</span></div>
+                            <div><span class="text-blue-400 font-bold text-[10px] uppercase">kA:</span> <span class="text-white text-[11px] font-bold">${i_sc_ka.toFixed(2)} kA</span></div>
+                            <div><span class="text-blue-400 font-bold text-[9px] uppercase">MVA:</span> <span class="text-white text-[10px]">${mva_sc.toFixed(1)} MVA</span></div>
+                        </div>`;
+
                         const limit = 40;
                         const status = i_sc_ka < limit
-                            ? '<span class="px-2 py-1 rounded bg-emerald-100 text-emerald-700 font-bold text-xs border border-emerald-200">PASS</span>'
-                            : '<span class="px-2 py-1 rounded bg-red-100 text-red-700 font-bold text-xs border border-red-200 animate-pulse">FAIL (EXPLOSION RISK)</span>';
+                            ? '<span class="px-2 py-1 rounded bg-emerald-100/10 text-emerald-500 font-bold text-[10px] border border-emerald-500/20">SAFE</span>'
+                            : '<span class="px-2 py-1 rounded bg-red-100/10 text-red-500 font-bold text-[10px] border border-red-500/20 animate-pulse">CRITICAL</span>';
 
                         tbody.innerHTML += `
-                        <tr class="hover:bg-gray-50 border-b border-gray-100 transition">
-                            <td class="px-6 py-3 font-bold">${bus.bus}</td>
-                            <td class="px-6 py-3">${v_pre.toFixed(3)}</td>
-                            <td class="px-6 py-3 font-mono text-xs text-gray-500">${z_th.r.toFixed(4)} + j${z_th.i.toFixed(4)}<br>(|Z|=${z_mag.toFixed(4)})</td>
-                            <td class="px-6 py-3 font-bold text-slate-700">${i_sc_ka.toFixed(2)} kA</td>
-                            <td class="px-6 py-3 text-orange-600 font-bold">${mva_sc.toFixed(1)} MVA</td>
-                            <td class="px-6 py-3">${status}</td>
+                        <tr class="hover:bg-slate-50 border-b border-gray-100 transition">
+                            <td class="px-6 py-3 font-bold text-slate-700">${bus.bus}</td>
+                            <td class="px-6 py-3 font-mono text-xs">${v_pre_val.toFixed(3)}</td>
+                            <td class="px-6 py-3 font-mono text-[10px] text-gray-500">${z1.r.toFixed(4)} + j${z1.i.toFixed(4)}</td>
+                            <td class="px-6 py-3 font-bold text-slate-800">${i_sc_ka.toFixed(2)} kA</td>
+                            <td class="px-6 py-3 text-orange-600 font-bold">${mva_sc.toFixed(1)}</td>
+                            <td class="px-6 py-3 text-right">${status}</td>
                         </tr>
                     `;
                     });
 
+                    logEl.innerHTML += `<div class="text-green-400 mt-4">&gt; Analysis Complete for ${currentData.length} Buses.</div>`;
+                    statusEl.className = "w-2 h-2 bg-green-500 rounded-full";
+
                 } catch (err) {
                     console.error(err);
-                    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-red-500 py-4">Calculation Failed: System Matrix Singular or Unstable.<br>Ensure grid is connected (not islanded).</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-red-500 py-12">Calculation Failed: ${err.message}</td></tr>`;
+                    logEl.innerHTML += `<div class="text-red-500 mt-4">&gt; ERROR: ${err.message}</div>`;
+                    statusEl.className = "w-2 h-2 bg-red-500 rounded-full";
                 }
             }, 100);
         }
