@@ -1999,10 +1999,18 @@
                             <input type="checkbox" id="sldShowPower" checked onchange="renderSLD()"
                                 class="accent-blue-500"> Show Flow
                         </label>
-                        <span class="text-slate-600">|</span>
                         <label class="flex items-center gap-2 cursor-pointer hover:text-white transition">
                             <input type="checkbox" id="sldShowComponents" checked onchange="renderSLD()"
-                                class="accent-blue-500"> Show Gen/Load
+                                class="accent-blue-500"> Gen/Load
+                        </label>
+                        <span class="text-slate-600">|</span>
+                        <label class="flex items-center gap-2 cursor-pointer hover:text-white transition">
+                            <input type="checkbox" id="sldShowPF" onchange="renderSLD()" class="accent-blue-500"> PF
+                        </label>
+                        <span class="text-slate-600">|</span>
+                        <label class="flex items-center gap-2 cursor-pointer hover:text-white transition">
+                            <input type="checkbox" id="sldHeatmap" onchange="renderSLD()" class="accent-blue-500">
+                            Health (Heatmap)
                         </label>
                     </div>
 
@@ -3996,6 +4004,8 @@
             const showVoltage = document.getElementById('sldShowVoltage').checked;
             const showPower = document.getElementById('sldShowPower').checked;
             const showComponents = document.getElementById('sldShowComponents').checked;
+            const showPF = document.getElementById('sldShowPF') ? document.getElementById('sldShowPF').checked : false;
+            const useHeatmap = document.getElementById('sldHeatmap') ? document.getElementById('sldHeatmap').checked : false;
 
             // 1. Calculate Levels using BFS (Breadth-First Search) starting from Slack Bus (1)
             // Improved: Use multiple roots for better distribution in larger systems
@@ -4054,13 +4064,16 @@
                     label: busLabel,
                     level: level,
                     shape: 'box',
-                    color: {
-                        background: isDark ? '#cbd5e1' : 'black',
-                        border: isDark ? '#cbd5e1' : 'black',
-                        highlight: { background: '#333', border: '#333' }
-                    },
+                    color: (() => {
+                        if (!useHeatmap) return { background: isDark ? '#cbd5e1' : 'black', border: isDark ? '#cbd5e1' : 'black' };
+                        // Heatmap logic: 1.0 is green, < 0.95 is yellow, < 0.90 is red
+                        const v = bus.mag;
+                        if (v >= 0.98 && v <= 1.02) return { background: '#10b981', border: '#059669' }; // Healthy
+                        if (v < 0.95 || v > 1.05) return { background: '#ef4444', border: '#b91c1c' }; // Critical
+                        return { background: '#f59e0b', border: '#d97706' }; // Warning
+                    })(),
                     font: {
-                        color: isDark ? '#f1f5f9' : 'black',
+                        color: isDark ? (useHeatmap ? '#fff' : '#f1f5f9') : (useHeatmap ? '#fff' : 'black'),
                         vadjust: -35,
                         size: 11,
                         face: 'monospace',
@@ -4130,6 +4143,33 @@
                             smooth: { type: 'curvedCW', roundness: 0.2 }
                         });
                     }
+
+                    // Shunt Capacitor Node (Injection)
+                    if (parseFloat(bus.injQ) !== 0) {
+                        nodes.add({
+                            id: `S-${bus.bus}`,
+                            label: `Cap\n${bus.injQ} Mvar`,
+                            level: level + 1,
+                            shape: 'dot',
+                            color: {
+                                background: '#bae6fd',
+                                border: '#0284c7',
+                                highlight: { background: '#7dd3fc', border: '#0369a1' }
+                            },
+                            font: { size: 9, color: '#0369a1', face: 'monospace', vadjust: 15 },
+                            size: 10,
+                            shadow: false
+                        });
+
+                        edges.add({
+                            from: `S-${bus.bus}`,
+                            to: `B-${bus.bus}`,
+                            width: 1,
+                            color: '#0284c7',
+                            dashes: true,
+                            arrows: { to: { enabled: true, scaleFactor: 0.5 } }
+                        });
+                    }
                 }
             });
 
@@ -4158,9 +4198,18 @@
                 const i_pu = s_ft_mag / v1;
                 const i_amps = i_pu * iBaseAmps;
 
+                // Angle of I = angle(P-jQ) + angle(V)
+                const i_ang_rad = Math.atan2(-q_ft, p_ft) + a1;
+                const i_ang_deg = i_ang_rad * 180 / Math.PI;
+
+                // Power Factor
+                const pf = Math.abs(p_ft) / s_ft_mag;
+                const pf_text = isNaN(pf) ? "1.00" : pf.toFixed(2);
+
                 let label = "";
                 if (showPower) {
-                    label = `${(p_ft * baseMVA).toFixed(1)} MW\n${i_amps.toFixed(1)} A`;
+                    label = `${(p_ft * baseMVA).toFixed(1)} MW\n${i_amps.toFixed(1)} A ∠${i_ang_deg.toFixed(1)}°`;
+                    if (showPF) label += `\nPF: ${pf_text}`;
                 }
 
                 // Determine Flow Direction
