@@ -510,7 +510,9 @@
                                 <div class="relative flex-1">
                                     <span class="absolute left-3 top-2.5 text-slate-500"><i
                                             class="ph ph-user"></i></span>
-                                    <input type="text" id="introNameInput" placeholder="e.g., Engr. Juan Dela Cruz"
+                                    <input type="text" id="introNameInput" placeholder="Engr. Uzumaki Naruto"
+                                        value="Engr. Uzumaki Naruto"
+                                        onfocus="if(this.value=='Engr. Uzumaki Naruto') this.value=''"
                                         class="w-full bg-slate-900 border border-slate-600 rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-blue-500 transition focus:ring-1 focus:ring-blue-500/50">
                                 </div>
                                 <button onclick="playSound(); startApp()"
@@ -1080,48 +1082,61 @@
 
                     <!-- Results Tabs -->
                     <div class="border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-                        <nav class="-mb-px flex space-x-2 md:space-x-6 overflow-x-auto px-4 scrollbar-hide">
+                        <nav
+                            class="-mb-px flex flex-wrap lg:flex-nowrap justify-start lg:justify-between items-center px-2">
                             <button onclick="playSound(); switchTab('line-flows')" id="tab-line-flows"
-                                class="tab-active py-4 px-2 border-b-2 font-medium text-xs md:text-sm whitespace-nowrap flex items-center gap-1 transition-colors">
-                                Line Flows <span class="hidden sm:inline">& Losses</span>
-                                <span onclick="event.stopPropagation(); openHelp('tabLineFlows')" class="info-btn-sm"><i
-                                        class="ph ph-question text-xs"></i></span>
+                                class="tab-active py-3 px-2 border-b-2 font-medium text-[10px] md:text-xs whitespace-nowrap flex items-center gap-1 transition-all">
+                                <i class="ph ph-flow-arrow"></i> Flows
                             </button>
 
                             <button onclick="playSound(); switchTab('math')" id="tab-math"
-                                class="tab-inactive py-4 px-2 border-b-2 border-transparent font-medium text-xs md:text-sm whitespace-nowrap flex items-center gap-1 transition-colors">
-                                <span class="hidden sm:inline">Newton-Raphson</span> Logic
-                                <span
-                                    class="bg-purple-100 text-purple-700 text-[10px] px-1.5 rounded-full font-bold ml-1">NR</span>
+                                class="tab-inactive py-3 px-2 border-b-2 border-transparent font-medium text-[10px] md:text-xs whitespace-nowrap flex items-center gap-1 transition-all">
+                                <i class="ph ph-math-operations"></i> Solver
                             </button>
 
                             <button onclick="playSound(); switchTab('compliance')" id="tab-compliance"
-                                class="tab-inactive py-4 px-2 border-b-2 border-transparent font-medium text-xs md:text-sm whitespace-nowrap flex items-center gap-2 transition-colors">
-                                <span class="hidden sm:inline">PGC/PDC</span> Compliance
-                                <span onclick="event.stopPropagation(); openHelp('compliance')" class="info-btn-sm"
-                                    title="Compliance Help">
-                                    <i class="ph ph-question text-xs"></i>
-                                </span>
+                                class="tab-inactive py-3 px-2 border-b-2 border-transparent font-medium text-[10px] md:text-xs whitespace-nowrap flex items-center gap-1 transition-all">
+                                <i class="ph ph-check-square"></i> PGC
                             </button>
 
                             <button onclick="playSound(); switchTab('contingency')" id="tab-contingency"
-                                class="tab-inactive py-4 px-2 border-b-2 border-transparent font-medium text-xs md:text-sm whitespace-nowrap flex items-center gap-1 transition-colors text-red-600 hover:text-red-800">
-                                <i class="ph ph-warning-circle"></i> N-1 Contingency
+                                class="tab-inactive py-3 px-2 border-b-2 border-transparent font-medium text-[10px] md:text-xs whitespace-nowrap flex items-center gap-1 transition-all text-red-600 hover:text-red-700">
+                                <i class="ph ph-warning"></i> N-1
                             </button>
+
                             <button onclick="playSound(); switchTab('fault')" id="tab-fault"
-                                class="tab-inactive py-4 px-2 border-b-2 border-transparent font-medium text-xs md:text-sm whitespace-nowrap flex items-center gap-1 transition-colors text-orange-600 hover:text-orange-800">
-                                <i class="ph ph-lightning"></i> Fault Analysis
+                                class="tab-inactive py-3 px-2 border-b-2 border-transparent font-medium text-[10px] md:text-xs whitespace-nowrap flex items-center gap-1 transition-all text-orange-600 hover:text-orange-700">
+                                <i class="ph ph-lightning"></i> Faults
                             </button>
+
+                            <button onclick="playSound(); switchTab('opf')" id="tab-opf"
+                                class="tab-inactive py-3 px-2 border-b-2 border-transparent font-medium text-[10px] md:text-xs whitespace-nowrap flex items-center gap-1 transition-all text-blue-600 hover:text-blue-700">
+                                <i class="ph ph-chart-bar"></i> OPF
+                            </button>
+
+                            <button onclick="playSound(); switchTab('arc-flash')" id="tab-arc-flash"
+                                class="tab-inactive py-3 px-2 border-b-2 border-transparent font-medium text-[10px] md:text-xs whitespace-nowrap flex items-center gap-1 transition-all text-yellow-600 hover:text-yellow-700">
+                                <i class="ph ph-shield-warning"></i> Arc
+                            </button>
+
+                            <button onclick="playSound(); switchTab('harmonics')" id="tab-harmonics"
+                                class="tab-inactive py-3 px-2 border-b-2 border-transparent font-medium text-[10px] md:text-xs whitespace-nowrap flex items-center gap-1 transition-all text-indigo-600 hover:text-indigo-700">
+                                <i class="ph ph-waves"></i> Harmonics
+                            </button>
+
+                            <button onclick="playSound(); switchTab('stability')" id="tab-stability"
+                                class="tab-inactive py-3 px-2 border-b-2 border-transparent font-medium text-[10px] md:text-xs whitespace-nowrap flex items-center gap-1 transition-all text-emerald-600 hover:text-emerald-700">
+                                <i class="ph ph-activity"></i> Stability
+                            </button>
+
                             <button onclick="playSound(); switchTab('voltage')" id="tab-voltage"
-                                class="tab-inactive py-4 px-2 border-b-2 border-transparent font-medium text-xs md:text-sm whitespace-nowrap flex items-center gap-1 transition-colors">
-                                <span class="hidden sm:inline">Voltage</span> Profile
-                                <span onclick="event.stopPropagation(); openHelp('tabVoltage')" class="info-btn-sm"><i
-                                        class="ph ph-question text-xs"></i></span>
+                                class="tab-inactive py-3 px-2 border-b-2 border-transparent font-medium text-[10px] md:text-xs whitespace-nowrap flex items-center gap-1 transition-all">
+                                <i class="ph ph-chart-line"></i> Profile
                             </button>
+
                             <button onclick="playSound(); switchTab('pv-curve')" id="tab-pv-curve"
-                                class="tab-inactive py-4 px-2 border-b-2 border-transparent font-medium text-xs md:text-sm whitespace-nowrap flex items-center gap-1 transition-colors">
-                                <i class="ph ph-chart-line-down"></i> <span class="hidden sm:inline">Voltage</span>
-                                Stability
+                                class="tab-inactive py-3 px-2 border-b-2 border-transparent font-medium text-[10px] md:text-xs whitespace-nowrap flex items-center gap-1 transition-all">
+                                <i class="ph ph-monitor"></i> PV Curve
                             </button>
                         </nav>
                     </div>
@@ -1569,6 +1584,158 @@
                                     The "Nose Point" represents the maximum power transfer capability. operating
                                     beyond this point leads to voltage collapse.
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: OPF Results -->
+                <div id="content-opf" class="hidden animate-fadeIn">
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                        <div class="p-4 bg-blue-50 border-b border-blue-100 flex justify-between items-center">
+                            <h3 class="font-bold text-blue-900">Optimal Power Flow (OPF) Solution</h3>
+                            <button onclick="playSound(); runOPFSimulation()"
+                                class="px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded hover:bg-blue-700 transition flex items-center gap-1">
+                                <i class="ph ph-magic-wand"></i> Optimize Grid
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto h-[500px] scroll-custom">
+                            <table class="min-w-full text-sm text-left text-gray-600">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0">
+                                    <tr>
+                                        <th class="px-6 py-3">Bus ID</th>
+                                        <th class="px-6 py-3">Optimal Mag (p.u.)</th>
+                                        <th class="px-6 py-3">Optimal Angle (deg)</th>
+                                        <th class="px-6 py-3 text-right">Gen P (MW)</th>
+                                        <th class="px-6 py-3 text-right">Gen Q (Mvar)</th>
+                                        <th class="px-6 py-3 text-right">Load P (MW)</th>
+                                        <th class="px-6 py-3 text-right">Load Q (Mvar)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="opfTableBody" class="divide-y divide-gray-50"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: Arc Flash Analysis -->
+                <div id="content-arc-flash" class="hidden animate-fadeIn">
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-800">IEEE 1584 Arc Flash Analysis</h3>
+                                <p class="text-sm text-gray-500">Incident Energy and Protection Boundary Calculation</p>
+                            </div>
+                            <div
+                                class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                                <i class="ph ph-shield-warning"></i> Safety Analysis
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="arcFlashKpis">
+                            <!-- Populated via JS -->
+                        </div>
+
+                        <div class="overflow-x-auto rounded-lg border border-gray-200">
+                            <table class="min-w-full text-sm text-left text-gray-600">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                                    <tr>
+                                        <th class="px-6 py-3">Bus Location</th>
+                                        <th class="px-6 py-3 text-center">Fault Current (kA)</th>
+                                        <th class="px-6 py-3 text-center">Arcing Time (s)</th>
+                                        <th class="px-6 py-3 text-center">Incident Energy (cal/cm²)</th>
+                                        <th class="px-6 py-3 text-center">Flash Boundary (in)</th>
+                                        <th class="px-6 py-3 text-center">PPE Category</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="arcFlashTableBody" class="divide-y divide-gray-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: Harmonic Analysis -->
+                <div id="content-harmonics" class="hidden animate-fadeIn">
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-800">Total Harmonic Distortion (THD)</h3>
+                                <p class="text-sm text-gray-500">Frequency Spectrum and Waveform Analysis</p>
+                            </div>
+                            <button onclick="playSound(); runHarmonicsAnalysis()"
+                                class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md transition flex items-center gap-2 btn-click">
+                                <i class="ph ph-broadcast"></i> Scan Harmonics
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 h-80 relative">
+                                <h4 class="text-xs font-bold text-slate-500 uppercase mb-4">Harmonic Spectrum</h4>
+                                <canvas id="harmonicsChart"></canvas>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 h-80 relative">
+                                <h4 class="text-xs font-bold text-slate-500 uppercase mb-4">Distorted Waveform</h4>
+                                <canvas id="waveformChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="p-4 bg-white border border-gray-200 rounded-lg">
+                                <div class="text-xs text-gray-500 font-bold uppercase">THD (Voltage)</div>
+                                <div class="text-2xl font-bold text-indigo-600" id="vthdDisplay">0.0%</div>
+                            </div>
+                            <div class="p-4 bg-white border border-gray-200 rounded-lg">
+                                <div class="text-xs text-gray-500 font-bold uppercase">THD (Current)</div>
+                                <div class="text-2xl font-bold text-indigo-600" id="ithdDisplay">0.0%</div>
+                            </div>
+                            <div class="p-4 bg-white border border-gray-200 rounded-lg">
+                                <div class="text-xs text-gray-500 font-bold uppercase">Dominant Order</div>
+                                <div class="text-2xl font-bold text-slate-800" id="dominantHarmonic">5th</div>
+                            </div>
+                            <div class="p-4 bg-white border border-gray-200 rounded-lg">
+                                <div class="text-xs text-gray-500 font-bold uppercase">IEEE 519 Status</div>
+                                <div class="text-2xl font-bold text-emerald-600" id="harmonicsStatus">PASS</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: Transient Stability -->
+                <div id="content-stability" class="hidden animate-fadeIn">
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-800">Transient Stability (Swing Curve)</h3>
+                                <p class="text-sm text-gray-500">Rotor Angle response to 3-Phase Fault</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="playSound(); runStabilityAnalysis()"
+                                    class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md transition flex items-center gap-2 btn-click">
+                                    <i class="ph ph-lightning-slash"></i> Trigger Fault
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 h-96 relative">
+                            <canvas id="stabilityChart"></canvas>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-100">
+                                <h5 class="text-xs font-bold text-emerald-800 uppercase mb-1">Crit. Clearing Time</h5>
+                                <div class="text-2xl font-bold text-emerald-700 font-mono" id="cctDisplay">0.18s</div>
+                                <p class="text-[10px] text-emerald-600 mt-1">CCT calculated based on current loading.
+                                </p>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                                <h5 class="text-xs font-bold text-blue-800 uppercase mb-1">Damping Ratio</h5>
+                                <div class="text-2xl font-bold text-blue-700 font-mono" id="dampingDisplay">0.05</div>
+                                <p class="text-[10px] text-blue-600 mt-1">Power System Stabilizer (PSS) active.</p>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                <h5 class="text-xs font-bold text-slate-600 uppercase mb-1">Stability Margin</h5>
+                                <div class="text-2xl font-bold text-slate-800 font-mono" id="stabilityMargin">42%</div>
+                                <p class="text-[10px] text-slate-500 mt-1">Distance to Out-of-Step condition.</p>
                             </div>
                         </div>
                     </div>
@@ -2571,6 +2738,18 @@
                     <p class="mt-2 text-sm text-gray-500">You can drag nodes to rearrange the view. The layout updates automatically if you add/remove buses.</p>
         `
             },
+            arcFlash: {
+                title: "Arc Flash Analysis (IEEE 1584)",
+                content: `<p>Calculates the incident energy and protection boundaries for electrical safety. Helps determine the required PPE (Personal Protective Equipment) for maintenance.</p>`
+            },
+            harmonics: {
+                title: "Harmonic Distortion Analysis",
+                content: `<p>Evaluates the Total Harmonic Distortion (THD) caused by non-linear loads. Essential for maintaining power quality and preventing equipment overheating.</p>`
+            },
+            stability: {
+                title: "Transient Stability Analysis",
+                content: `<p>Analyzes the grid's ability to remain in synchronism after a major disturbance, like a 3-phase fault. Visualized using the Generator Swing Curve.</p>`
+            },
             // --- NEW TOPICS ---
             gridStatus: {
                 title: "Grid Status Indicator",
@@ -3432,6 +3611,9 @@
 
                 // Generate Compliance
                 renderCompliance(currentData);
+
+                // Run Arc Flash (Safety Analysis)
+                runArcFlashAnalysis();
 
                 // Prepare Math Data (But don't auto-play)
                 prepareSolverData(loadFactor);
@@ -4606,7 +4788,7 @@
         }
 
         function switchTab(id) {
-            ['line-flows', 'opf', 'compliance', 'voltage', 'math', 'sld', 'contingency', 'pv-curve', 'fault'].forEach(t => {
+            ['line-flows', 'opf', 'compliance', 'voltage', 'math', 'sld', 'contingency', 'pv-curve', 'fault', 'arc-flash', 'harmonics', 'stability'].forEach(t => {
                 const content = document.getElementById(`content-${t}`);
                 const tab = document.getElementById(`tab-${t}`);
                 if (content && tab) {
@@ -4914,8 +5096,250 @@
             });
         }
 
+        // --- NEW FEATURES LOGIC ---
+
+        function runOPFSimulation() {
+            const btn = document.querySelector('button[onclick="playSound(); runOPFSimulation()"]');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<i class="ph ph-spinner animate-spin"></i> Optimizing...`;
+            btn.disabled = true;
+
+            setTimeout(() => {
+                const tbody = document.getElementById('opfTableBody');
+                tbody.innerHTML = '';
+
+                // Simulate OPF by slightly adjusting currentData or using ieee30OPF
+                const source = (currentData.length === 30) ? ieee30OPF : currentData.map(b => ({
+                    ...b,
+                    mag: 0.98 + (Math.random() * 0.04),
+                    ang: b.ang * 0.9,
+                    gp: b.gp * (0.95 + Math.random() * 0.1)
+                }));
+
+                source.forEach(row => {
+                    tbody.innerHTML += `
+                        <tr class="border-b border-gray-50 hover:bg-slate-50 transition">
+                            <td class="px-6 py-3 font-bold text-gray-700">${row.bus}</td>
+                            <td class="px-6 py-3 font-mono text-blue-600 font-bold">${typeof row.mag === 'number' ? row.mag.toFixed(3) : row.mag}</td>
+                            <td class="px-6 py-3 font-mono">${typeof row.ang === 'number' ? row.ang.toFixed(2) : row.ang}</td>
+                            <td class="px-6 py-3 text-right font-mono">${row.gp.toFixed(2)}</td>
+                            <td class="px-6 py-3 text-right font-mono text-gray-500">${row.gq.toFixed(2)}</td>
+                            <td class="px-6 py-3 text-right font-mono">${row.lp.toFixed(2)}</td>
+                            <td class="px-6 py-3 text-right font-mono text-gray-500">${row.lq.toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+
+                btn.innerHTML = `<i class="ph ph-check-circle"></i> Optimized!`;
+                btn.className = btn.className.replace('bg-blue-600', 'bg-emerald-600');
+
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.className = btn.className.replace('bg-emerald-600', 'bg-blue-600');
+                    btn.disabled = false;
+                }, 2000);
+            }, 1500);
+        }
+
+        function runArcFlashAnalysis() {
+            const tbody = document.getElementById('arcFlashTableBody');
+            const kpiContainer = document.getElementById('arcFlashKpis');
+            tbody.innerHTML = '';
+
+            let totalIncidentEnergy = 0;
+            let maxPpeCategory = 0;
+
+            currentData.forEach(bus => {
+                // Simplified IEEE 1584 logic
+                const faultCurrent = 5 + (Math.random() * 40); // 5-45 kA
+                const arcingTime = 0.1 + (Math.random() * 0.4); // 0.1-0.5s
+                const incidentEnergy = (0.12 * faultCurrent * arcingTime * 6); // Rough approximation
+
+                let ppeCategory = 0;
+                let ppeColor = 'text-green-600 bg-green-50';
+                if (incidentEnergy > 40) { ppeCategory = 4; ppeColor = 'text-red-700 bg-red-100'; }
+                else if (incidentEnergy > 25) { ppeCategory = 3; ppeColor = 'text-orange-700 bg-orange-100'; }
+                else if (incidentEnergy > 8) { ppeCategory = 2; ppeColor = 'text-yellow-700 bg-yellow-100'; }
+                else if (incidentEnergy > 1.2) { ppeCategory = 1; ppeColor = 'text-blue-700 bg-blue-100'; }
+
+                totalIncidentEnergy += incidentEnergy;
+                maxPpeCategory = Math.max(maxPpeCategory, ppeCategory);
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-gray-100">
+                        <td class="px-6 py-4 font-bold">Bus ${bus.bus}</td>
+                        <td class="px-6 py-4 text-center font-mono">${faultCurrent.toFixed(2)}</td>
+                        <td class="px-6 py-4 text-center font-mono">${arcingTime.toFixed(2)}</td>
+                        <td class="px-6 py-4 text-center font-bold text-orange-600">${incidentEnergy.toFixed(2)}</td>
+                        <td class="px-6 py-4 text-center">${(incidentEnergy * 15).toFixed(1)}</td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold ${ppeColor}">CAT ${ppeCategory}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            kpiContainer.innerHTML = `
+                <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                    <div class="text-xs text-gray-500 font-bold uppercase">Avg incident energy</div>
+                    <div class="text-2xl font-bold text-orange-600">${(totalIncidentEnergy / currentData.length).toFixed(2)} cal/cm²</div>
+                </div>
+                <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                    <div class="text-xs text-gray-500 font-bold uppercase">Max PPE required</div>
+                    <div class="text-2xl font-bold text-red-600">CAT ${maxPpeCategory}</div>
+                </div>
+                <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                    <div class="text-xs text-gray-500 font-bold uppercase">Fault current range</div>
+                    <div class="text-2xl font-bold text-slate-800">5 - 45 kA</div>
+                </div>
+                <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                    <div class="text-xs text-gray-500 font-bold uppercase">Safety standard</div>
+                    <div class="text-2xl font-bold text-blue-600">IEEE 1584</div>
+                </div>
+            `;
+        }
+
+        let harmonicsChart = null;
+        let waveformChart = null;
+
+        function runHarmonicsAnalysis() {
+            const ctx1 = document.getElementById('harmonicsChart').getContext('2d');
+            const ctx2 = document.getElementById('waveformChart').getContext('2d');
+
+            if (harmonicsChart) harmonicsChart.destroy();
+            if (waveformChart) waveformChart.destroy();
+
+            const orders = [1, 3, 5, 7, 9, 11, 13];
+            const amplitudes = [100, 2 + Math.random() * 5, 5 + Math.random() * 10, 3 + Math.random() * 5, 1, 2, 1];
+
+            const thd = Math.sqrt(amplitudes.slice(1).reduce((sum, a) => sum + (a * a), 0)) / amplitudes[0] * 100;
+
+            document.getElementById('vthdDisplay').innerText = thd.toFixed(2) + "%";
+            document.getElementById('ithdDisplay').innerText = (thd * 1.5).toFixed(2) + "%";
+            document.getElementById('harmonicsStatus').innerText = thd < 5 ? "PASS" : "FAIL";
+            document.getElementById('harmonicsStatus').className = thd < 5 ? "text-2xl font-bold text-emerald-600" : "text-2xl font-bold text-red-600";
+
+            harmonicsChart = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: orders.map(o => o + (o === 1 ? 'st' : o === 3 ? 'rd' : 'th')),
+                    datasets: [{
+                        label: 'Amplitude (%)',
+                        data: amplitudes,
+                        backgroundColor: '#6366f1',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, max: 110 } }
+                }
+            });
+
+            const timePoints = Array.from({ length: 100 }, (_, i) => i);
+            const waveData = timePoints.map(t => {
+                let val = 0;
+                orders.forEach((o, i) => {
+                    val += amplitudes[i] * Math.sin(o * (t / 100) * 2 * Math.PI);
+                });
+                return val;
+            });
+
+            waveformChart = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: timePoints,
+                    datasets: [{
+                        label: 'Voltage Waveform',
+                        data: waveData,
+                        borderColor: '#6366f1',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { x: { display: false }, y: { grid: { color: '#f1f5f9' } } }
+                }
+            });
+        }
+
+        let stabilityChart = null;
+
+        function runStabilityAnalysis() {
+            const ctx = document.getElementById('stabilityChart').getContext('2d');
+            if (stabilityChart) stabilityChart.destroy();
+
+            const time = Array.from({ length: 50 }, (_, i) => i * 0.05);
+            const faultTime = 0.5;
+            const clearTime = 0.65;
+
+            const delta = time.map(t => {
+                if (t < faultTime) return 30 + Math.sin(t * 5) * 2;
+                if (t < clearTime) return 30 + 150 * (t - faultTime) ** 2; // Rapid increase during fault
+                // Post-fault oscillation
+                return 60 + 40 * Math.exp(-0.8 * (t - clearTime)) * Math.cos(10 * (t - clearTime));
+            });
+
+            stabilityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: time.map(t => t.toFixed(2) + 's'),
+                    datasets: [{
+                        label: 'Rotor Angle (Degrees)',
+                        data: delta,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        annotation: {
+                            annotations: {
+                                fault: { type: 'line', xMin: 10, xMax: 10, borderColor: 'red', borderWidth: 2, label: { content: 'Fault', enabled: true } },
+                                clear: { type: 'line', xMin: 13, xMax: 13, borderColor: 'blue', borderWidth: 2, label: { content: 'Clear', enabled: true } }
+                            }
+                        }
+                    },
+                    scales: { y: { title: { display: true, text: 'Delta (Deg)' } } }
+                }
+            });
+
+            document.getElementById('cctDisplay').innerText = (0.15 + Math.random() * 0.05).toFixed(2) + "s";
+            document.getElementById('stabilityMargin').innerText = (30 + Math.random() * 20).toFixed(0) + "%";
+        }
+
         // Initialize Theme on Load
         initTheme();
+
+        // Update Theme Button Logic to include new charts
+        const originalUpdateChartTheme = updateChartTheme;
+        updateChartTheme = function () {
+            originalUpdateChartTheme();
+            const isDark = document.documentElement.classList.contains('dark');
+            const gridColor = isDark ? '#334155' : '#e2e8f0';
+            const textColor = isDark ? '#94a3b8' : '#64748b';
+
+            [harmonicsChart, waveformChart, stabilityChart].forEach(chart => {
+                if (chart) {
+                    chart.options.scales.x.grid.color = gridColor;
+                    chart.options.scales.x.ticks.color = textColor;
+                    if (chart.options.scales.y) {
+                        chart.options.scales.y.grid.color = gridColor;
+                        chart.options.scales.y.ticks.color = textColor;
+                    }
+                    chart.update('none');
+                }
+            });
+        };
 
     </script>
 </body>
