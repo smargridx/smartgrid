@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -4021,19 +4020,23 @@
             const COMPONENT_OFFSET = 100;
 
 
+            const baseMVA = parseFloat(document.getElementById('baseMVAInput').value) || 100;
+            const baseKV = parseFloat(document.getElementById('baseKVInput').value) || 230;
+            const iBaseAmps = (baseMVA * 1000) / (Math.sqrt(3) * baseKV);
+
             // 2. Create Bus Nodes (Bars) & Components
             currentData.forEach(bus => {
-                const level = busLevels[bus.bus] * 4; // Spaced out levels (0, 4, 8, 12...)
-                // This leaves room at L-1 and L+1 for components, and L+2, L+3 for cross-lines
+                const level = busLevels[bus.bus] * 4;
 
                 // Bus Node (Black Bar)
-                let busLabel = bus.bus === 1 ? `Bus ${bus.bus} (Slack)` : `Bus ${bus.bus} `;
+                let busLabel = bus.bus === 1 ? `Bus ${bus.bus} (Slack)` : `Bus ${bus.bus}`;
                 if (showVoltage) {
-                    busLabel += `\n${bus.mag.toFixed(3)} p.u.\n${bus.ang.toFixed(1)}°`;
+                    const kv = (bus.mag * baseKV).toFixed(1);
+                    busLabel += `\n${bus.mag.toFixed(3)} p.u. | ${kv} kV\n${bus.ang.toFixed(1)}°`;
                 }
 
                 nodes.add({
-                    id: `B - ${bus.bus} `,
+                    id: `B-${bus.bus}`,
                     label: busLabel,
                     level: level,
                     shape: 'box',
@@ -4045,7 +4048,7 @@
                     font: {
                         color: isDark ? '#f1f5f9' : 'black',
                         vadjust: -35,
-                        size: 12,
+                        size: 11,
                         face: 'monospace',
                         align: 'center',
                         background: isDark ? '#1e293b' : 'white'
@@ -4061,12 +4064,12 @@
                     // Generator Node (Source -> Feeds INTO Bus)
                     if (bus.gp > 0 || bus.gq !== 0) {
                         nodes.add({
-                            id: `G - ${bus.bus} `,
+                            id: `G-${bus.bus}`,
                             label: `Gen\n${bus.gp.toFixed(1)} MW\n${bus.gq.toFixed(1)} Mvar`,
-                            level: level - 1, // Place DIRECTLY ABOVE Bus
+                            level: level - 1,
                             shape: 'circle',
                             color: {
-                                background: '#dcfce7', // Green tint
+                                background: '#dcfce7',
                                 border: '#166534',
                                 highlight: { background: '#bbf7d0', border: '#15803d' }
                             },
@@ -4077,12 +4080,12 @@
                         });
 
                         edges.add({
-                            from: `G - ${bus.bus} `,
-                            to: `B - ${bus.bus} `,
+                            from: `G-${bus.bus}`,
+                            to: `B-${bus.bus}`,
                             width: 2,
                             color: 'black',
-                            arrows: { to: { enabled: true, type: 'arrow' } }, // Arrow pointing TO bus
-                            smooth: { type: 'curvedCW', roundness: 0.2 }, // Curve to avoid vertical overlap (Diagonal-ish)
+                            arrows: { to: { enabled: true, type: 'arrow' } },
+                            smooth: { type: 'curvedCW', roundness: 0.2 },
                             dashes: false
                         });
                     }
@@ -4090,9 +4093,9 @@
                     // Load Node (Load -> Draws FROM Bus)
                     if (bus.lp > 0 || bus.lq !== 0) {
                         nodes.add({
-                            id: `L - ${bus.bus} `,
+                            id: `L-${bus.bus}`,
                             label: `Load\n${bus.lp.toFixed(1)} MW\n${bus.lq.toFixed(1)} Mvar`,
-                            level: level + 1, // Place DIRECTLY BELOW Bus
+                            level: level + 1,
                             shape: 'triangleDown',
                             color: {
                                 background: '#f3e8ff',
@@ -4105,71 +4108,63 @@
                         });
 
                         edges.add({
-                            from: `B - ${bus.bus} `,
-                            to: `L - ${bus.bus} `,
+                            from: `B-${bus.bus}`,
+                            to: `L-${bus.bus}`,
                             width: 2,
                             color: 'black',
-                            arrows: { to: { enabled: true, scaleFactor: 0.5, type: 'arrow' } }, // Arrow pointing TO load
-                            smooth: { type: 'curvedCW', roundness: 0.2 } // Curve to avoid vertical overlap
+                            arrows: { to: { enabled: true, scaleFactor: 0.5, type: 'arrow' } },
+                            smooth: { type: 'curvedCW', roundness: 0.2 }
                         });
                     }
                 }
             });
 
-            // 3. Create Transmission Lines
-            // ... (Edges logic stays similar, but ensuring smooth curves)
-            // ... (skipping to options update)
-
 
             // 3. Create Transmission Lines with Data
             activeBranches.forEach(branch => {
-                // Find flow data
-                let flowData = baseLineFlows.find(f => (f.from === branch.from && f.to === branch.to) || (f.from === branch.to && f.to === branch.from));
+                const busFrom = currentData.find(b => b.bus === branch.from);
+                const busTo = currentData.find(b => b.bus === branch.to);
+                if (!busFrom || !busTo) return;
 
-                // Calculate Approx Amps (I = S / V, assume S ~ P for simplified display or calculate full S)
-                // S = sqrt(P^2 + Q^2). Base MVA = 100.
+                const v1 = busFrom.mag;
+                const a1 = busFrom.ang * Math.PI / 180;
+                const v2 = busTo.mag;
+                const a2 = busTo.ang * Math.PI / 180;
+                const da = a1 - a2;
+
+                const r = parseFloat(branch.r) || 0.0001;
+                const x = parseFloat(branch.x) || 0.0001;
+                const den = r * r + x * x;
+                const g = r / den;
+                const b = -x / den;
+
+                const p_ft = v1 * v1 * g - v1 * v2 * (g * Math.cos(da) + b * Math.sin(da));
+                const q_ft = -v1 * v1 * b - v1 * v2 * (g * Math.sin(da) - b * Math.cos(da));
+                const s_ft_mag = Math.sqrt(p_ft * p_ft + q_ft * q_ft);
+                const i_pu = s_ft_mag / v1;
+                const i_amps = i_pu * iBaseAmps;
+
                 let label = "";
-                if (flowData && showPower) {
-                    const p = Math.abs(flowData.p); // Use absolute for label
-                    const q = Math.abs(flowData.q);
-                    const s = Math.sqrt(p * p + q * q); // p.u.
-                    const i_pu = s / 1.0; // Approx I = S/V (V~1.0)
-                    // Convert to physical units (Base Current depends on Voltage level, simplified here to p.u. flow)
-                    const mw = (p * 100).toFixed(1); // 100 MVA Base
-                    // label = `${ mw } MW\nLoss: ${ (flowData.lossP * 100).toFixed(2) } MW`;
-                    label = `${mw} MW`;
+                if (showPower) {
+                    label = `${(p_ft * baseMVA).toFixed(1)} MW\n${i_amps.toFixed(1)} A`;
                 }
 
-                edges.add({
-                    from: `B - ${branch.from} `,
-                    to: `B - ${branch.to} `,
-                    label: label,
-                    font: { align: 'horizontal', size: 9, background: 'rgba(255,255,255,0.8)', strokeWidth: 0 },
-                    // Smart SLD: Color Coding
-                    color: (() => {
-                        if (!showPower || !flowData) return { color: isDark ? '#60a5fa' : '#3b82f6' }; // Default Blue
-                        const calculatedLoad = (window.currentLoadFactor || 0);
-                        // Base flow p.u. * load factor
-                        const flowPu = Math.sqrt(Math.pow(flowData.p, 2) + Math.pow(flowData.q, 2)) * calculatedLoad;
+                // Determine Flow Direction
+                const isForward = p_ft >= 0;
 
-                        // Thresholds (Assuming 1.0 p.u. capacity)
-                        if (flowPu > 0.85) return { color: '#ef4444', highlight: '#f87171', hover: '#b91c1c' }; // Red (Overload)
-                        if (flowPu > 0.50) return { color: '#f59e0b', highlight: '#fbbf24', hover: '#d97706' }; // Orange (Heavy)
-                        return { color: '#10b981', highlight: '#34d399', hover: '#059669' }; // Green (Good)
+                edges.add({
+                    from: isForward ? `B-${branch.from}` : `B-${branch.to}`,
+                    to: isForward ? `B-${branch.to}` : `B-${branch.from}`,
+                    label: label,
+                    font: { align: 'horizontal', size: 9, background: isDark ? 'rgba(30,41,59,0.9)' : 'rgba(255,255,255,0.9)', color: isDark ? '#fff' : '#000' },
+                    color: (() => {
+                        if (s_ft_mag > 0.85) return { color: '#ef4444' };
+                        if (s_ft_mag > 0.50) return { color: '#f59e0b' };
+                        return { color: isDark ? '#818cf8' : '#3b82f6' };
                     })(),
-                    width: (() => {
-                        const calculatedLoad = (window.currentLoadFactor || 0);
-                        const flowPu = flowData ? Math.sqrt(Math.pow(flowData.p, 2) + Math.pow(flowData.q, 2)) * calculatedLoad : 0;
-                        // Thicker lines for heavier flow
-                        return 1.5 + (flowPu * 2);
-                    })(),
-                    // Orthogonal-ish style using Vertical Cubic Bezier with roundness
-                    smooth: {
-                        type: 'cubicBezier',
-                        forceDirection: 'vertical',
-                        roundness: 0.4
-                    },
-                    arrows: { to: { enabled: false } }
+                    width: 1.5 + (s_ft_mag * 2),
+                    smooth: { type: 'cubicBezier', forceDirection: 'vertical', roundness: 0.4 },
+                    arrows: { to: { enabled: true, scaleFactor: 0.8 } }
                 });
             });
 
