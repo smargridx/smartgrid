@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -816,6 +817,18 @@
                                     class="w-16 bg-transparent text-right font-mono text-sm font-bold text-slate-700 dark:text-slate-200 focus:outline-none border-b border-transparent focus:border-amber-400 placeholder-slate-300 transition-all hover:bg-slate-50 dark:hover:bg-slate-900 rounded px-1">
                             </div>
 
+                            <!-- NEW: Base Voltage Widget -->
+                            <div class="h-11 flex items-center gap-3 px-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm hover:border-sky-400 transition-colors group relative overflow-hidden"
+                                title="System Base Voltage">
+                                <div class="flex flex-col justify-center">
+                                    <label for="baseKVInput"
+                                        class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none mb-0.5 group-hover:text-sky-500 transition-colors">Base</label>
+                                    <span class="text-[10px] text-slate-400">Voltage (kV)</span>
+                                </div>
+                                <input type="number" id="baseKVInput" value="230" step="5" min="1"
+                                    class="w-16 bg-transparent text-right font-mono text-sm font-bold text-slate-700 dark:text-slate-200 focus:outline-none border-b border-transparent focus:border-sky-400 placeholder-slate-300 transition-all hover:bg-slate-50 dark:hover:bg-slate-900 rounded px-1">
+                            </div>
+
                             <!-- 3. Load Defaults Button -->
                             <button onclick="playSound(); resetGrid()" id="resetBtn"
                                 class="h-11 flex items-center gap-2 pl-4 pr-5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm text-slate-600 dark:text-slate-300 font-bold text-sm transition-all hover:border-red-500 hover:text-red-600 hover:shadow-md active:scale-95 group relative overflow-hidden">
@@ -1152,16 +1165,19 @@
                                     <tr>
                                         <th class="px-6 py-3 w-[10%]">From Bus</th>
                                         <th class="px-6 py-3 w-[10%]">To Bus</th>
-                                        <th class="px-6 py-3 text-right w-[20%]">Flow (From&rarr;To) <div
+                                        <th class="px-6 py-3 text-right w-[15%]">Flow (From&rarr;To) <div
                                                 class="text-[9px] font-normal">[p.u.] / [MW]</div>
                                         </th>
-                                        <th class="px-6 py-3 text-right w-[20%]">Flow (To&rarr;From) <div
+                                        <th class="px-6 py-3 text-right w-[15%]">Flow (To&rarr;From) <div
                                                 class="text-[9px] font-normal">[p.u.] / [MW]</div>
                                         </th>
-                                        <th class="px-6 py-3 text-right text-red-600 w-[20%]">Loss P <div
+                                        <th class="px-6 py-3 text-right text-blue-600 w-[20%]">Current (I) <div
+                                                class="text-[9px] font-normal">[p.u.] / [Amperes]</div>
+                                        </th>
+                                        <th class="px-6 py-3 text-right text-red-600 w-[15%]">Loss P <div
                                                 class="text-[9px] font-normal">[p.u.] / [MW]</div>
                                         </th>
-                                        <th class="px-6 py-3 text-right text-red-600 w-[20%]">Loss Q <div
+                                        <th class="px-6 py-3 text-right text-red-600 w-[15%]">Loss Q <div
                                                 class="text-[9px] font-normal">[p.u.] / [Mvar]</div>
                                         </th>
                                     </tr>
@@ -2995,15 +3011,16 @@
 
                 // Random Load: 70% chance to have load
                 if (Math.random() > 0.3) {
-                    bus.lp = Math.floor(Math.random() * 45) + 5; // 5 to 50 MW
-                    bus.lq = Math.floor(Math.random() * 15) + 1;  // 1 to 16 Mvar
+                    bus.lp = Math.floor(Math.random() * 30) + 5; // 5 to 35 MW
+                    bus.lq = Math.floor(Math.random() * 10) + 1;  // 1 to 11 Mvar
                 } else {
                     bus.lp = 0; bus.lq = 0;
                 }
 
-                // Random Gen
-                if (Math.random() > 0.8 || bus.bus <= 3) {
-                    bus.gp = Math.floor(Math.random() * 40) + 10;
+                // Random Gen: Higher probability for bus 2 and 3, or rare random
+                if (bus.bus <= 3 || Math.random() > 0.85) {
+                    bus.gp = Math.floor(Math.random() * 100) + 50; // 50 to 150 MW
+                    bus.gq = Math.floor(Math.random() * 30) + 5;   // 5 to 35 Mvar
                 } else {
                     bus.gp = 0; bus.gq = 0;
                 }
@@ -3532,10 +3549,12 @@
                     if (bus.mag < 0.8) bus.mag = 0.8;
                 });
 
+                const baseKV = parseFloat(document.getElementById('baseKVInput').value) || 230;
+
                 document.getElementById('totalGenDisplay').innerText = totalGenP.toFixed(2) + " MW";
                 document.getElementById('totalLoadDisplay').innerText = totalLoadP.toFixed(2) + " MW";
 
-                renderLineFlows(baseMVA);
+                renderLineFlows(baseMVA, baseKV);
                 renderOPFResults();
                 renderCompliance(currentData);
                 runArcFlashAnalysis();
@@ -3561,12 +3580,15 @@
             document.getElementById('inputState').classList.remove('hidden');
         }
 
-        function renderLineFlows(baseMVA = 100) {
+        function renderLineFlows(baseMVA = 100, baseKV = 230) {
             const tbody = document.getElementById('lineFlowTableBody');
             tbody.innerHTML = '';
 
             let totalLossP = 0;
             let totalLossQ = 0;
+
+            // Ibase = Sbase / (sqrt(3) * Vbase)
+            const iBaseAmps = (baseMVA * 1000) / (Math.sqrt(3) * baseKV);
 
             activeBranches.forEach(branch => {
                 const busFrom = currentData.find(b => b.bus === branch.from);
@@ -3593,6 +3615,11 @@
                 const p_tf = v2 * v2 * g - v2 * v1 * (g * Math.cos(-da) + b * Math.sin(-da));
                 const q_tf = -v2 * v2 * b - v2 * v1 * (g * Math.sin(-da) - b * Math.cos(-da));
 
+                // Current I = S*/V* => |I| = |S|/|V|
+                const s_ft_mag = Math.sqrt(p_ft * p_ft + q_ft * q_ft);
+                const i_pu = s_ft_mag / v1;
+                const i_amps = i_pu * iBaseAmps;
+
                 const lossP = (p_ft + p_tf);
                 const lossQ = (q_ft + q_tf);
 
@@ -3610,6 +3637,10 @@
                         <td class="px-6 py-3 font-mono text-right text-gray-500">
                             <div class="font-bold">${p_tf.toFixed(4)} p.u.</div>
                             <div class="text-[10px] text-gray-400">${(p_tf * baseMVA).toFixed(1)} MW</div>
+                        </td>
+                        <td class="px-6 py-3 font-mono text-right text-blue-600">
+                            <div class="font-bold">${i_pu.toFixed(5)} p.u.</div>
+                            <div class="text-[10px] text-blue-400">${i_amps.toFixed(2)} A</div>
                         </td>
                         <td class="px-6 py-3 font-mono text-right text-red-600">
                             <div class="font-bold">${Math.abs(lossP).toFixed(5)} p.u.</div>
