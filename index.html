@@ -804,6 +804,18 @@
                                     class="w-24 bg-transparent text-right font-mono text-sm font-bold text-slate-700 dark:text-slate-200 focus:outline-none border-b border-transparent focus:border-violet-400 placeholder-slate-300 transition-all hover:bg-slate-50 dark:hover:bg-slate-900 rounded px-1">
                             </div>
 
+                            <!-- NEW: Base Power Widget -->
+                            <div class="h-11 flex items-center gap-3 px-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm hover:border-amber-400 transition-colors group relative overflow-hidden"
+                                title="System Base MVA">
+                                <div class="flex flex-col justify-center">
+                                    <label for="baseMVAInput"
+                                        class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none mb-0.5 group-hover:text-amber-500 transition-colors">Base</label>
+                                    <span class="text-[10px] text-slate-400">Power (MVA)</span>
+                                </div>
+                                <input type="number" id="baseMVAInput" value="100" step="10" min="1"
+                                    class="w-16 bg-transparent text-right font-mono text-sm font-bold text-slate-700 dark:text-slate-200 focus:outline-none border-b border-transparent focus:border-amber-400 placeholder-slate-300 transition-all hover:bg-slate-50 dark:hover:bg-slate-900 rounded px-1">
+                            </div>
+
                             <!-- 3. Load Defaults Button -->
                             <button onclick="playSound(); resetGrid()" id="resetBtn"
                                 class="h-11 flex items-center gap-2 pl-4 pr-5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm text-slate-600 dark:text-slate-300 font-bold text-sm transition-all hover:border-red-500 hover:text-red-600 hover:shadow-md active:scale-95 group relative overflow-hidden">
@@ -1140,14 +1152,18 @@
                                     <tr>
                                         <th class="px-6 py-3 w-[10%]">From Bus</th>
                                         <th class="px-6 py-3 w-[10%]">To Bus</th>
-                                        <th class="px-6 py-3 text-right w-[20%]">Flow (From&rarr;To) <span
-                                                onclick="playSound(); openHelp('flowColumn')" class="info-btn-sm"><i
-                                                    class="ph ph-info text-xs"></i></span></th>
-                                        <th class="px-6 py-3 text-right w-[20%]">Flow (To&rarr;From)</th>
-                                        <th class="px-6 py-3 text-right text-red-600 w-[20%]">Loss P (MW) <span
-                                                onclick="playSound(); openHelp('lossColumn')" class="info-btn-sm"><i
-                                                    class="ph ph-info text-xs"></i></span></th>
-                                        <th class="px-6 py-3 text-right text-red-600 w-[20%]">Loss Q (Mvar)</th>
+                                        <th class="px-6 py-3 text-right w-[20%]">Flow (From&rarr;To) <div
+                                                class="text-[9px] font-normal">[p.u.] / [MW]</div>
+                                        </th>
+                                        <th class="px-6 py-3 text-right w-[20%]">Flow (To&rarr;From) <div
+                                                class="text-[9px] font-normal">[p.u.] / [MW]</div>
+                                        </th>
+                                        <th class="px-6 py-3 text-right text-red-600 w-[20%]">Loss P <div
+                                                class="text-[9px] font-normal">[p.u.] / [MW]</div>
+                                        </th>
+                                        <th class="px-6 py-3 text-right text-red-600 w-[20%]">Loss Q <div
+                                                class="text-[9px] font-normal">[p.u.] / [Mvar]</div>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody id="lineFlowTableBody" class="divide-y divide-gray-100"></tbody>
@@ -1161,7 +1177,7 @@
 
                     <!-- MATHEMATICAL SOLVER TAB -->
                     <div id="content-math"
-                        class="hidden bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden animate-fadeIn flex flex-col h-[700px]">
+                        class="hidden bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden animate-fadeIn flex flex-col h-[800px]">
                         <div class="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
                             <h3 class="font-bold text-gray-700">Newton-Raphson Iteration & Formulas</h3>
                             <div class="flex gap-2">
@@ -1170,94 +1186,105 @@
                                         class="ph ph-play"></i> Auto Run</button>
                                 <button onclick="playSound(); stepSolverAnim()" id="btnMathStep"
                                     class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded hover:bg-blue-200 transition btn-click flex items-center gap-1"><i
-                                        class="ph ph-steps"></i> Step</button>
+                                        class="ph ph-step-forward"></i> Step</button>
                                 <button onclick="playSound(); resetSolverAnim()" id="btnMathReset"
                                     class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded hover:bg-gray-200 transition btn-click flex items-center gap-1"><i
                                         class="ph ph-arrow-counter-clockwise"></i> Reset</button>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4 h-full overflow-hidden">
-                            <!-- Left: Visualization Flowchart -->
-                            <div class="flex flex-col gap-4 overflow-y-auto scroll-custom p-2">
-                                <div
-                                    class="bg-slate-50 border border-slate-200 rounded-lg p-6 relative flex flex-col items-center gap-6">
-                                    <h4 class="text-xs font-bold text-gray-400 uppercase w-full text-center mb-2">
-                                        Algorithm Flow</h4>
-
-                                    <!-- Nodes -->
-                                    <div id="flow-start"
-                                        class="flow-node px-6 py-3 rounded-full text-sm font-medium shadow-sm w-48 text-center">
-                                        1. Initialize (Flat Start)</div>
-                                    <div class="flow-arrow"><i class="ph ph-arrow-down text-xl"></i></div>
-
-                                    <div id="flow-mismatch"
-                                        class="flow-node px-6 py-3 rounded-lg text-sm font-medium shadow-sm w-64 text-center border-l-4 border-l-purple-400">
-                                        2. Calc Power Mismatches</div>
-                                    <div class="flow-arrow"><i class="ph ph-arrow-down text-xl"></i></div>
-
-                                    <div id="flow-check"
-                                        class="flow-node px-6 py-3 rounded-lg text-sm font-medium shadow-sm w-64 text-center border-l-4 border-l-yellow-400">
-                                        3. Check Convergence</div>
-                                    <div class="flow-arrow"><i class="ph ph-arrow-down text-xl"></i></div>
-
-                                    <div id="flow-jacobian"
-                                        class="flow-node px-6 py-3 rounded-lg text-sm font-medium shadow-sm w-64 text-center border-l-4 border-l-blue-400">
-                                        4. Build Jacobian Matrix</div>
-                                    <div class="flow-arrow"><i class="ph ph-arrow-down text-xl"></i></div>
-
-                                    <div id="flow-update"
-                                        class="flow-node px-6 py-3 rounded-lg text-sm font-medium shadow-sm w-64 text-center border-l-4 border-l-green-400">
-                                        5. Update V and δ</div>
-
-                                    <!-- Loop Line (Visual) -->
-                                    <div
-                                        class="absolute right-4 top-1/2 bottom-12 w-8 border-r-2 border-dashed border-gray-300 rounded-r-xl pointer-events-none">
-                                    </div>
-                                    <div
-                                        class="absolute right-4 bottom-12 w-24 border-b-2 border-dashed border-gray-300 pointer-events-none">
-                                    </div>
-                                    <div
-                                        class="absolute right-4 top-1/2 w-24 border-t-2 border-dashed border-gray-300 pointer-events-none">
+                        <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 overflow-hidden bg-slate-50">
+                            <!-- Left: Math Parameters (Z and Y-Bus) -->
+                            <div
+                                class="border-r border-gray-200 flex flex-col gap-4 overflow-y-auto scroll-custom p-4 bg-white">
+                                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                    <h4
+                                        class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                        <i class="ph ph-matrix text-blue-600"></i> System Admittance (Y-Bus)
+                                    </h4>
+                                    <div id="yBusDisplay"
+                                        class="font-mono text-[9px] overflow-auto scroll-custom whitespace-nowrap bg-slate-50 p-3 rounded border border-gray-100 leading-relaxed text-slate-700 max-h-[400px]">
+                                        [ Execute simulation ]
                                     </div>
                                 </div>
 
-                                <!-- NEW: Theory Reference Card -->
-                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-xs text-blue-900">
-                                    <h5 class="font-bold border-b border-blue-200 pb-2 mb-2">Newton-Raphson
-                                        Fundamentals
-                                    </h5>
-                                    <ul class="list-disc pl-4 space-y-2">
-                                        <li><strong>State Variables (x):</strong> Voltage Magnitude (\(|V|\)) and
-                                            Angle
-                                            (\(\delta\)).</li>
-                                        <li><strong>Mismatch Equation:</strong> \(f(x) = S_{calc} - S_{scheduled} =
-                                            0\).
-                                        </li>
-                                        <li><strong>Jacobian (J):</strong> Matrix of first-order partial
-                                            derivatives.
-                                            Determines direction to move.</li>
-                                        <li><strong>Update Rule:</strong> \(x_{new} = x_{old} - J^{-1} \cdot
-                                            f(x_{old})\).
-                                        </li>
+                                <div class="bg-white border border-gray-100 rounded-lg p-4 shadow-sm">
+                                    <h4
+                                        class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                        <i class="ph ph-list-numbers"></i> Branch Impedances (Z)
+                                    </h4>
+                                    <div class="overflow-x-auto max-h-48 scroll-custom border border-gray-50 rounded">
+                                        <table class="min-w-full text-[10px]">
+                                            <thead class="bg-gray-50 sticky top-0">
+                                                <tr class="text-gray-400 text-left">
+                                                    <th class="py-1.5 px-2">Line</th>
+                                                    <th class="py-1.5 px-2">R (p.u.)</th>
+                                                    <th class="py-1.5 px-2">X (p.u.)</th>
+                                                    <th class="py-1.5 px-2">|Z|</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="zTableBody"
+                                                class="divide-y divide-gray-50 text-gray-600 font-mono">
+                                                <!-- Populated via JS -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 text-[10px] text-blue-900">
+                                    <h5 class="font-bold border-b border-blue-200 pb-2 mb-2">Algorithm Base</h5>
+                                    <ul class="list-disc pl-4 space-y-1 opacity-80">
+                                        <li>Complex Voltages: \( V = |V| \angle \delta \)</li>
+                                        <li>Power Balance: \( S_{gen} - S_{load} = S_{calc} \)</li>
+                                        <li>System Base: <span id="mathBaseMVA">100</span> MVA</li>
                                     </ul>
                                 </div>
+                            </div>
 
-                                <!-- NEW: Convergence Graph -->
+                            <!-- Middle: Flowchart & Convergence -->
+                            <div class="border-r border-gray-200 flex flex-col gap-4 overflow-y-auto scroll-custom p-4">
                                 <div
-                                    class="bg-white border border-gray-200 rounded-lg p-3 shadow-sm h-64 flex flex-col">
-                                    <h5 class="text-xs font-bold text-gray-500 mb-1">Convergence Profile (Max
-                                        Mismatch
-                                        vs Iteration)</h5>
+                                    class="bg-white border border-gray-100 rounded-lg p-6 relative flex flex-col items-center gap-3 shadow-sm">
+                                    <h4
+                                        class="text-[10px] font-bold text-gray-400 uppercase w-full text-center border-b pb-2 mb-2">
+                                        Algorithm Flow</h4>
+                                    <div id="flow-start"
+                                        class="flow-node px-4 py-2 rounded-full text-[10px] font-medium shadow-sm w-40 text-center border">
+                                        1. Flat Start</div>
+                                    <div class="flow-arrow opacity-40"><i class="ph ph-arrow-down"></i></div>
+                                    <div id="flow-mismatch"
+                                        class="flow-node px-4 py-2 rounded-lg text-[10px] font-medium shadow-sm w-48 text-center border-l-4 border-l-purple-400">
+                                        2. Mismatches</div>
+                                    <div class="flow-arrow opacity-40"><i class="ph ph-arrow-down"></i></div>
+                                    <div id="flow-check"
+                                        class="flow-node px-4 py-2 rounded-lg text-[10px] font-medium shadow-sm w-48 text-center border-l-4 border-l-yellow-400">
+                                        3. Convergence Check</div>
+                                    <div class="flow-arrow opacity-40"><i class="ph ph-arrow-down"></i></div>
+                                    <div id="flow-jacobian"
+                                        class="flow-node px-4 py-2 rounded-lg text-[10px] font-medium shadow-sm w-48 text-center border-l-4 border-l-blue-400">
+                                        4. Jacobian Matrix</div>
+                                    <div class="flow-arrow opacity-40"><i class="ph ph-arrow-down"></i></div>
+                                    <div id="flow-update"
+                                        class="flow-node px-4 py-2 rounded-lg text-[10px] font-medium shadow-sm w-48 text-center border-l-4 border-l-green-400">
+                                        5. Update States</div>
+
+                                    <div
+                                        class="absolute right-2 top-1/2 bottom-12 w-4 border-r border-dashed border-gray-300 rounded-r-lg pointer-events-none opacity-50">
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="bg-white border border-gray-100 rounded-lg p-3 shadow-sm h-52 flex flex-col">
+                                    <h5 class="text-[10px] font-bold text-gray-400 mb-1 px-1">Error Profile</h5>
                                     <div class="flex-grow w-full relative">
                                         <canvas id="convergenceChart"></canvas>
                                     </div>
                                 </div>
 
-                                <!-- Equations Reference (Mini) -->
-                                <div class="bg-white border border-gray-200 rounded-lg p-4">
-                                    <h5 class="text-xs font-bold text-gray-500 mb-2">Active Equation</h5>
-                                    <div class="math-block text-xs" id="activeEqDisplay">
+                                <div class="bg-white border border-gray-100 rounded-lg p-3 shadow-sm">
+                                    <h5 class="text-[10px] font-bold text-gray-400 mb-2 px-1">Active Formula</h5>
+                                    <div class="math-block text-xs bg-slate-50 p-2 rounded border border-slate-100"
+                                        id="activeEqDisplay">
                                         $$ f(x) = 0 $$
                                     </div>
                                 </div>
@@ -1591,10 +1618,18 @@
                                         <th class="px-6 py-3">Bus ID</th>
                                         <th class="px-6 py-3">Optimal Mag (p.u.)</th>
                                         <th class="px-6 py-3">Optimal Angle (deg)</th>
-                                        <th class="px-6 py-3 text-right">Gen P (MW)</th>
-                                        <th class="px-6 py-3 text-right">Gen Q (Mvar)</th>
-                                        <th class="px-6 py-3 text-right">Load P (MW)</th>
-                                        <th class="px-6 py-3 text-right">Load Q (Mvar)</th>
+                                        <th class="px-6 py-3 text-right">Gen P <div class="text-[9px] font-normal">[MW]
+                                                / [p.u.]</div>
+                                        </th>
+                                        <th class="px-6 py-3 text-right">Gen Q <div class="text-[9px] font-normal">
+                                                [Mvar] / [p.u.]</div>
+                                        </th>
+                                        <th class="px-6 py-3 text-right">Load P <div class="text-[9px] font-normal">[MW]
+                                                / [p.u.]</div>
+                                        </th>
+                                        <th class="px-6 py-3 text-right">Load Q <div class="text-[9px] font-normal">
+                                                [Mvar] / [p.u.]</div>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody id="opfTableBody" class="divide-y divide-gray-50"></tbody>
@@ -2886,11 +2921,24 @@
             const tbody = document.getElementById('topologyTableBody');
             tbody.innerHTML = '';
             activeBranches.forEach((b, index) => {
+                const fromOptions = currentData.map(bus => `<option value="${bus.bus}" ${bus.bus === b.from ? 'selected' : ''}>Bus ${bus.bus} ${bus.bus === 1 ? '(Slack)' : ''}</option>`).join('');
+                const toOptions = currentData.map(bus => `<option value="${bus.bus}" ${bus.bus === b.to ? 'selected' : ''}>Bus ${bus.bus} ${bus.bus === 1 ? '(Slack)' : ''}</option>`).join('');
+
                 tbody.innerHTML += `
             <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 border-b border-gray-100 dark:border-slate-700 transition">
                         <td class="px-3 py-2 font-mono text-xs text-gray-500 dark:text-gray-400">L${b.id}</td>
-                        <td class="px-3 py-2 font-bold text-gray-700 dark:text-gray-200">Bus ${b.from}</td>
-                        <td class="px-3 py-2 font-bold text-gray-700 dark:text-gray-200">Bus ${b.to}</td>
+                        <td class="px-3 py-2">
+                            <select class="bg-transparent font-bold text-gray-700 dark:text-gray-200 focus:outline-none cursor-pointer border-b border-dotted border-gray-300 dark:border-slate-600 hover:border-blue-500 transition" 
+                                    onchange="updateBranchData(${index}, 'from', this.value)">
+                                ${fromOptions}
+                            </select>
+                        </td>
+                        <td class="px-3 py-2">
+                            <select class="bg-transparent font-bold text-gray-700 dark:text-gray-200 focus:outline-none cursor-pointer border-b border-dotted border-gray-300 dark:border-slate-600 hover:border-blue-500 transition" 
+                                    onchange="updateBranchData(${index}, 'to', this.value)">
+                                ${toOptions}
+                            </select>
+                        </td>
                         <td class="px-3 py-2 text-center">
                             <input type="number" step="0.0001" placeholder="R" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full max-w-[120px] text-center focus:outline-none placeholder-gray-300 mx-auto" value="${(b.r !== null && b.r !== undefined && !isNaN(b.r)) ? b.r : ''}" onchange="updateBranchData(${index}, 'r', this.value)">
                         </td>
@@ -2910,6 +2958,9 @@
             if (activeBranches[index]) {
                 const parsed = parseFloat(val);
                 activeBranches[index][field] = isNaN(parsed) ? null : parsed;
+                if (field === 'from' || field === 'to') {
+                    renderSidebarTopology();
+                }
             }
         }
 
@@ -3459,6 +3510,9 @@
             document.getElementById('loadingState').classList.remove('hidden');
             document.getElementById('loadingState').classList.add('flex');
 
+            const baseMVA = parseFloat(document.getElementById('baseMVAInput').value) || 100;
+            document.getElementById('mathBaseMVA').innerText = baseMVA;
+
             // 1. Calculate Totals based on INPUTS
             let totalGenP = 0, totalLoadP = 0;
             currentData.forEach(d => {
@@ -3466,45 +3520,40 @@
                 totalLoadP += d.lp;
             });
 
-            // 2. Generate Result Tables
+            // 2. Perform Simplified Power Flow Calculation
             setTimeout(() => {
+                // Heuristic Solver
+                currentData.forEach(bus => {
+                    if (bus.bus === 1) return;
+                    const p_pu = bus.lp / baseMVA;
+                    const q_pu = bus.lq / baseMVA;
+                    bus.mag = 1.0 - (p_pu * 0.05) - (q_pu * 0.02);
+                    bus.ang = -(p_pu * 20) - (Math.random() * 2);
+                    if (bus.mag < 0.8) bus.mag = 0.8;
+                });
+
                 document.getElementById('totalGenDisplay').innerText = totalGenP.toFixed(2) + " MW";
                 document.getElementById('totalLoadDisplay').innerText = totalLoadP.toFixed(2) + " MW";
 
-                // Logic check: if 0 load, 0 loss
-                const loadFactor = totalLoadP > 0 ? totalLoadP / 189.2 : 0;
-                window.currentLoadFactor = loadFactor; // Expose for SLD
-
-                // Scale by topology and load
-                const estimatedLoss = loadFactor > 0 ? 2.86 * loadFactor * (activeBranches.length / 41) : 0;
-                document.getElementById('totalLossDisplay').innerText = estimatedLoss.toFixed(2) + " MW";
-
-                // Generate Table 2: Line Flows
-                renderLineFlows(loadFactor);
-
-                // Generate Table 5: OPF Results
-                renderOPFResults(loadFactor);
-
-                // Generate Compliance
+                renderLineFlows(baseMVA);
+                renderOPFResults();
                 renderCompliance(currentData);
-
-                // Run Arc Flash (Safety Analysis)
                 runArcFlashAnalysis();
 
-                // Prepare Math Data (But don't auto-play)
-                prepareSolverData(loadFactor);
-                resetSolverAnim(); // Reset UI to ready state
+                // NEW: Populate Math Dashboard
+                updateSolverParametersDisplay();
 
-                // UI Transitions
+                const loadPercentage = totalLoadP / baseMVA;
+                prepareSolverData(loadPercentage);
+                resetSolverAnim();
+
                 document.getElementById('loadingState').classList.add('hidden');
                 document.getElementById('loadingState').classList.remove('flex');
                 document.getElementById('resultsState').classList.remove('hidden');
-
-                // Render SLD
                 renderSLD();
-
-                switchTab('line-flows');
             }, 1200);
+
+            switchTab('line-flows');
         }
 
         function resetSimulation() {
@@ -3512,35 +3561,148 @@
             document.getElementById('inputState').classList.remove('hidden');
         }
 
-        function renderLineFlows(loadFactor) {
+        function renderLineFlows(baseMVA = 100) {
             const tbody = document.getElementById('lineFlowTableBody');
             tbody.innerHTML = '';
 
+            let totalLossP = 0;
+            let totalLossQ = 0;
+
             activeBranches.forEach(branch => {
-                let flowData = baseLineFlows.find(f => (f.from === branch.from && f.to === branch.to) || (f.from === branch.to && f.to === branch.from));
+                const busFrom = currentData.find(b => b.bus === branch.from);
+                const busTo = currentData.find(b => b.bus === branch.to);
 
-                let p_ft, p_tf, lossP, lossQ;
+                if (!busFrom || !busTo) return;
 
-                if (flowData && loadFactor > 0) {
-                    p_ft = flowData.p * loadFactor;
-                    p_tf = flowData.p_rev * loadFactor;
-                    lossP = flowData.lossP * loadFactor;
-                    lossQ = flowData.lossQ * loadFactor;
-                } else {
-                    p_ft = 0; p_tf = 0; lossP = 0; lossQ = 0;
-                }
+                const v1 = busFrom.mag;
+                const a1 = busFrom.ang * Math.PI / 180;
+                const v2 = busTo.mag;
+                const a2 = busTo.ang * Math.PI / 180;
+
+                const r = parseFloat(branch.r) || 0.0001;
+                const x = parseFloat(branch.x) || 0.0001;
+                const den = r * r + x * x;
+                const g = r / den;
+                const b = -x / den;
+
+                const da = a1 - a2;
+
+                const p_ft = v1 * v1 * g - v1 * v2 * (g * Math.cos(da) + b * Math.sin(da));
+                const q_ft = -v1 * v1 * b - v1 * v2 * (g * Math.sin(da) - b * Math.cos(da));
+
+                const p_tf = v2 * v2 * g - v2 * v1 * (g * Math.cos(-da) + b * Math.sin(-da));
+                const q_tf = -v2 * v2 * b - v2 * v1 * (g * Math.sin(-da) - b * Math.cos(-da));
+
+                const lossP = (p_ft + p_tf);
+                const lossQ = (q_ft + q_tf);
+
+                totalLossP += lossP;
+                totalLossQ += lossQ;
 
                 tbody.innerHTML += `
-            <tr class="hover:bg-slate-50 border-b border-gray-100 transition">
-                        <td class="px-6 py-3 font-medium">Bus ${branch.from}</td>
-                        <td class="px-6 py-3 font-medium">Bus ${branch.to}</td>
-                        <td class="px-6 py-3 font-mono text-right">${typeof p_ft === 'number' ? p_ft.toFixed(3) : p_ft} p.u.</td>
-                        <td class="px-6 py-3 font-mono text-right text-gray-500">${typeof p_tf === 'number' ? p_tf.toFixed(3) : p_tf} p.u.</td>
-                        <td class="px-6 py-3 font-mono text-right text-red-600 font-bold">${typeof lossP === 'number' ? lossP.toFixed(3) : lossP}</td>
-                        <td class="px-6 py-3 font-mono text-right text-red-600">${typeof lossQ === 'number' ? lossQ.toFixed(3) : lossQ}</td>
+                    <tr class="hover:bg-slate-50 border-b border-gray-100 transition">
+                        <td class="px-6 py-3 font-medium">Bus ${branch.from} ${branch.from === 1 ? '<span class="text-[9px] text-amber-600 font-bold ml-1 px-1 bg-amber-50 rounded border border-amber-200 uppercase">Slack</span>' : ''}</td>
+                        <td class="px-6 py-3 font-medium">Bus ${branch.to} ${branch.to === 1 ? '<span class="text-[9px] text-amber-600 font-bold ml-1 px-1 bg-amber-50 rounded border border-amber-200 uppercase">Slack</span>' : ''}</td>
+                        <td class="px-6 py-3 font-mono text-right">
+                            <div class="font-bold">${p_ft.toFixed(4)} p.u.</div>
+                            <div class="text-[10px] text-gray-400">${(p_ft * baseMVA).toFixed(1)} MW</div>
+                        </td>
+                        <td class="px-6 py-3 font-mono text-right text-gray-500">
+                            <div class="font-bold">${p_tf.toFixed(4)} p.u.</div>
+                            <div class="text-[10px] text-gray-400">${(p_tf * baseMVA).toFixed(1)} MW</div>
+                        </td>
+                        <td class="px-6 py-3 font-mono text-right text-red-600">
+                            <div class="font-bold">${Math.abs(lossP).toFixed(5)} p.u.</div>
+                            <div class="text-[10px] text-red-400">${(Math.abs(lossP) * baseMVA).toFixed(2)} MW</div>
+                        </td>
+                        <td class="px-6 py-3 font-mono text-right text-red-600">
+                            <div class="font-bold">${Math.abs(lossQ).toFixed(5)} p.u.</div>
+                            <div class="text-[10px] text-red-400">${(Math.abs(lossQ) * baseMVA).toFixed(2)} Mvar</div>
+                        </td>
                     </tr>
-            `;
+                `;
             });
+
+            document.getElementById('totalLossDisplay').innerText = (totalLossP * baseMVA).toFixed(2) + " MW";
+        }
+
+        function updateSolverParametersDisplay() {
+            const zTbody = document.getElementById('zTableBody');
+            const yDisplay = document.getElementById('yBusDisplay');
+            if (!zTbody || !yDisplay) return;
+
+            zTbody.innerHTML = '';
+            activeBranches.forEach((br, idx) => {
+                const z_mag = Math.sqrt(br.r ** 2 + br.x ** 2);
+                zTbody.innerHTML += `
+                    <tr>
+                        <td class="py-1 px-2">L${idx + 1}</td>
+                        <td class="py-1 px-2">${br.r.toFixed(4)}</td>
+                        <td class="py-1 px-2">${br.x.toFixed(4)}</td>
+                        <td class="py-1 px-2 font-bold">${z_mag.toFixed(4)}</td>
+                    </tr>
+                `;
+            });
+
+            // Build REAL Y-Bus Matrix
+            const size = currentData.length;
+            const buses = currentData.map(b => b.bus);
+
+            // Initialize Complex Matrix
+            let Y = Array.from({ length: size }, () =>
+                Array.from({ length: size }, () => ({ g: 0, b: 0 }))
+            );
+
+            // Off-diagonals
+            activeBranches.forEach(br => {
+                const i = buses.indexOf(br.from);
+                const k = buses.indexOf(br.to);
+                if (i === -1 || k === -1) return;
+
+                const r = parseFloat(br.r) || 0.0001;
+                const x = parseFloat(br.x) || 0.0001;
+                const den = r * r + x * x;
+                const g_line = r / den;
+                const b_line = -x / den;
+
+                // Yik = -yik
+                Y[i][k].g -= g_line;
+                Y[i][k].b -= b_line;
+                Y[k][i].g -= g_line;
+                Y[k][i].b -= b_line;
+
+                // Yii += yik
+                Y[i][i].g += g_line;
+                Y[i][i].b += b_line;
+                Y[k][k].g += g_line;
+                Y[k][k].b += b_line;
+            });
+
+            let matrixHTML = "<div class='flex flex-col gap-1.5'>";
+
+            for (let i = 0; i < size; i++) {
+                let rowHTML = "<div class='flex gap-2 items-center'>";
+                rowHTML += `<span class='w-4 text-[8px] font-bold text-slate-400'>B${buses[i]}</span>`;
+                for (let j = 0; j < size; j++) {
+                    const cell = Y[i][j];
+                    const isZero = Math.abs(cell.g) < 0.0001 && Math.abs(cell.b) < 0.0001;
+
+                    let cellText;
+                    if (isZero) {
+                        cellText = "0";
+                    } else {
+                        const sign = cell.b >= 0 ? "+" : "-";
+                        cellText = `${cell.g.toFixed(2)}${sign}j${Math.abs(cell.b).toFixed(2)}`;
+                    }
+
+                    const isDiag = i === j;
+                    rowHTML += `<span class='min-w-[85px] text-center p-1 rounded ${isDiag ? "bg-blue-50 text-blue-700 font-bold" : isZero ? "text-slate-300" : "bg-gray-50 text-slate-600"}'>${cellText}</span>`;
+                }
+                matrixHTML += rowHTML + "</div>";
+            }
+            matrixHTML += "</div>";
+
+            yDisplay.innerHTML = matrixHTML;
         }
 
         function renderOPFResults(loadFactor) {
@@ -3834,7 +3996,7 @@
                 // This leaves room at L-1 and L+1 for components, and L+2, L+3 for cross-lines
 
                 // Bus Node (Black Bar)
-                let busLabel = `Bus ${bus.bus} `;
+                let busLabel = bus.bus === 1 ? `Bus ${bus.bus} (Slack)` : `Bus ${bus.bus} `;
                 if (showVoltage) {
                     busLabel += `\n${bus.mag.toFixed(3)} p.u.\n${bus.ang.toFixed(1)}°`;
                 }
@@ -4998,10 +5160,22 @@
                             <td class="px-6 py-3 font-bold text-gray-700">${row.bus}</td>
                             <td class="px-6 py-3 font-mono text-blue-600 font-bold">${typeof row.mag === 'number' ? row.mag.toFixed(3) : row.mag}</td>
                             <td class="px-6 py-3 font-mono">${typeof row.ang === 'number' ? row.ang.toFixed(2) : row.ang}</td>
-                            <td class="px-6 py-3 text-right font-mono">${row.gp.toFixed(2)}</td>
-                            <td class="px-6 py-3 text-right font-mono text-gray-500">${row.gq.toFixed(2)}</td>
-                            <td class="px-6 py-3 text-right font-mono">${row.lp.toFixed(2)}</td>
-                            <td class="px-6 py-3 text-right font-mono text-gray-500">${row.lq.toFixed(2)}</td>
+                            <td class="px-6 py-3 text-right font-mono">
+                                <div class="font-bold">${row.gp.toFixed(1)} MW</div>
+                                <div class="text-[10px] text-gray-400">${(row.gp / 100).toFixed(3)} p.u.</div>
+                            </td>
+                            <td class="px-6 py-3 text-right font-mono text-gray-500">
+                                <div class="font-bold">${row.gq.toFixed(1)} Mvar</div>
+                                <div class="text-[10px] text-gray-400">${(row.gq / 100).toFixed(3)} p.u.</div>
+                            </td>
+                            <td class="px-6 py-3 text-right font-mono">
+                                <div class="font-bold">${row.lp.toFixed(1)} MW</div>
+                                <div class="text-[10px] text-gray-400">${(row.lp / 100).toFixed(3)} p.u.</div>
+                            </td>
+                            <td class="px-6 py-3 text-right font-mono text-gray-500">
+                                <div class="font-bold">${row.lq.toFixed(1)} Mvar</div>
+                                <div class="text-[10px] text-gray-400">${(row.lq / 100).toFixed(3)} p.u.</div>
+                            </td>
                         </tr>
                     `;
                 });
