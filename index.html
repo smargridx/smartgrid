@@ -614,99 +614,106 @@
                         PH</div>
                     <div class="truncate max-w-[120px] sm:max-w-none">
                         <div>
-                            <h1 class="text-xl font-bold tracking-tight truncate"><span
-                                    class="hidden md:inline">Web-Based Power
-                                    Flow Simulator</span><span class="md:hidden">PowerSim</span></h1>
-                            <p class="text-xs text-slate-400 font-medium truncate">IEEE 30-Bus • PGC Compliant</p>
+                            <h1 class="text-xl font-bold tracking-tight truncate">
+                                <span class="hidden lg:inline">Web-Based Power Flow Simulator</span>
+                                <span class="lg:hidden">PowerSim</span>
+                            </h1>
+                            <p class="text-xs text-slate-400 font-medium truncate hidden sm:block">IEEE 30-Bus • PGC
+                                Compliant</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2 md:gap-3">
-                        <!-- Operator Badge (Hidden on Mobile) -->
-                        <div class="hidden lg:flex flex-col items-end mr-1">
-                            <span class="text-[10px] text-slate-400 font-bold tracking-wider uppercase">Operator</span>
-                            <div class="flex items-center gap-1.5">
-                                <i class="ph ph-user-circle text-blue-400"></i>
-                                <span class="text-sm font-medium text-blue-100" id="displayUserName">Guest</span>
-                            </div>
+                </div>
+
+                <div class="flex items-center gap-1.5 md:gap-2">
+                    <!-- Operator Badge (Hidden on Mobile) -->
+                    <div class="hidden lg:flex flex-col items-end mr-1">
+                        <span class="text-[10px] text-slate-400 font-bold tracking-wider uppercase">Operator</span>
+                        <div class="flex items-center gap-1.5">
+                            <i class="ph ph-user-circle text-blue-400"></i>
+                            <span class="text-sm font-medium text-blue-100" id="displayUserName">Guest</span>
+                        </div>
+                    </div>
+
+                    <!-- Vertical Divider -->
+                    <div class="h-6 w-px bg-slate-700 mx-1 hidden lg:block"></div>
+
+                    <!-- Tour Button (High Visibility) -->
+                    <button onclick="playSound(); startTour()"
+                        class="h-9 px-3 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold text-sm rounded-md transition flex items-center gap-2 btn-click shadow-sm">
+                        <i class="ph ph-flag-checkered"></i> <span class="hidden xl:inline">Tour</span>
+                    </button>
+
+                    <!-- File/View Group (Hidden on Mobile, Visible on LG) -->
+                    <div class="hidden lg:flex items-center gap-2">
+                        <!-- View Group -->
+                        <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700/50">
+                            <button onclick="playSound(); openHelp('procedure')"
+                                class="h-7 px-2.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-md transition flex items-center gap-2 text-sm">
+                                <i class="ph ph-book-open"></i> <span class="hidden xl:inline">Manual</span>
+                            </button>
+                            <div class="w-px h-4 bg-slate-700 mx-1"></div>
+                            <button onclick="playSound(); openSLDModal()"
+                                class="h-7 px-2.5 text-cyan-400 hover:text-white hover:bg-cyan-900/30 rounded-md transition flex items-center gap-2 text-sm">
+                                <i class="ph ph-share-network"></i> <span class="hidden xl:inline">SLD</span>
+                            </button>
                         </div>
 
-                        <!-- Vertical Divider -->
-                        <div class="h-6 w-px bg-slate-700 mx-1 hidden lg:block"></div>
+                        <!-- File Group -->
+                        <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700/50">
+                            <button onclick="playSound(); exportScenario()"
+                                class="h-7 w-8 flex items-center justify-center text-emerald-400 hover:text-white hover:bg-emerald-900/30 rounded-md transition">
+                                <i class="ph ph-download-simple"></i>
+                            </button>
+                            <div class="w-px h-4 bg-slate-700 mx-1"></div>
+                            <input type="file" id="importFile" accept=".json" class="hidden"
+                                onchange="importScenario(this)">
+                            <button onclick="playSound(); document.getElementById('importFile').click()"
+                                class="h-7 w-8 flex items-center justify-center text-purple-400 hover:text-white hover:bg-purple-900/30 rounded-md transition">
+                                <i class="ph ph-upload-simple"></i>
+                            </button>
+                        </div>
+                    </div>
 
-                        <!-- Tour Button (High Visibility) -->
-                        <button onclick="playSound(); startTour()"
-                            class="h-9 px-3 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold text-sm rounded-md transition flex items-center gap-2 btn-click shadow-sm">
-                            <i class="ph ph-flag-checkered"></i> <span class="hidden xl:inline">Tour</span>
+                    <!-- Vertical Divider -->
+                    <div class="h-6 w-px bg-slate-700 mx-1 hidden lg:block"></div>
+
+                    <!-- Utility Group (Reset, Theme, Info) -->
+                    <div class="flex items-center gap-1">
+                        <button onclick="playSound(); goToLanding()"
+                            class="h-9 px-3 flex items-center justify-center gap-2 text-red-300 hover:bg-red-900/20 hover:text-red-200 rounded-md transition btn-click"
+                            title="Reset">
+                            <i class="ph ph-house text-lg"></i>
+                            <span class="hidden xl:inline font-bold text-sm">Reset</span>
                         </button>
 
-                        <!-- File/View Group (Hidden on Mobile, Visible on LG) -->
-                        <div class="hidden lg:flex items-center gap-2">
-                            <!-- View Group -->
-                            <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700/50">
-                                <button onclick="playSound(); openHelp('procedure')"
-                                    class="h-7 px-2.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-md transition flex items-center gap-2 text-sm">
-                                    <i class="ph ph-book-open"></i> <span class="hidden xl:inline">Manual</span>
-                                </button>
-                                <div class="w-px h-4 bg-slate-700 mx-1"></div>
-                                <button onclick="playSound(); openSLDModal()"
-                                    class="h-7 px-2.5 text-cyan-400 hover:text-white hover:bg-cyan-900/30 rounded-md transition flex items-center gap-2 text-sm">
-                                    <i class="ph ph-share-network"></i> <span class="hidden xl:inline">SLD</span>
-                                </button>
+                        <button onclick="playSound(); toggleTheme()" id="themeToggleBtn"
+                            class="h-9 w-9 flex items-center justify-center text-yellow-400 hover:bg-slate-800 rounded-md transition btn-click">
+                            <i class="ph ph-sun text-lg"></i>
+                        </button>
+
+                        <button onclick="playSound(); openAuthorModal()"
+                            class="h-9 w-9 flex items-center justify-center text-slate-400 hover:bg-slate-800 hover:text-white rounded-md transition btn-click"
+                            title="About Authors">
+                            <i class="ph ph-info text-lg"></i>
+                        </button>
+                    </div>
+
+                    <!-- Primary Action -->
+                    <div class="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
+                        <button onclick="playSound(); showManualNRCalculation()" id="manualNRBtn"
+                            class="h-10 px-3 md:px-4 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-blue-500 dark:hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-300 font-black text-[10px] sm:text-xs uppercase tracking-tighter rounded-xl transition-all shadow-sm hover:shadow-blue-500/10 flex items-center justify-center gap-2 whitespace-nowrap group btn-click">
+                            <div
+                                class="w-6 h-6 rounded bg-slate-50 dark:bg-slate-900 flex items-center justify-center group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 transition-colors">
+                                <i
+                                    class="ph ph-math-operations text-blue-500 transition-transform group-hover:scale-110"></i>
                             </div>
-
-                            <!-- File Group -->
-                            <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700/50">
-                                <button onclick="playSound(); exportScenario()"
-                                    class="h-7 w-8 flex items-center justify-center text-emerald-400 hover:text-white hover:bg-emerald-900/30 rounded-md transition">
-                                    <i class="ph ph-download-simple"></i>
-                                </button>
-                                <div class="w-px h-4 bg-slate-700 mx-1"></div>
-                                <input type="file" id="importFile" accept=".json" class="hidden"
-                                    onchange="importScenario(this)">
-                                <button onclick="playSound(); document.getElementById('importFile').click()"
-                                    class="h-7 w-8 flex items-center justify-center text-purple-400 hover:text-white hover:bg-purple-900/30 rounded-md transition">
-                                    <i class="ph ph-upload-simple"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Vertical Divider -->
-                        <div class="h-6 w-px bg-slate-700 mx-1 hidden lg:block"></div>
-
-                        <!-- Utility Group (Reset, Theme, Info) -->
-                        <div class="flex items-center gap-1">
-                            <button onclick="playSound(); goToLanding()"
-                                class="h-9 px-3 flex items-center justify-center gap-2 text-red-300 hover:bg-red-900/20 hover:text-red-200 rounded-md transition btn-click"
-                                title="Reset">
-                                <i class="ph ph-house text-lg"></i>
-                                <span class="hidden md:inline font-bold text-sm">Reset</span>
-                            </button>
-
-                            <button onclick="playSound(); toggleTheme()" id="themeToggleBtn"
-                                class="h-9 w-9 flex items-center justify-center text-yellow-400 hover:bg-slate-800 rounded-md transition btn-click">
-                                <i class="ph ph-sun text-lg"></i>
-                            </button>
-
-                            <button onclick="playSound(); openAuthorModal()"
-                                class="h-9 w-9 flex items-center justify-center text-slate-400 hover:bg-slate-800 hover:text-white rounded-md transition btn-click"
-                                title="About Authors">
-                                <i class="ph ph-info text-lg"></i>
-                            </button>
-                        </div>
-
-                        <!-- Primary Action -->
-                        <div class="flex items-center gap-2">
-                            <button onclick="playSound(); showManualNRCalculation()" id="manualNRBtn"
-                                class="h-9 sm:h-10 px-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-gray-200 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold text-sm rounded-lg sm:rounded-lg transition transform hover:scale-105 shadow-sm flex items-center justify-center gap-2 btn-click">
-                                <i class="ph ph-math-operations text-lg text-blue-500"></i>
-                                <span class="hidden sm:inline">Manual Calculation for NR</span>
-                            </button>
-                            <button onclick="playSound(); runSimulation()" id="runBtn"
-                                class="h-9 w-9 sm:w-auto sm:h-10 sm:px-5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-full sm:rounded-lg transition transform hover:scale-105 shadow-md flex items-center justify-center gap-2 btn-click ring-2 ring-blue-500/20">
-                                <i class="ph ph-play-circle text-xl"></i>
-                                <span class="hidden sm:inline">Run Simulation</span>
-                            </button>
-                        </div>
+                            <span class="hidden lg:inline">Mechanical</span>
+                        </button>
+                        <button onclick="playSound(); runSimulation()" id="runBtn"
+                            class="h-10 px-4 md:px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-[10px] sm:text-xs uppercase tracking-tighter rounded-xl transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 flex items-center justify-center gap-2 whitespace-nowrap active:scale-95 btn-click ring-2 ring-blue-500/20">
+                            <i class="ph ph-play-circle text-lg"></i>
+                            <span class="hidden md:inline">Run Solver</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1557,8 +1564,9 @@
                             <p><strong>Safety Check:</strong> Simulates a fault at every bus based on the selected type
                                 to verify breaker capacities.</p>
                             <p class="mt-1">Assumes Sequence Ratios: <span
-                                    class="font-mono bg-orange-100 px-1 rounded">Z2 ≈ Z1</span>, <span
-                                    class="font-mono bg-orange-100 px-1 rounded">Z0 ≈ 2.5×Z1</span>.</p>
+                                    class="font-mono bg-orange-100 px-1 rounded">Z2 ≈
+                                    Z1</span>, <span class="font-mono bg-orange-100 px-1 rounded">Z0 ≈ 2.5×Z1</span>.
+                            </p>
                         </div>
 
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -5915,6 +5923,7 @@
         };
 
     </script>
+    </div>
 </body>
 
 </html>
