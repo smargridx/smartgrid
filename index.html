@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -2422,6 +2423,7 @@
             const dashDisplay = document.getElementById('busCountDisplay');
             if (dashDisplay) dashDisplay.innerText = count;
 
+            calculateVoltageBases();
             launchMainApp();
         }
 
@@ -2956,6 +2958,15 @@
             renderTopologyInput();
             renderSidebarTopology();
             initAddLineModal();
+
+            // Link Base KV Input to Propagation Logic
+            const kbInput = document.getElementById('baseKVInput');
+            if (kbInput) {
+                kbInput.addEventListener('change', () => {
+                    calculateVoltageBases();
+                    renderInputTable();
+                });
+            }
         };
 
         function openAuthorModal() {
@@ -3040,11 +3051,16 @@
                     ? `<span class="text-gray-300 cursor-not-allowed" title="Slack Bus cannot be removed"><i class="ph ph-trash"></i></span>`
                     : `<button onclick="playSound(); deleteBus(${index})" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 btn-click" title="Remove Bus"><i class="ph ph-trash"></i></button>`;
 
+                const baseKV = row.baseKV || parseFloat(document.getElementById('baseKVInput').value) || 230;
+
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700 transition">
                         <td class="px-4 py-2 font-bold text-gray-700 dark:text-gray-200 bg-gray-50/50 dark:bg-slate-800/50">
                             <div class="flex flex-col gap-1">
-                                <span>Bus ${row.bus}</span>
+                                <div class="flex items-center gap-2">
+                                    <span>Bus ${row.bus}</span>
+                                    <span class="text-[9px] font-mono text-slate-400 font-normal">(${baseKV}kV)</span>
+                                </div>
                                 ${isSlack ?
                         `<span class="text-[9px] px-1.5 py-0.5 rounded border uppercase tracking-wide font-normal w-fit ${typeClass}">Slack</span>` :
                         `<select onchange="updateData(${index}, 'type', this.value)" 
@@ -3185,8 +3201,8 @@
                 if (field === 'type') {
                     activeBranches[index][field] = val;
                     if (val === 'transformer') {
-                        activeBranches[index].v_prim = 138;
-                        activeBranches[index].v_sec = 69;
+                        activeBranches[index].v_prim = 230;
+                        activeBranches[index].v_sec = 115;
                         activeBranches[index].tap = 2.0;
                     }
                 } else {
@@ -3195,15 +3211,74 @@
 
                     // Recalculate Tap if Vp or Vs changes
                     if (field === 'v_prim' || field === 'v_sec') {
-                        const vp = activeBranches[index].v_prim || 138;
-                        const vs = activeBranches[index].v_sec || 69;
+                        const vp = activeBranches[index].v_prim || 230;
+                        const vs = activeBranches[index].v_sec || 115;
                         activeBranches[index].tap = vp / vs;
                     }
                 }
 
+                calculateVoltageBases();
                 renderTopologyInput();
                 renderSidebarTopology();
+                renderInputTable();
             }
+        }
+
+        function calculateVoltageBases() {
+            if (!currentData || currentData.length === 0) return;
+
+            const globalBase = parseFloat(document.getElementById('baseKVInput').value) || 230;
+
+            // Step 1: Initialize all to null except Slack
+            currentData.forEach(bus => {
+                bus.baseKV = (bus.bus === 1) ? globalBase : null;
+            });
+
+            // Step 2: BFS/Propagation system
+            const queue = [1];
+            const visited = new Set([1]);
+
+            while (queue.length > 0) {
+                const currentId = queue.shift();
+                const currentBus = currentData.find(b => b.bus === currentId);
+                const currentBase = currentBus.baseKV || globalBase;
+
+                // Find outgoing connections
+                activeBranches.forEach(branch => {
+                    let neighborId = null;
+                    let isForward = true;
+
+                    if (branch.from === currentId) {
+                        neighborId = branch.to;
+                        isForward = true;
+                    } else if (branch.to === currentId) {
+                        neighborId = branch.from;
+                        isForward = false;
+                    }
+
+                    if (neighborId !== null && !visited.has(neighborId)) {
+                        const neighborBus = currentData.find(b => b.bus === neighborId);
+                        if (neighborBus) {
+                            if (branch.type === 'transformer') {
+                                // If transformer, adopt the secondary voltage logic
+                                // Assuming "Forward" means From->To. 
+                                // Primary side adopts currentBase, Secondary adopts branch.v_sec
+                                neighborBus.baseKV = isForward ? branch.v_sec : branch.v_prim;
+                            } else {
+                                // Line - propagates the same base
+                                neighborBus.baseKV = currentBase;
+                            }
+                            visited.add(neighborId);
+                            queue.push(neighborId);
+                        }
+                    }
+                });
+            }
+
+            // Fallback for islanded buses
+            currentData.forEach(bus => {
+                if (bus.baseKV === null) bus.baseKV = globalBase;
+            });
         }
 
         // --- DATA UPDATES ---
@@ -3224,6 +3299,7 @@
             isSimulationSolved = false;
             const newBusId = currentData.length > 0 ? Math.max(...currentData.map(d => d.bus)) + 1 : 1;
             currentData.push({ bus: newBusId, mag: 1.0, ang: 0, gp: 0, gq: 0, lp: 0, lq: 0, injQ: 0, type: 'PQ' });
+            calculateVoltageBases();
             renderInputTable();
             initAddLineModal(); // Refresh modal options
 
@@ -3323,6 +3399,7 @@
                 }
             }
 
+            calculateVoltageBases();
             renderTopologyInput();
             renderSidebarTopology();
 
@@ -3346,6 +3423,7 @@
             activeBranches = activeBranches.filter(b => b.from !== busId && b.to !== busId);
 
             // UI Updates
+            calculateVoltageBases();
             // UI Updates
             renderInputTable();
             renderTopologyInput(); // Refresh line table if lines removed
@@ -3360,8 +3438,10 @@
 
         function removeLine(index) {
             activeBranches.splice(index, 1);
+            calculateVoltageBases();
             renderTopologyInput();
             renderSidebarTopology();
+            renderInputTable();
         }
 
         // --- NEW ADD LINE MODAL LOGIC ---
@@ -3467,6 +3547,7 @@
                 bus.mag = 1.0; bus.ang = 0; bus.gp = 0; bus.gq = 0; bus.lp = 0; bus.lq = 0; bus.injQ = 0;
             });
             activeBranches = [];
+            calculateVoltageBases();
             renderInputTable();
             renderTopologyInput();
             renderSidebarTopology();
@@ -4110,14 +4191,17 @@
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 font-mono text-slate-600">
                                     ${(() => {
-                    const baseKV = parseFloat(document.getElementById('baseKVInput').value) || 230;
-                    const baseAmps = (baseMVA * 1000) / (Math.sqrt(3) * baseKV); // Ib = Sb / (sqrt3 * Vb)
                     let flowRows = "";
                     activeBranches.forEach(branch => {
-                        const fromV = currentData.find(b => b.bus == branch.from).mag;
-                        const toV = currentData.find(b => b.bus == branch.to).mag;
+                        const fromBus = currentData.find(b => b.bus == branch.from);
+                        const toBus = currentData.find(b => b.bus == branch.to);
+                        const fromV = fromBus.mag;
+                        const toV = toBus.mag;
                         const r = parseFloat(branch.r) || 0.02;
                         const x = parseFloat(branch.x) || 0.1;
+
+                        const busBaseKV = fromBus.baseKV || 230;
+                        const baseAmps = (baseMVA * 1000) / (Math.sqrt(3) * busBaseKV);
 
                         // Simulated calc for proof
                         const p_pu = (fromV * toV * Math.sin(0.05) / x) * 50;
@@ -4128,7 +4212,7 @@
 
                         flowRows += `
                                         <tr class="hover:bg-slate-50 transition">
-                                            <td class="px-4 py-3 font-bold text-slate-800">${branch.from} $\\to$ ${branch.to}</td>
+                                            <td class="px-4 py-3 font-bold text-slate-800">${branch.from} $\to$ ${branch.to} (${busBaseKV} kV)</td>
                                             <td class="px-4 py-3 text-emerald-600">${(p_pu * baseMVA / 100).toFixed(2)}</td>
                                             <td class="px-4 py-3 text-amber-600">${(q_pu * baseMVA / 100).toFixed(2)}</td>
                                             <td class="px-4 py-3">${(s_mva * baseMVA / 100).toFixed(2)}</td>
@@ -4167,17 +4251,17 @@
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 font-mono text-slate-600">
                                     ${(() => {
-                    const baseKV = parseFloat(document.getElementById('baseKVInput').value) || 230;
                     let rows = "";
                     currentData.forEach(b => {
-                        const v_kv = (b.mag * baseKV).toFixed(2);
+                        const busBaseKV = b.baseKV || 230;
+                        const v_kv = (b.mag * busBaseKV).toFixed(2);
                         const p_mw = (b.gp - b.lp).toFixed(2);
                         const q_mvar = (b.gq - b.lq).toFixed(2);
                         const s_mva = Math.sqrt(Math.pow(p_mw, 2) + Math.pow(q_mvar, 2)).toFixed(2);
 
                         rows += `
                                         <tr class="hover:bg-slate-50 transition">
-                                            <td class="px-4 py-3 font-bold text-slate-800">${b.bus}</td>
+                                            <td class="px-4 py-3 font-bold text-slate-800">${b.bus} <span class="text-[8px] font-normal text-slate-400">(${busBaseKV}kV Base)</span></td>
                                             <td class="px-4 py-3 text-blue-600">${b.mag.toFixed(4)}</td>
                                             <td class="px-4 py-3 font-bold text-slate-900">${v_kv}</td>
                                             <td class="px-4 py-3">${b.ang.toFixed(4)}&deg;</td>
