@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -2550,6 +2549,8 @@
                     const disp = document.getElementById('busCountDisplay');
                     if (disp) disp.innerText = currentData.length;
 
+                    calculateVoltageBases();
+
                     // Reset View
                     resetSimulation();
 
@@ -3519,8 +3520,10 @@
                 x: null,
 
             });
+            calculateVoltageBases();
             renderTopologyInput();
             renderSidebarTopology();
+            renderInputTable();
             closeAddLineModal();
         }
 
@@ -4413,7 +4416,11 @@
                 // Current I = S*/V* => |I| = |S|/|V|
                 const s_ft_mag = Math.sqrt(p_ft * p_ft + q_ft * q_ft);
                 const i_pu = s_ft_mag / v1;
-                const i_amps = i_pu * iBaseAmps;
+
+                // Use local bus voltage base for Ibase calculation
+                const localBaseKV = busFrom.baseKV || baseKV;
+                const localIBase = (baseMVA * 1000) / (Math.sqrt(3) * localBaseKV);
+                const i_amps = i_pu * localIBase;
 
                 // Angle of I = angle(P-jQ) + angle(V)
                 // angle(P-jQ) = atan2(-q_ft, p_ft)
@@ -4439,11 +4446,11 @@
                         <td class="px-6 py-3 font-mono text-emerald-700 text-[10px] leading-tight">
                             <div class="flex items-center gap-1">
                                 <span class="text-gray-400 w-3">f:</span> 
-                                <span>${busFrom.mag.toFixed(3)} <span class="text-gray-400">p.u.</span> | ${(busFrom.mag * baseKV).toFixed(1)} <span class="text-gray-400">kV</span> | ${busFrom.ang.toFixed(1)}&deg;</span>
+                                <span>${busFrom.mag.toFixed(3)} <span class="text-gray-400">p.u.</span> | ${(busFrom.mag * (busFrom.baseKV || baseKV)).toFixed(1)} <span class="text-gray-400">kV</span> | ${busFrom.ang.toFixed(1)}&deg;</span>
                             </div>
                             <div class="flex items-center gap-1 mt-1">
                                 <span class="text-gray-400 w-3">t:</span> 
-                                <span>${busTo.mag.toFixed(3)} <span class="text-gray-400">p.u.</span> | ${(busTo.mag * baseKV).toFixed(1)} <span class="text-gray-400">kV</span> | ${busTo.ang.toFixed(1)}&deg;</span>
+                                <span>${busTo.mag.toFixed(3)} <span class="text-gray-400">p.u.</span> | ${(busTo.mag * (busTo.baseKV || baseKV)).toFixed(1)} <span class="text-gray-400">kV</span> | ${busTo.ang.toFixed(1)}&deg;</span>
                             </div>
                         </td>
                         <td class="px-6 py-3 font-mono text-right">
@@ -4849,8 +4856,7 @@
 
 
             const baseMVA = parseFloat(document.getElementById('baseMVAInput').value) || 100;
-            const baseKV = parseFloat(document.getElementById('baseKVInput').value) || 230;
-            const iBaseAmps = (baseMVA * 1000) / (Math.sqrt(3) * baseKV);
+            const globalBaseKV = parseFloat(document.getElementById('baseKVInput').value) || 230;
 
             // 2. Create Bus Nodes (Bars) & Components
             currentData.forEach(bus => {
@@ -4860,8 +4866,9 @@
                 let busLabel = bus.bus === 1 ? `Bus ${bus.bus} (Slack)` : `Bus ${bus.bus}`;
 
                 if (showVoltage) {
-                    const kv = (bus.mag * baseKV).toFixed(1);
-                    busLabel += `\n${bus.mag.toFixed(3)} p.u. | ${kv} kV\n${bus.ang.toFixed(1)}°`;
+                    const busKV = (bus.baseKV || globalBaseKV);
+                    const actualKV = (bus.mag * busKV).toFixed(1);
+                    busLabel += `\n${bus.mag.toFixed(3)} p.u. | ${actualKV} kV\n${bus.ang.toFixed(1)}°`;
                 }
 
                 nodes.add({
@@ -5004,7 +5011,10 @@
                 const q_ft = -Math.pow(v1 / a, 2) * b - (v1 / a) * v2 * (g * Math.sin(da) - b * Math.cos(da));
                 const s_ft_mag = Math.sqrt(p_ft * p_ft + q_ft * q_ft);
                 const i_pu = s_ft_mag / v1;
-                const i_amps = i_pu * iBaseAmps;
+
+                const busFromBaseKV = (busFrom.baseKV || globalBaseKV);
+                const localIBaseAmps = (baseMVA * 1000) / (Math.sqrt(3) * busFromBaseKV);
+                const i_amps = i_pu * localIBaseAmps;
 
                 // Power Factor
                 const pf = Math.abs(p_ft) / s_ft_mag;
@@ -5505,6 +5515,8 @@
                 return;
             }
 
+            calculateVoltageBases();
+
             // 2. Reset UI
             tableBody.innerHTML = '';
             let criticalCount = 0;
@@ -5617,6 +5629,7 @@
                 document.getElementById('btnUndoN1').classList.add('hidden');
 
                 // Refresh UI
+                calculateVoltageBases();
                 renderInputTable();
                 renderTopologyInput();
                 runN1Analysis(); // Re-run to show original errors
@@ -5637,6 +5650,7 @@
                     to: line.to, // Parallel
                     r: line.r, x: line.x, tap: 1, shift: 0
                 });
+                calculateVoltageBases();
                 renderTopologyInput();
             } else if (type === 'VOLTAGE') {
                 // Fix: Add Cap Bank (InjQ) at 'to' bus
@@ -5645,6 +5659,7 @@
                     // Add 10 Mvar Cap
                     currentData[busIdx].injQ = (currentData[busIdx].injQ || 0) + 0.10; // 10 Mvar
                 }
+                calculateVoltageBases();
                 renderInputTable();
             }
 
@@ -5677,6 +5692,7 @@
                 }
             });
 
+            calculateVoltageBases();
             renderInputTable();
             renderTopologyInput();
             runN1Analysis();
@@ -5798,8 +5814,8 @@
                     logEl.innerHTML += `<div class="text-slate-400">&gt; Inverting Y<sub>bus</sub> to find Z<sub>bus</sub> [Thevenin Matrix]</div>`;
                     const Z1 = invertComplexMatrix(Y);
                     const baseMVA = 100;
-                    const basekV = 115;
-                    const baseI = (baseMVA * 1000) / (Math.sqrt(3) * basekV);
+
+                    logEl.innerHTML += `<div class="text-slate-400">&gt; Results using Nodal Voltage Bases [BFS Engine Active]</div>`;
 
                     logEl.innerHTML += `<div class="text-slate-400">&gt; Applying Sequence Network Assumptions:</div>
                         <div class="pl-4 text-[10px] text-slate-500 space-y-1">
@@ -5819,6 +5835,9 @@
                         const v_pre_val = bus.mag || 1.0;
                         const v_pre = new Complex(v_pre_val, 0);
                         const z1 = Z1[idx][idx];
+
+                        const busBaseKV = bus.baseKV || parseFloat(document.getElementById('baseKVInput').value) || 230;
+                        const busBaseI = (baseMVA * 1000) / (Math.sqrt(3) * busBaseKV);
 
                         // Assumed sequence ratios for educational simulation
                         const z2 = z1;
@@ -5859,8 +5878,8 @@
                             calcStr = "Symmetrical Component Parallel Inversion";
                         }
 
-                        const i_sc_ka = (i_fault_pu * baseI) / 1000;
-                        const mva_sc = Math.sqrt(3) * basekV * i_sc_ka;
+                        const i_sc_ka = (i_fault_pu * busBaseI) / 1000;
+                        const mva_sc = Math.sqrt(3) * busBaseKV * i_sc_ka;
 
                         // Detailed Calculation Logging for EVERY Bus
                         logEl.innerHTML += `<div class="text-orange-300 mt-6 font-bold tracking-wider border-t border-slate-800 pt-4">BUS ${bus.bus} ANALYSIS</div>`;
