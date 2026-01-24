@@ -2911,33 +2911,83 @@
 
         function renderInputTable() {
             const tbody = document.getElementById('inputTableBody');
+            if (!tbody) return;
             tbody.innerHTML = '';
+
             currentData.forEach((row, index) => {
                 const isSlack = row.bus === 1;
+                const isPV = !isSlack && row.gp > 0;
+                const isPQ = !isSlack && !isPV;
+
+                let typeLabel = '';
+                let typeClass = '';
+                if (isSlack) {
+                    typeLabel = 'Slack';
+                    typeClass = 'bg-yellow-100 text-yellow-800 border-yellow-200';
+                } else if (isPV) {
+                    typeLabel = 'PV Bus';
+                    typeClass = 'bg-green-100 text-green-800 border-green-200';
+                } else {
+                    typeLabel = 'PQ Bus';
+                    typeClass = 'bg-blue-100 text-blue-800 border-blue-200';
+                }
+
                 const deleteBtn = isSlack
                     ? `<span class="text-gray-300 cursor-not-allowed" title="Slack Bus cannot be removed"><i class="ph ph-trash"></i></span>`
                     : `<button onclick="playSound(); deleteBus(${index})" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 btn-click" title="Remove Bus"><i class="ph ph-trash"></i></button>`;
 
                 tbody.innerHTML += `
-            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700 transition">
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700 transition">
                         <td class="px-4 py-2 font-bold text-gray-700 dark:text-gray-200 bg-gray-50/50 dark:bg-slate-800/50">
-                            ${row.bus}
-                            ${isSlack ? '<span class="ml-2 text-[10px] bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded border border-yellow-200 uppercase tracking-wide">Slack</span>' : ''}
+                            <div class="flex flex-col">
+                                <span>${row.bus}</span>
+                                <span class="text-[9px] px-1.5 py-0.5 rounded border uppercase tracking-wide font-normal mt-1 w-fit ${typeClass}">${typeLabel}</span>
+                            </div>
                         </td>
                         
+                        <!-- Voltage: Mag & Ang -->
+                        <!-- Fixed for Slack, Calculated for PQ, PV (Ang), Mag (Fixed for PV) -->
+                        <td class="px-4 py-2 border-l border-gray-100 dark:border-slate-700">
+                            <input type="number" step="0.01" 
+                                class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full focus:outline-none ${isPQ ? 'text-gray-400 font-normal italic' : 'font-bold'}" 
+                                value="${row.mag}" onchange="updateData(${index}, 'mag', this.value)" 
+                                title="${isPQ ? 'Voltage Magnitude is CALCULATED for PQ Bus' : 'Specified Parameter'}">
+                        </td>
+                        <td class="px-4 py-2">
+                            <input type="number" step="0.1" 
+                                class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full focus:outline-none ${!isSlack ? 'text-gray-400 font-normal italic' : 'font-bold'}" 
+                                value="${row.ang}" ${isSlack ? '' : ''} onchange="updateData(${index}, 'ang', this.value)"
+                                title="${!isSlack ? 'Phase Angle is CALCULATED for non-Slack Bus' : 'Fixed Reference'}">
+                        </td>
+
+                        <!-- Generation: P & Q -->
+                        <td class="px-4 py-2 border-l border-gray-100 dark:border-slate-700">
+                            <input type="number" 
+                                class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full focus:outline-none ${isSlack ? 'text-gray-400 font-normal italic' : 'font-bold'}" 
+                                value="${row.gp}" onchange="updateData(${index}, 'gp', this.value)"
+                                title="${isSlack ? 'Generation P is CALCULATED for Slack Bus' : 'Specified Parameter'}">
+                        </td>
+                        <td class="px-4 py-2">
+                            <input type="number" 
+                                class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full focus:outline-none ${isSlack || isPV ? 'text-gray-400 font-normal italic' : 'font-bold'}" 
+                                value="${row.gq}" onchange="updateData(${index}, 'gq', this.value)"
+                                title="${isSlack || isPV ? 'Reactive Q is CALCULATED for Slack/PV Bus' : 'Specified Parameter'}">
+                        </td>
                         
-                        <td class="px-4 py-2 border-l border-gray-100 dark:border-slate-700"><input type="number" step="0.01" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full focus:outline-none" value="${row.mag}" onchange="updateData(${index}, 'mag', this.value)"></td>
-                        <td class="px-4 py-2"><input type="number" step="0.1" class="input-edit ${isSlack ? 'text-gray-300 cursor-not-allowed' : 'text-gray-700 dark:text-gray-200'} dark:bg-transparent w-full focus:outline-none" value="${row.ang}" ${isSlack ? 'disabled' : ''} onchange="updateData(${index}, 'ang', this.value)"></td>
-                        <td class="px-4 py-2 border-l border-gray-100 dark:border-slate-700"><input type="number" class="input-edit ${row.gp === 0 ? 'text-gray-300 dark:text-gray-600' : 'text-gray-700 dark:text-gray-200'} dark:bg-transparent w-full focus:outline-none" value="${row.gp}" onchange="updateData(${index}, 'gp', this.value)"></td>
-                        <td class="px-4 py-2"><input type="number" class="input-edit ${row.gq === 0 ? 'text-gray-300 dark:text-gray-600' : 'text-gray-700 dark:text-gray-200'} dark:bg-transparent w-full focus:outline-none" value="${row.gq}" onchange="updateData(${index}, 'gq', this.value)"></td>
+                        <!-- Load: Always Specified for PQ/PV -->
+                        <td class="px-4 py-2 border-l border-gray-100 dark:border-slate-700">
+                            <input type="number" class="input-edit font-bold text-gray-700 dark:text-gray-200 dark:bg-transparent w-full focus:outline-none" value="${row.lp}" onchange="updateData(${index}, 'lp', this.value)">
+                        </td>
+                        <td class="px-4 py-2">
+                            <input type="number" class="input-edit font-bold text-gray-700 dark:text-gray-200 dark:bg-transparent w-full focus:outline-none" value="${row.lq}" onchange="updateData(${index}, 'lq', this.value)">
+                        </td>
                         
-                        <td class="px-4 py-2 border-l border-gray-100 dark:border-slate-700"><input type="number" class="input-edit ${row.lp === 0 ? 'text-gray-300 dark:text-gray-600' : 'text-gray-700 dark:text-gray-200'} dark:bg-transparent w-full focus:outline-none" value="${row.lp}" onchange="updateData(${index}, 'lp', this.value)"></td>
-                        <td class="px-4 py-2"><input type="number" class="input-edit ${row.lq === 0 ? 'text-gray-300 dark:text-gray-600' : 'text-gray-700 dark:text-gray-200'} dark:bg-transparent w-full focus:outline-none" value="${row.lq}" onchange="updateData(${index}, 'lq', this.value)"></td>
-                        
-                        <td class="px-4 py-2 border-l border-gray-100 dark:border-slate-700"><input type="number" class="input-edit text-blue-600 dark:text-blue-400 font-bold ${row.injQ === 0 ? 'opacity-50' : 'opacity-100'} dark:bg-transparent w-full focus:outline-none" value="${row.injQ}" onchange="updateData(${index}, 'injQ', this.value)"></td>
+                        <td class="px-4 py-2 border-l border-gray-100 dark:border-slate-700">
+                            <input type="number" class="input-edit text-blue-600 dark:text-blue-400 font-bold ${row.injQ === 0 ? 'opacity-50' : 'opacity-100'} dark:bg-transparent w-full focus:outline-none" value="${row.injQ}" onchange="updateData(${index}, 'injQ', this.value)">
+                        </td>
                         <td class="px-4 py-2 text-right border-l border-gray-100 dark:border-slate-700">${deleteBtn}</td>
                     </tr>
-            `;
+                `;
             });
         }
 
