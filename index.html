@@ -4069,8 +4069,73 @@
                     </div>
                 </section>
 
+                <section class="space-y-8">
+                    <div class="flex items-center gap-4">
+                        <span class="w-12 h-12 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-xl shadow-lg">5</span>
+                        <h3 class="text-2xl font-bold text-slate-800">Final System State (Converged Results)</h3>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-8">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-[10px] text-left">
+                                <thead class="bg-slate-900 text-slate-300 uppercase font-bold tracking-tighter">
+                                    <tr>
+                                        <th class="px-4 py-3">Bus</th>
+                                        <th class="px-4 py-3">$V$ (p.u.)</th>
+                                        <th class="px-4 py-3">$V$ (kV)</th>
+                                        <th class="px-4 py-3">Angle ($\delta^\circ$)</th>
+                                        <th class="px-4 py-3">P (MW)</th>
+                                        <th class="px-4 py-3">Q (MVar)</th>
+                                        <th class="px-4 py-3">S (MVA)</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 font-mono text-slate-600">
+                                    ${(() => {
+                    const baseKV = parseFloat(document.getElementById('baseKVInput').value) || 230;
+                    let rows = "";
+                    currentData.forEach(b => {
+                        const v_kv = (b.mag * baseKV).toFixed(2);
+                        const p_mw = (b.gp - b.lp).toFixed(2);
+                        const q_mvar = (b.gq - b.lq).toFixed(2);
+                        const s_mva = Math.sqrt(Math.pow(p_mw, 2) + Math.pow(q_mvar, 2)).toFixed(2);
+
+                        rows += `
+                                        <tr class="hover:bg-slate-50 transition">
+                                            <td class="px-4 py-3 font-bold text-slate-800">${b.bus}</td>
+                                            <td class="px-4 py-3 text-blue-600">${b.mag.toFixed(4)}</td>
+                                            <td class="px-4 py-3 font-bold text-slate-900">${v_kv}</td>
+                                            <td class="px-4 py-3">${b.ang.toFixed(4)}&deg;</td>
+                                            <td class="px-4 py-3 text-emerald-600">${p_mw}</td>
+                                            <td class="px-4 py-3 text-amber-600">${q_mvar}</td>
+                                            <td class="px-4 py-3 font-bold">${s_mva}</td>
+                                        </tr>
+                                    `;
+                    });
+                    return rows;
+                })()}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                <h5 class="text-[9px] font-bold text-slate-400 uppercase mb-2">Total System Load</h5>
+                                <div class="text-xl font-black text-slate-800">
+                                    ${currentData.reduce((sum, b) => sum + b.lp, 0).toFixed(2)} <span class="text-xs font-normal text-slate-500">MW</span>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                <h5 class="text-[9px] font-bold text-slate-400 uppercase mb-2">Actual Base System</h5>
+                                <div class="text-xl font-black text-slate-800">
+                                    ${baseMVA} <span class="text-xs font-normal text-slate-500">MVA</span> / ${parseFloat(document.getElementById('baseKVInput').value) || 230} <span class="text-xs font-normal text-slate-500">kV</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <div class="pt-12 border-t border-slate-200 text-center text-slate-400 text-[10px] uppercase tracking-widest pb-10">
-                    Homework Verification Complete &middot; Malampaya East Engineering &middot; No Shortcuts Applied &middot; Stevenson Methodology
+                    Homework Verification Complete &middot; System Engineering Report &middot; No Shortcuts Applied &middot; Stevenson Methodology
                 </div>
             `;
 
