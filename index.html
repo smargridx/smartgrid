@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -912,10 +911,6 @@
                                             colspan="2">Load <span onclick="playSound(); openHelp('loadColumn')"
                                                 class="info-btn-sm"><i class="ph ph-info text-xs"></i></span></th>
                                         <th
-                                            class="px-4 py-3 bg-gray-100 dark:bg-slate-900 text-center border-l border-gray-200 dark:border-slate-700 w-[12%]">
-                                            Injection <span onclick="playSound(); openHelp('injColumn')"
-                                                class="info-btn-sm"><i class="ph ph-info text-xs"></i></span></th>
-                                        <th
                                             class="px-4 py-3 bg-gray-100 dark:bg-slate-900 text-right border-l border-gray-200 dark:border-slate-700 w-[10%]">
                                             Action</th>
                                     </tr>
@@ -937,9 +932,6 @@
                                             P (MW)</th>
                                         <th class="px-4 py-2 bg-gray-50 dark:bg-slate-800 text-right font-normal">Q
                                             (Mvar)</th>
-                                        <th
-                                            class="px-4 py-2 bg-gray-50 dark:bg-slate-800 text-right font-normal border-l border-gray-200 dark:border-slate-700">
-                                            Q (Mvar)</th>
                                         <th class="px-4 py-2 bg-gray-50 border-l border-gray-200"></th>
                                     </tr>
                                 </thead>
@@ -976,12 +968,14 @@
                                 class="w-full text-sm text-left text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden">
                                 <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-slate-900 shadow-sm">
                                     <tr>
-                                        <th class="px-3 py-2 w-[8%]">Line ID</th>
-                                        <th class="px-3 py-2 w-[15%]">F_BUS</th>
-                                        <th class="px-3 py-2 w-[15%]">T_BUS</th>
-                                        <th class="px-3 py-2 w-[26%] text-center">r (p.u.)</th>
-                                        <th class="px-3 py-2 w-[26%] text-center">x (p.u.)</th>
-                                        <th class="px-3 py-2 text-right w-[10%]">Action</th>
+                                        <th class="px-3 py-2 w-[8%]">ID</th>
+                                        <th class="px-3 py-2 w-[12%]">Type</th>
+                                        <th class="px-3 py-2 w-[12%]">F_BUS</th>
+                                        <th class="px-3 py-2 w-[12%]">T_BUS</th>
+                                        <th class="px-3 py-2 w-[15%] text-center">R / %Z</th>
+                                        <th class="px-3 py-2 w-[15%] text-center">X / Voltages (kV)</th>
+                                        <th class="px-3 py-2 w-[18%] text-center">Calculated Z</th>
+                                        <th class="px-3 py-2 text-right w-[8%]">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody id="topologyTableBody"
@@ -1163,21 +1157,24 @@
                             <table class="min-w-full text-sm text-left text-gray-600">
                                 <thead class="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0">
                                     <tr>
-                                        <th class="px-6 py-3 w-[10%]">From Bus</th>
-                                        <th class="px-6 py-3 w-[10%]">To Bus</th>
-                                        <th class="px-6 py-3 text-right w-[15%]">Flow (From&rarr;To) <div
+                                        <th class="px-6 py-3 w-[8%]">From Bus</th>
+                                        <th class="px-6 py-3 w-[8%]">To Bus</th>
+                                        <th class="px-6 py-3 text-emerald-600 w-[16%]">Voltages (Vf | Vt) <div
+                                                class="text-[9px] font-normal">[p.u.] / [kV] / [&ang;&deg;]</div>
+                                        </th>
+                                        <th class="px-6 py-3 text-right w-[12%]">Flow (F&rarr;T) <div
                                                 class="text-[9px] font-normal">[p.u.] / [MW]</div>
                                         </th>
-                                        <th class="px-6 py-3 text-right w-[15%]">Flow (To&rarr;From) <div
+                                        <th class="px-6 py-3 text-right w-[12%]">Flow (T&rarr;F) <div
                                                 class="text-[9px] font-normal">[p.u.] / [MW]</div>
                                         </th>
-                                        <th class="px-6 py-3 text-right text-blue-600 w-[20%]">Current (I) <div
-                                                class="text-[9px] font-normal">[p.u.] / [Amperes] / [Angle&deg;]</div>
+                                        <th class="px-6 py-3 text-right text-blue-600 w-[16%]">Current (I) <div
+                                                class="text-[9px] font-normal">[p.u.] / [A] / [&ang;&deg;]</div>
                                         </th>
-                                        <th class="px-6 py-3 text-right text-red-600 w-[15%]">Loss P <div
+                                        <th class="px-6 py-3 text-right text-red-600 w-[14%]">Loss P <div
                                                 class="text-[9px] font-normal">[p.u.] / [MW]</div>
                                         </th>
-                                        <th class="px-6 py-3 text-right text-red-600 w-[15%]">Loss Q <div
+                                        <th class="px-6 py-3 text-right text-red-600 w-[14%]">Loss Q <div
                                                 class="text-[9px] font-normal">[p.u.] / [Mvar]</div>
                                         </th>
                                     </tr>
@@ -2982,9 +2979,6 @@
                             <input type="number" class="input-edit font-bold text-gray-700 dark:text-gray-200 dark:bg-transparent w-full focus:outline-none" value="${row.lq}" onchange="updateData(${index}, 'lq', this.value)">
                         </td>
                         
-                        <td class="px-4 py-2 border-l border-gray-100 dark:border-slate-700">
-                            <input type="number" class="input-edit text-blue-600 dark:text-blue-400 font-bold ${row.injQ === 0 ? 'opacity-50' : 'opacity-100'} dark:bg-transparent w-full focus:outline-none" value="${row.injQ}" onchange="updateData(${index}, 'injQ', this.value)">
-                        </td>
                         <td class="px-4 py-2 text-right border-l border-gray-100 dark:border-slate-700">${deleteBtn}</td>
                     </tr>
                 `;
@@ -2998,30 +2992,70 @@
                 const fromOptions = currentData.map(bus => `<option value="${bus.bus}" ${bus.bus === b.from ? 'selected' : ''}>Bus ${bus.bus} ${bus.bus === 1 ? '(Slack)' : ''}</option>`).join('');
                 const toOptions = currentData.map(bus => `<option value="${bus.bus}" ${bus.bus === b.to ? 'selected' : ''}>Bus ${bus.bus} ${bus.bus === 1 ? '(Slack)' : ''}</option>`).join('');
 
+                const isTransformer = b.type === 'transformer';
+
                 tbody.innerHTML += `
             <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 border-b border-gray-100 dark:border-slate-700 transition">
-                        <td class="px-3 py-2 font-mono text-xs text-gray-500 dark:text-gray-400">L${b.id}</td>
+                        <td class="px-3 py-2 font-mono text-xs text-gray-500 dark:text-gray-400">${isTransformer ? 'T' : 'L'}${b.id}</td>
                         <td class="px-3 py-2">
-                            <select class="bg-transparent font-bold text-gray-700 dark:text-gray-200 focus:outline-none cursor-pointer border-b border-dotted border-gray-300 dark:border-slate-600 hover:border-blue-500 transition" 
+                            <select class="text-[10px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded p-1 focus:outline-none font-bold"
+                                    onchange="updateBranchData(${index}, 'type', this.value)">
+                                <option value="line" ${!isTransformer ? 'selected' : ''}>Line</option>
+                                <option value="transformer" ${isTransformer ? 'selected' : ''}>Xfmr</option>
+                            </select>
+                        </td>
+                        <td class="px-3 py-2 text-xs">
+                            <select class="bg-transparent font-bold text-gray-700 dark:text-gray-200 focus:outline-none w-full border-b border-dotted border-gray-300 dark:border-slate-600" 
                                     onchange="updateBranchData(${index}, 'from', this.value)">
                                 ${fromOptions}
                             </select>
                         </td>
-                        <td class="px-3 py-2">
-                            <select class="bg-transparent font-bold text-gray-700 dark:text-gray-200 focus:outline-none cursor-pointer border-b border-dotted border-gray-300 dark:border-slate-600 hover:border-blue-500 transition" 
+                        <td class="px-3 py-2 text-xs">
+                            <select class="bg-transparent font-bold text-gray-700 dark:text-gray-200 focus:outline-none w-full border-b border-dotted border-gray-300 dark:border-slate-600" 
                                     onchange="updateBranchData(${index}, 'to', this.value)">
                                 ${toOptions}
                             </select>
                         </td>
                         <td class="px-3 py-2 text-center">
-                            <input type="number" step="0.0001" placeholder="R" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full max-w-[120px] text-center focus:outline-none placeholder-gray-300 mx-auto" value="${(b.r !== null && b.r !== undefined && !isNaN(b.r)) ? b.r : ''}" onchange="updateBranchData(${index}, 'r', this.value)">
+                            <div class="flex flex-col gap-1 items-center">
+                                <span class="text-[9px] text-gray-400 uppercase font-bold">${isTransformer ? '%Z' : 'R (p.u)'}</span>
+                                <input type="number" step="0.0001" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full max-w-[80px] text-center focus:outline-none font-bold" 
+                                       value="${isTransformer ? (b.z_pct || 10) : (b.r || 0)}" 
+                                       onchange="updateBranchData(${index}, '${isTransformer ? 'z_pct' : 'r'}', this.value)">
+                            </div>
                         </td>
                         <td class="px-3 py-2 text-center">
-                            <input type="number" step="0.0001" placeholder="X" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full max-w-[120px] text-center focus:outline-none placeholder-gray-300 mx-auto" value="${(b.x !== null && b.x !== undefined && !isNaN(b.x)) ? b.x : ''}" onchange="updateBranchData(${index}, 'x', this.value)">
+                            <div class="flex flex-col gap-1 items-center">
+                                ${isTransformer ? `
+                                    <span class="text-[9px] text-gray-400 uppercase font-bold">Vp / Vs</span>
+                                    <div class="flex items-center gap-1">
+                                        <input type="number" step="0.1" placeholder="Vp" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-12 text-center focus:outline-none font-bold text-[10px]" 
+                                               value="${b.v_prim || 138}" 
+                                               onchange="updateBranchData(${index}, 'v_prim', this.value)">
+                                        <span class="text-gray-400">/</span>
+                                        <input type="number" step="0.1" placeholder="Vs" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-12 text-center focus:outline-none font-bold text-[10px]" 
+                                               value="${b.v_sec || 69}" 
+                                               onchange="updateBranchData(${index}, 'v_sec', this.value)">
+                                    </div>
+                                ` : `
+                                    <span class="text-[9px] text-gray-400 uppercase font-bold">X (p.u)</span>
+                                    <input type="number" step="0.0001" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full max-w-[80px] text-center focus:outline-none font-bold" 
+                                           value="${b.x || 0.1}" 
+                                           onchange="updateBranchData(${index}, 'x', this.value)">
+                                `}
+                            </div>
+                        </td>
+                        <td class="px-3 py-2 text-center font-mono text-[10px]">
+                            ${isTransformer ? `
+                                <div class="text-blue-600 font-bold">X ≈ ${(b.z_pct / 100).toFixed(4)}j</div>
+                                <div class="text-[8px] text-gray-400">Tap: ${(b.tap || 1).toFixed(3)}:1</div>
+                            ` : `
+                                <div class="text-gray-600">${(b.r || 0).toFixed(4)} + ${(b.x || 0.1).toFixed(4)}j</div>
+                            `}
                         </td>
 
                         <td class="px-3 py-2 text-right">
-                            <button onclick="playSound(); removeLine(${index})" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 btn-click"><i class="ph ph-trash"></i></button>
+                            <button onclick="playSound(); removeLine(${index})" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50"><i class="ph ph-trash"></i></button>
                         </td>
                     </tr>
             `;
@@ -3030,18 +3064,38 @@
 
         function updateBranchData(index, field, val) {
             if (activeBranches[index]) {
-                const parsed = parseFloat(val);
-                activeBranches[index][field] = isNaN(parsed) ? null : parsed;
-                if (field === 'from' || field === 'to') {
-                    renderSidebarTopology();
+                if (field === 'type') {
+                    activeBranches[index][field] = val;
+                    if (val === 'transformer') {
+                        activeBranches[index].v_prim = 138;
+                        activeBranches[index].v_sec = 69;
+                        activeBranches[index].tap = 2.0;
+                    }
+                } else {
+                    const parsed = parseFloat(val);
+                    activeBranches[index][field] = isNaN(parsed) ? val : parsed;
+
+                    // Recalculate Tap if Vp or Vs changes
+                    if (field === 'v_prim' || field === 'v_sec') {
+                        const vp = activeBranches[index].v_prim || 138;
+                        const vs = activeBranches[index].v_sec || 69;
+                        activeBranches[index].tap = vp / vs;
+                    }
                 }
+
+                renderTopologyInput();
+                renderSidebarTopology();
             }
         }
 
         // --- DATA UPDATES ---
 
         function updateData(index, field, val) {
-            currentData[index][field] = parseFloat(val) || 0;
+            if (field === 'name') {
+                currentData[index][field] = val;
+            } else {
+                currentData[index][field] = parseFloat(val) || 0;
+            }
         }
 
         function addBus() {
@@ -3659,19 +3713,25 @@
                 const v2 = busTo.mag;
                 const a2 = busTo.ang * Math.PI / 180;
 
-                const r = parseFloat(branch.r) || 0.0001;
-                const x = parseFloat(branch.x) || 0.0001;
+                const isTransformer = branch.type === 'transformer';
+                const r = isTransformer ? 0.001 : (parseFloat(branch.r) || 0.0001);
+                const x = isTransformer ? ((branch.z_pct || 10) / 100) : (parseFloat(branch.x) || 0.0001);
+                const a = isTransformer ? (branch.tap || 1.0) : 1.0;
+
                 const den = r * r + x * x;
                 const g = r / den;
                 const b = -x / den;
 
                 const da = a1 - a2;
 
-                const p_ft = v1 * v1 * g - v1 * v2 * (g * Math.cos(da) + b * Math.sin(da));
-                const q_ft = -v1 * v1 * b - v1 * v2 * (g * Math.sin(da) - b * Math.cos(da));
+                // Power flow with tap ratio 'a' on 'from' bus
+                // Pft = (V1/a)^2 * g - (V1/a)*V2*(g*cos(da) + b*sin(da))
+                const p_ft = Math.pow(v1 / a, 2) * g - (v1 / a) * v2 * (g * Math.cos(da) + b * Math.sin(da));
+                const q_ft = -Math.pow(v1 / a, 2) * b - (v1 / a) * v2 * (g * Math.sin(da) - b * Math.cos(da));
 
-                const p_tf = v2 * v2 * g - v2 * v1 * (g * Math.cos(-da) + b * Math.sin(-da));
-                const q_tf = -v2 * v2 * b - v2 * v1 * (g * Math.sin(-da) - b * Math.cos(-da));
+                // Ptf = V2^2 * g - (V2*(V1/a))*(g*cos(-da) + b*sin(-da))
+                const p_tf = v2 * v2 * g - (v2 * (v1 / a)) * (g * Math.cos(-da) + b * Math.sin(-da));
+                const q_tf = -v2 * v2 * b - (v2 * (v1 / a)) * (g * Math.sin(-da) - b * Math.cos(-da));
 
                 // Current I = S*/V* => |I| = |S|/|V|
                 const s_ft_mag = Math.sqrt(p_ft * p_ft + q_ft * q_ft);
@@ -3693,21 +3753,29 @@
                     <tr class="hover:bg-slate-50 border-b border-gray-100 transition">
                         <td class="px-6 py-3 font-medium">
                             Bus ${branch.from} 
-                            <div class="text-[10px] text-gray-400">${busFrom.ang.toFixed(1)}&deg;</div>
-                            ${branch.from === 1 ? '<span class="text-[9px] text-amber-600 font-bold px-1 bg-amber-50 rounded border border-amber-200 uppercase">Slack</span>' : ''}
+                            ${branch.from === 1 ? '<div class="text-[9px] text-amber-600 font-bold uppercase">Slack</div>' : ''}
                         </td>
                         <td class="px-6 py-3 font-medium">
                             Bus ${branch.to} 
-                            <div class="text-[10px] text-gray-400">${busTo.ang.toFixed(1)}&deg;</div>
-                            ${branch.to === 1 ? '<span class="text-[9px] text-amber-600 font-bold px-1 bg-amber-50 rounded border border-amber-200 uppercase">Slack</span>' : ''}
+                            ${branch.to === 1 ? '<div class="text-[9px] text-amber-600 font-bold uppercase">Slack</div>' : ''}
+                        </td>
+                        <td class="px-6 py-3 font-mono text-emerald-700 text-[10px] leading-tight">
+                            <div class="flex items-center gap-1">
+                                <span class="text-gray-400 w-3">f:</span> 
+                                <span>${busFrom.mag.toFixed(3)} <span class="text-gray-400">p.u.</span> | ${(busFrom.mag * baseKV).toFixed(1)} <span class="text-gray-400">kV</span> | ${busFrom.ang.toFixed(1)}&deg;</span>
+                            </div>
+                            <div class="flex items-center gap-1 mt-1">
+                                <span class="text-gray-400 w-3">t:</span> 
+                                <span>${busTo.mag.toFixed(3)} <span class="text-gray-400">p.u.</span> | ${(busTo.mag * baseKV).toFixed(1)} <span class="text-gray-400">kV</span> | ${busTo.ang.toFixed(1)}&deg;</span>
+                            </div>
                         </td>
                         <td class="px-6 py-3 font-mono text-right">
-                            <div class="font-bold">${p_ft.toFixed(4)} p.u.</div>
-                            <div class="text-[10px] text-gray-400">${(p_ft * baseMVA).toFixed(1)} MW</div>
+                            <div class="font-bold text-xs">${p_ft.toFixed(4)} p.u.</div>
+                            <div class="text-[9px] text-gray-400">${(p_ft * baseMVA).toFixed(1)} MW</div>
                         </td>
                         <td class="px-6 py-3 font-mono text-right text-gray-500">
-                            <div class="font-bold">${p_tf.toFixed(4)} p.u.</div>
-                            <div class="text-[10px] text-gray-400">${(p_tf * baseMVA).toFixed(1)} MW</div>
+                            <div class="font-bold text-xs">${p_tf.toFixed(4)} p.u.</div>
+                            <div class="text-[9px] text-gray-400">${(p_tf * baseMVA).toFixed(1)} MW</div>
                         </td>
                         <td class="px-6 py-3 font-mono text-right text-blue-600">
                             <div class="font-bold">${i_pu.toFixed(5)} p.u.</div>
@@ -3735,12 +3803,16 @@
 
             zTbody.innerHTML = '';
             activeBranches.forEach((br, idx) => {
-                const z_mag = Math.sqrt(br.r ** 2 + br.x ** 2);
+                const isTrans = br.type === 'transformer';
+                const r = isTrans ? 0.001 : (br.r || 0);
+                const x = isTrans ? ((br.z_pct || 10) / 100) : (br.x || 0.1);
+                const z_mag = Math.sqrt(r ** 2 + x ** 2);
+
                 zTbody.innerHTML += `
-                    <tr>
-                        <td class="py-1 px-2">L${idx + 1}</td>
-                        <td class="py-1 px-2">${br.r.toFixed(4)}</td>
-                        <td class="py-1 px-2">${br.x.toFixed(4)}</td>
+                    <tr class="${isTrans ? 'bg-blue-50/30' : ''}">
+                        <td class="py-1 px-2 font-bold">${isTrans ? 'T' : 'L'}${idx + 1}</td>
+                        <td class="py-1 px-2">${r.toFixed(4)}</td>
+                        <td class="py-1 px-2">${x.toFixed(4)}</td>
                         <td class="py-1 px-2 font-bold">${z_mag.toFixed(4)}</td>
                     </tr>
                 `;
@@ -3755,27 +3827,32 @@
                 Array.from({ length: size }, () => ({ g: 0, b: 0 }))
             );
 
-            // Off-diagonals
+            // Off-diagonals & Diagonals with Tap Handling
             activeBranches.forEach(br => {
                 const i = buses.indexOf(br.from);
                 const k = buses.indexOf(br.to);
                 if (i === -1 || k === -1) return;
 
-                const r = parseFloat(br.r) || 0.0001;
-                const x = parseFloat(br.x) || 0.0001;
+                const isTrans = br.type === 'transformer';
+                const r = isTrans ? 0.001 : (parseFloat(br.r) || 0.0001);
+                const x = isTrans ? ((br.z_pct || 10) / 100) : (parseFloat(br.x) || 0.0001);
+                const a = isTrans ? (br.tap || 1.0) : 1.0;
+
                 const den = r * r + x * x;
                 const g_line = r / den;
                 const b_line = -x / den;
 
-                // Yik = -yik
-                Y[i][k].g -= g_line;
-                Y[i][k].b -= b_line;
-                Y[k][i].g -= g_line;
-                Y[k][i].b -= b_line;
+                // Yik = Yki = -y / a
+                Y[i][k].g -= g_line / a;
+                Y[i][k].b -= b_line / a;
+                Y[k][i].g -= g_line / a;
+                Y[k][i].b -= b_line / a;
 
-                // Yii += yik
-                Y[i][i].g += g_line;
-                Y[i][i].b += b_line;
+                // Yii += y / a^2
+                Y[i][i].g += g_line / (a * a);
+                Y[i][i].b += b_line / (a * a);
+
+                // Ykk += y
                 Y[k][k].g += g_line;
                 Y[k][k].b += b_line;
             });
@@ -4104,6 +4181,7 @@
 
                 // Bus Node (Black Bar)
                 let busLabel = bus.bus === 1 ? `Bus ${bus.bus} (Slack)` : `Bus ${bus.bus}`;
+
                 if (showVoltage) {
                     const kv = (bus.mag * baseKV).toFixed(1);
                     busLabel += `\n${bus.mag.toFixed(3)} p.u. | ${kv} kV\n${bus.ang.toFixed(1)}°`;
@@ -4236,21 +4314,20 @@
                 const a2 = busTo.ang * Math.PI / 180;
                 const da = a1 - a2;
 
-                const r = parseFloat(branch.r) || 0.0001;
-                const x = parseFloat(branch.x) || 0.0001;
+                const isTrans = branch.type === 'transformer';
+                const r = isTrans ? 0.001 : (parseFloat(branch.r) || 0.0001);
+                const x = isTrans ? ((branch.z_pct || 10) / 100) : (parseFloat(branch.x) || 0.0001);
+                const a = isTrans ? (branch.tap || 1.0) : 1.0;
+
                 const den = r * r + x * x;
                 const g = r / den;
                 const b = -x / den;
 
-                const p_ft = v1 * v1 * g - v1 * v2 * (g * Math.cos(da) + b * Math.sin(da));
-                const q_ft = -v1 * v1 * b - v1 * v2 * (g * Math.sin(da) - b * Math.cos(da));
+                const p_ft = Math.pow(v1 / a, 2) * g - (v1 / a) * v2 * (g * Math.cos(da) + b * Math.sin(da));
+                const q_ft = -Math.pow(v1 / a, 2) * b - (v1 / a) * v2 * (g * Math.sin(da) - b * Math.cos(da));
                 const s_ft_mag = Math.sqrt(p_ft * p_ft + q_ft * q_ft);
                 const i_pu = s_ft_mag / v1;
                 const i_amps = i_pu * iBaseAmps;
-
-                // Angle of I = angle(P-jQ) + angle(V)
-                const i_ang_rad = Math.atan2(-q_ft, p_ft) + a1;
-                const i_ang_deg = i_ang_rad * 180 / Math.PI;
 
                 // Power Factor
                 const pf = Math.abs(p_ft) / s_ft_mag;
@@ -4258,11 +4335,11 @@
 
                 let label = "";
                 if (showPower) {
-                    label = `${(p_ft * baseMVA).toFixed(1)} MW\n${i_amps.toFixed(1)} A ∠${i_ang_deg.toFixed(1)}°`;
+                    label = `${(p_ft * baseMVA).toFixed(1)} MW\n${i_amps.toFixed(1)} A ∠${(i_pu > 0 ? (Math.atan2(-q_ft, p_ft) * 180 / Math.PI + busFrom.ang).toFixed(1) : 0)}°`;
+                    if (isTrans) label = `T:${a}:1\n` + label;
                     if (showPF) label += `\nPF: ${pf_text}`;
                 }
 
-                // Determine Flow Direction
                 const isForward = p_ft >= 0;
 
                 edges.add({
@@ -4271,11 +4348,13 @@
                     label: label,
                     font: { align: 'horizontal', size: 9, background: isDark ? 'rgba(30,41,59,0.9)' : 'rgba(255,255,255,0.9)', color: isDark ? '#fff' : '#000' },
                     color: (() => {
+                        if (isTrans) return { color: '#8b5cf6' }; // Violet for Transformers
                         if (s_ft_mag > 0.85) return { color: '#ef4444' };
                         if (s_ft_mag > 0.50) return { color: '#f59e0b' };
                         return { color: isDark ? '#818cf8' : '#3b82f6' };
                     })(),
-                    width: 1.5 + (s_ft_mag * 2),
+                    width: isTrans ? 3 : (1.5 + (s_ft_mag * 2)),
+                    dashes: isTrans ? [5, 5] : false, // Dashed line for Transformers
                     smooth: { type: 'cubicBezier', forceDirection: 'vertical', roundness: 0.4 },
                     arrows: { to: { enabled: true, scaleFactor: 0.8 } }
                 });
