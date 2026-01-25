@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -3732,8 +3733,8 @@
             let yMatrixHTML = "$$ \\begin{bmatrix} ";
 
             // Limiting display to 10x10 to prevent browser crash on render, or scrollable full text
-            // User asked for "Full Ybus". If size <= 15 show all. Else show 15x15 + dots.
-            const displayLimit = Math.min(size, 12);
+            // User asked for "Full Ybus". Showing all elements as the system is capped at 15 buses.
+            const displayLimit = size;
 
             for (let r = 0; r < displayLimit; r++) {
                 for (let c = 0; c < displayLimit; c++) {
@@ -3756,9 +3757,8 @@
 
             solverQueue.push({
                 node: 'flow-start',
-                text: `> Step 2: Build Admittance Matrix(Ybus).System Size: ${size}x${size}.<div class='text-white my-1 pl-4 text-xs opacity-90 max-h-60 overflow-y-auto scroll-custom border border-slate-600 p-2 bg-slate-800 rounded'>
+                text: `> Step 2: Build Admittance Matrix (Ybus). System Size: ${size}x${size}.<div class='text-white my-1 pl-4 text-xs opacity-90 max-h-60 overflow-y-auto scroll-custom border border-slate-600 p-2 bg-slate-800 rounded'>
             ${yMatrixHTML}
-            ${size > displayLimit ? `<br><div class='text-center text-gray-500 italic'>... Matrix truncated for display (showing ${displayLimit}x${displayLimit}) ...</div>` : ''}
         </div>`,
                 eq: "$$ Y_{bus} = G + jB $$"
             });
@@ -4031,7 +4031,7 @@
                     busMismatchRowsHTML += `
                         <div class="pl-4 border-l border-slate-200 py-1">
                             <span class="font-bold text-slate-700">Bus ${bus.bus}:</span><br/>
-                            $P_{${bus.bus},calc} = |V_{${bus.bus}}| \\sum |V_j| Y_{${bus.bus}j} \\dots = ${p_calc}$ p.u.<br/>
+                            $P_{${bus.bus},calc} = |V_{${bus.bus}}| \\sum_{j=1}^{${currentData.length}} |V_j| (G_{${bus.bus}j} \\cos \\delta_{${bus.bus}j} + B_{${bus.bus}j} \\sin \\delta_{${bus.bus}j}) = ${p_calc}$ p.u.<br/>
                             $\\Delta P_{${bus.bus}} = ${p_sch.toFixed(4)} - ${p_calc} = ${dp}$
                         </div>
                     `;
@@ -4077,7 +4077,7 @@
                                 <h5 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">B. Linear System Update</h5>
                                 <p class="text-xs text-slate-600 mb-4">Solving the sensitivity matrix equation:</p>
                                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-[10px] font-mono">
-                                    \\[ \\begin{bmatrix} \\Delta \\delta \\\\ \\Delta |V| \\end{bmatrix} = - [J^{(k)}]^{-1} \\begin{bmatrix} ${(currentMismatch).toFixed(4)} \\\\ \\vdots \\end{bmatrix} \\]
+                                    \\[ \\begin{bmatrix} \\Delta \\delta \\\\ \\Delta |V| \\end{bmatrix} = - [J^{(k)}]^{-1} \\begin{bmatrix} ${mismatchVectorValues.join(' \\\\ ')} \\end{bmatrix} \\]
                                     <div class="text-center text-blue-600 mt-2">
                                         $\\Delta \\delta \\approx ${(currentMismatch * 0.2).toFixed(5)} \\text{ rad}, \\quad \\Delta |V| \\approx ${(currentMismatch * 0.05).toFixed(5)} \\text{ p.u.}$
                                     </div>
