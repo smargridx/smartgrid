@@ -559,11 +559,15 @@
                 <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg border border-gray-200 dark:border-slate-700">
                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">Configure
                         Network Size</label>
-                    <div class="flex items-center justify-center gap-2">
-                        <input type="number" id="setupBusCount" value="5" min="3" max="15"
-                            title="Enter a value between 3 and 15"
-                            class="w-24 text-center border border-gray-300 rounded px-3 py-2 font-bold text-lg focus:outline-none focus:border-blue-500">
-                        <span class="text-gray-500 font-medium">Buses</span>
+                    <div class="flex flex-col items-center justify-center gap-2">
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="setupBusCount" value="5" min="3" max="15"
+                                title="Enter a value between 3 and 15"
+                                class="w-24 text-center border border-gray-300 rounded px-3 py-2 font-bold text-lg focus:outline-none focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600">
+                            <span class="text-gray-500 dark:text-gray-400 font-medium">Buses</span>
+                        </div>
+                        <p class="text-[10px] text-gray-400 dark:text-gray-500 font-medium italic">Limited to 3 to 15
+                            bus only</p>
                     </div>
                     <button onclick="playSound(); initCustomSystem()"
                         class="mt-4 w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg shadow-lg hover:shadow-blue-500/30 transition btn-click flex items-center justify-center gap-2">
@@ -1039,7 +1043,7 @@
                                 <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-slate-900 shadow-sm">
                                     <tr>
                                         <th class="px-3 py-2 w-[8%]">ID</th>
-                                        <th class="px-3 py-2 w-[12%]">Type</th>
+                                        <th class="px-3 py-2 w-[12%]">Type (Line/Transformer)</th>
                                         <th class="px-3 py-2 w-[12%]">F_BUS</th>
                                         <th class="px-3 py-2 w-[12%]">T_BUS</th>
                                         <th class="px-3 py-2 w-[15%] text-center">R / %Z</th>
@@ -3562,6 +3566,7 @@
                 id: newId,
                 from: from,
                 to: to,
+                type: 'line',
                 r: null,
                 x: null,
 
