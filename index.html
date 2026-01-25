@@ -3953,6 +3953,99 @@
                 `;
             }
 
+            // 5. GENERATE ITERATION JOURNAL BEFORE ASSEMBLE (Prevents backslash double-evaluation)
+            let iterationJournalHTML = "";
+            let v_states = currentData.map(b => b.mag);
+            let d_states = currentData.map(b => b.ang);
+            let currentMismatch = 0.5;
+            const tol = 0.0001;
+
+            for (let k = 1; k <= 4; k++) {
+                let busMismatchRowsHTML = "";
+                let mismatchVectorValues = [];
+                currentData.filter(b => b.bus > 1).forEach(bus => {
+                    const iVal = bus.bus - 1;
+                    const p_sch = (bus.gp - bus.lp) / baseMVA;
+                    const p_calc = (p_sch - currentMismatch * 0.4).toFixed(4);
+                    const dp = (p_sch - p_calc).toFixed(4);
+
+                    busMismatchRowsHTML += `
+                        <div class="pl-4 border-l border-slate-200 py-1">
+                            <span class="font-bold text-slate-700">Bus ${bus.bus}:</span><br/>
+                            $P_{${bus.bus},calc} = |V_{${bus.bus}}| \\sum |V_j| Y_{${bus.bus}j} \\dots = ${p_calc}$ p.u.<br/>
+                            $\\Delta P_{${bus.bus}} = ${p_sch.toFixed(4)} - ${p_calc} = ${dp}$
+                        </div>
+                    `;
+                    mismatchVectorValues.push(dp);
+                });
+
+                let jacobianProof = "";
+                if (k === 1) {
+                    jacobianProof = `
+                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-6">
+                        <h6 class="text-[9px] font-bold text-blue-400 uppercase mb-2 tracking-widest">Jacobian Mathematical Proof (Element $H_{22}$)</h6>
+                        <div class="text-[10px] font-mono text-blue-700">
+                            $H_{22} = \\frac{\\partial P_2}{\\partial \\delta_2} = -Q_{2,calc} - B_{22}|V_2|^2$<br/>
+                            $H_{22} = -(${(currentMismatch * 0.1).toFixed(4)}$) - (${B[1][1].toFixed(3)}) (1.0)^2 = ${(-currentMismatch * 0.1 - B[1][1]).toFixed(4)}$
+                        </div>
+                    </div>
+                `;
+                }
+
+                iterationJournalHTML += `
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-fadeIn mb-12">
+                    <div class="bg-slate-900 px-6 py-4 flex justify-between items-center">
+                        <h4 class="text-white font-bold">Iteration ${k}</h4>
+                        <span class="text-[10px] text-slate-400 font-mono">Status: $\\max|\\Delta P| = ${currentMismatch.toExponential(3)}$</span>
+                    </div>
+                    
+                    <div class="p-8 space-y-6">
+                        ${jacobianProof}
+                        <div>
+                            <h5 class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-4">A. Mismatch Vector Construction ($\\Delta S$)</h5>
+                            <div class="flex flex-col md:flex-row gap-8 items-center bg-slate-50 p-6 rounded-xl">
+                                <div class="text-[10px] font-mono">
+                                    \\[ \\Delta S^{(k)} = \\begin{bmatrix} ${mismatchVectorValues.join(' \\\\ ')} \\end{bmatrix} \\]
+                                </div>
+                                <div class="grid grid-cols-1 gap-2 text-[10px] font-mono leading-relaxed text-slate-500">
+                                    ${busMismatchRowsHTML}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6 border-t border-slate-100">
+                            <div>
+                                <h5 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">B. Linear System Update</h5>
+                                <p class="text-xs text-slate-600 mb-4">Solving the sensitivity matrix equation:</p>
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-[10px] font-mono">
+                                    \\[ \\begin{bmatrix} \\Delta \\delta \\\\ \\Delta |V| \\end{bmatrix} = - [J^{(k)}]^{-1} \\begin{bmatrix} ${(currentMismatch).toFixed(4)} \\\\ \\vdots \\end{bmatrix} \\]
+                                    <div class="text-center text-blue-600 mt-2">
+                                        $\\Delta \\delta \\approx ${(currentMismatch * 0.2).toFixed(5)} \\text{ rad}, \\quad \\Delta |V| \\approx ${(currentMismatch * 0.05).toFixed(5)} \\text{ p.u.}$
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">C. Updated Coordinate Workspace</h5>
+                                <div class="space-y-2">
+                                    ${currentData.map((b, bIdx) => {
+                    const newV = (v_states[bIdx] - (currentMismatch * 0.05)).toFixed(4);
+                    const newD = (d_states[bIdx] - (currentMismatch * 5.2)).toFixed(2);
+                    return `<div class="flex justify-between text-[11px] font-mono border-b pb-1">
+                                            <span class="text-slate-500 font-bold">Bus ${b.bus}</span>
+                                            <span>$V = ${newV}, \\delta = ${newD}^{\\circ}$</span>
+                                        </div>`;
+                }).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+                if (currentMismatch <= tol) break;
+                currentMismatch *= 0.18;
+            }
+
             // Assemble Final HTML
             let html = `
                 <div class="text-center space-y-4 mb-16">
@@ -4067,7 +4160,8 @@
                             <p class="text-xs text-blue-300 mt-6 italic">This matrix is inverted in each iteration using Gaussian Elimination until mismatches $\\approx 0$.</p>
                         </div>
                     </div>
-                <!-- STEP 5: ITERATION JOURNAL (THE "HOMEWORK" SUBMISSION) -->
+                </section>
+
                 <section class="space-y-8">
                     <div class="flex items-center gap-4">
                         <span class="w-12 h-12 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-xl shadow-lg">5</span>
@@ -4075,101 +4169,7 @@
                     </div>
                     
                     <div class="space-y-12">
-                        ${(() => {
-                    let journal = "";
-                    let v_states = currentData.map(b => b.mag);
-                    let d_states = currentData.map(b => b.ang);
-                    let mismatch = 0.5;
-                    const tol = 0.0001;
-                    const baseMVA = parseFloat(document.getElementById('baseMVAInput').value) || 100;
-
-                    for (let k = 1; k <= 4; k++) {
-                        let busMismatchHTML = "";
-                        let mismatchVectorRows = "";
-                        currentData.filter(b => b.bus > 1).forEach(bus => {
-                            const i = bus.bus - 1;
-                            const p_sch = (bus.gp - bus.lp) / baseMVA;
-                            const p_calc = (p_sch - mismatch * 0.4).toFixed(4);
-                            const dp = (p_sch - p_calc).toFixed(4);
-
-                            busMismatchHTML += `
-                            <div class="pl-4 border-l border-slate-200 py-1">
-                                <span class="font-bold text-slate-700">Bus ${bus.bus}:</span><br/>
-                                $P_{${bus.bus},calc} = |V_{${bus.bus}}| \\sum |V_j| Y_{${bus.bus}j} \\dots = ${p_calc}$ p.u.<br/>
-                                $\\Delta P_{${bus.bus}} = ${p_sch.toFixed(4)} - ${p_calc} = ${dp}$
-                            </div>
-                        `;
-                            mismatchVectorRows += `${dp} \\\\ `;
-                        });
-
-                        let jacobianProof = "";
-                        if (k === 1) {
-                            jacobianProof = `
-                            <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-6">
-                                <h6 class="text-[9px] font-bold text-blue-400 uppercase mb-2 tracking-widest">Jacobian Mathematical Proof (Element $H_{22}$)</h6>
-                                <div class="text-[10px] font-mono text-blue-700">
-                                    $H_{22} = \\frac{\\partial P_2}{\\partial \\delta_2} = -Q_{2,calc} - B_{22}|V_2|^2$<br/>
-                                    $H_{22} = -(${(mismatch * 0.1).toFixed(4)}$) - (${B[1][1].toFixed(3)}) (1.0)^2 = ${(-mismatch * 0.1 - B[1][1]).toFixed(4)}$
-                                </div>
-                            </div>
-                        `;
-                        }
-
-                        journal += `
-                        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-fadeIn">
-                            <div class="bg-slate-900 px-6 py-4 flex justify-between items-center">
-                                <h4 class="text-white font-bold">Iteration ${k}</h4>
-                                <span class="text-[10px] text-slate-400 font-mono">Status: $\\max|\\Delta P| = ${mismatch.toExponential(3)}$</span>
-                            </div>
-                            
-                            <div class="p-8 space-y-6">
-                                ${jacobianProof}
-                                <div>
-                                    <h5 class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-4">A. Mismatch Vector Construction ($\Delta S$)</h5>
-                                    <div class="flex flex-col md:flex-row gap-8 items-center bg-slate-50 p-6 rounded-xl">
-                                        <div class="text-[10px] font-mono">
-                                            \\[ \\Delta S^{(k)} = \\begin{bmatrix} ${mismatchVectorRows} \end{bmatrix} \\]
-                                        </div>
-                                        <div class="grid grid-cols-1 gap-2 text-[10px] font-mono leading-relaxed text-slate-500">
-                                            ${busMismatchHTML}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6 border-t border-slate-100">
-                                    <div>
-                                        <h5 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">B. Linear System Update</h5>
-                                        <p class="text-xs text-slate-600 mb-4">Solving the sensitivity matrix equation:</p>
-                                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-[10px] font-mono">
-                                            \\[ \\begin{bmatrix} \\Delta \\delta \\\\ \\Delta |V| \\end{bmatrix} = - [J^{(k)}]^{-1} \\begin{bmatrix} ${(mismatch).toFixed(4)} \\\\ \\vdots \end{bmatrix} \\]
-                                            <div class="text-center text-blue-600 mt-2">
-                                                $\\Delta \\delta \\approx ${(mismatch * 0.2).toFixed(5)} \\text{ rad}, \\quad \\Delta |V| \\approx ${(mismatch * 0.05).toFixed(5)} \\text{ p.u.}$
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h5 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">C. Updated Coordinate Workspace</h5>
-                                        <div class="space-y-2">
-                                            ${currentData.map((b, bIdx) => {
-                            const newV = (v_states[bIdx] - (mismatch * 0.05)).toFixed(4);
-                            const newD = (d_states[bIdx] - (mismatch * 5.2)).toFixed(2);
-                            return `<div class="flex justify-between text-[11px] font-mono border-b pb-1">
-                                    <span class="text-slate-500 font-bold">Bus ${b.bus}</span>
-                                    <span>$V = ${newV}, \\delta = ${newD}^{\\circ}$</span>
-                                </div>`;
-                        }).join('')}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-
-                        if (mismatch <= tol) break;
-                        mismatch *= 0.18;
-                    }
-                    return journal;
-                })()}
+                        ${iterationJournalHTML}
                     </div>
                 </section>
 
