@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -3202,8 +3203,11 @@
                 if (field === 'type') {
                     activeBranches[index][field] = val;
                     if (val === 'transformer') {
-                        activeBranches[index].v_prim = 230;
-                        activeBranches[index].v_sec = 115;
+                        // Default to current bus voltage for v_prim
+                        const fromBus = currentData.find(b => b.bus === activeBranches[index].from);
+                        const vBase = fromBus ? (fromBus.baseKV || 230) : 230;
+                        activeBranches[index].v_prim = vBase;
+                        activeBranches[index].v_sec = vBase / 2; // Default 2:1 ratio
                         activeBranches[index].tap = 2.0;
                     }
                 } else {
@@ -3261,10 +3265,18 @@
                         const neighborBus = currentData.find(b => b.bus === neighborId);
                         if (neighborBus) {
                             if (branch.type === 'transformer') {
-                                // If transformer, adopt the secondary voltage logic
-                                // Assuming "Forward" means From->To. 
-                                // Primary side adopts currentBase, Secondary adopts branch.v_sec
-                                neighborBus.baseKV = isForward ? branch.v_sec : branch.v_prim;
+                                // NEW: Sync transformer ratings with the current bus base to avoid mismatches
+                                if (isForward) {
+                                    // Primary side connected to 'current' bus
+                                    branch.v_prim = currentBase;
+                                    neighborBus.baseKV = branch.v_sec;
+                                } else {
+                                    // Secondary side connected to 'current' bus
+                                    branch.v_sec = currentBase;
+                                    neighborBus.baseKV = branch.v_prim;
+                                }
+                                // Recalculate tap ratio based on synced voltages
+                                branch.tap = (branch.v_prim || 1) / (branch.v_sec || 1);
                             } else {
                                 // Line - propagates the same base
                                 neighborBus.baseKV = currentBase;
@@ -3314,36 +3326,51 @@
             isSimulationSolved = false;
 
             currentData.forEach(bus => {
-                if (bus.bus === 1) return; // Skip Slack (ref)
-
-                // Randomize Voltage (Initial Guess)
-                // Mag: 0.90 to 1.10 p.u.
-                bus.mag = parseFloat((0.9 + Math.random() * 0.2).toFixed(3));
-                // Angle: -10 to +10 degrees
-                bus.ang = parseFloat((-10 + Math.random() * 20).toFixed(2));
-
-                // Random Load: 70% chance to have load
-                if (Math.random() > 0.3) {
-                    bus.lp = Math.floor(Math.random() * 30) + 5; // 5 to 35 MW
-                    bus.lq = Math.floor(Math.random() * 10) + 1;  // 1 to 11 Mvar
-                } else {
-                    bus.lp = 0; bus.lq = 0;
-                }
-
-                // Random Gen: Higher probability for bus 2 and 3, or rare random
-                if (bus.bus <= 3 || Math.random() > 0.85) {
-                    bus.gp = Math.floor(Math.random() * 100) + 50; // 50 to 150 MW
-                    bus.gq = Math.floor(Math.random() * 30) + 5;   // 5 to 35 Mvar
-                } else {
+                if (bus.bus === 1) {
+                    // Slack Bus: Usually has Generation, No Load
                     bus.gp = 0; bus.gq = 0;
+                    bus.lp = 0; bus.lq = 0;
+                    bus.type = 'Slack';
+                    return;
                 }
 
-                // Random Injection
-                if (Math.random() > 0.9) {
-                    bus.injQ = (Math.random() * 5).toFixed(1);
+                const vBase = bus.baseKV || 230;
+
+                // 1. Generation Logic
+                // Higher voltages (>= 115kV) are more likely to have generators
+                if (vBase >= 115) {
+                    const hasGen = Math.random() > 0.4; // 60% chance for high voltage
+                    if (hasGen) {
+                        bus.gp = Math.floor(Math.random() * 100) + 50; // 50-150 MW
+                        bus.gq = Math.floor(Math.random() * 40) + 10;  // 10-50 Mvar
+                        bus.type = 'PV';
+                    } else {
+                        bus.gp = 0; bus.gq = 0;
+                        bus.type = 'PQ';
+                    }
                 } else {
-                    bus.injQ = 0;
+                    bus.gp = 0; bus.gq = 0; // Low voltage usually has no generation in this model
+                    bus.type = 'PQ';
                 }
+
+                // 2. Load Logic
+                // Lower voltages (<= 69kV) are more likely to have heavy loads
+                if (vBase <= 69) {
+                    bus.lp = Math.floor(Math.random() * 40) + 10; // 10-50 MW
+                    bus.lq = Math.floor(Math.random() * 15) + 5;  // 5-20 Mvar
+                } else {
+                    // Transmission level might have small city loads
+                    const hasLoad = Math.random() > 0.6;
+                    bus.lp = hasLoad ? (Math.floor(Math.random() * 20) + 5) : 0;
+                    bus.lq = hasLoad ? (Math.floor(Math.random() * 8) + 2) : 0;
+                }
+
+                // 3. Initial Guesses
+                bus.mag = parseFloat((0.95 + Math.random() * 0.1).toFixed(3));
+                bus.ang = parseFloat((-5 - Math.random() * 10).toFixed(2));
+
+                // 4. Injection
+                bus.injQ = (vBase <= 34 && Math.random() > 0.8) ? (Math.random() * 10).toFixed(1) : 0;
             });
 
             renderInputTable();
@@ -3361,17 +3388,37 @@
 
             activeBranches = [];
             const buses = currentData.map(b => b.bus);
+            const hierarchy = [230, 138, 115, 69, 34, 13.2];
 
-            // 1. Create a Linear Backbone (1-2-3--N) to ensure connectivity
+            // 1. Create a Cascading Backbone to demonstrate voltage tiers
             for (let i = 0; i < buses.length - 1; i++) {
-                activeBranches.push({
-                    id: i + 1,
-                    from: buses[i],
-                    to: buses[i + 1],
-                    r: parseFloat((0.005 + Math.random() * 0.04).toFixed(4)), // 0.005 - 0.045
-                    x: parseFloat((0.02 + Math.random() * 0.10).toFixed(4)),  // 0.02 - 0.12
+                const canStepDown = i < hierarchy.length - 1;
 
-                });
+                if (canStepDown) {
+                    // Create Transformer for Step-Down
+                    activeBranches.push({
+                        id: i + 1,
+                        from: buses[i],
+                        to: buses[i + 1],
+                        type: 'transformer',
+                        r: 0.001,
+                        x: 0.05, // Standard reactor X
+                        z_pct: 10,
+                        v_prim: hierarchy[i],
+                        v_sec: hierarchy[i + 1],
+                        tap: hierarchy[i] / hierarchy[i + 1]
+                    });
+                } else {
+                    // Standard Line for same-voltage connections
+                    activeBranches.push({
+                        id: i + 1,
+                        from: buses[i],
+                        to: buses[i + 1],
+                        type: 'line',
+                        r: parseFloat((0.005 + Math.random() * 0.04).toFixed(4)),
+                        x: parseFloat((0.02 + Math.random() * 0.10).toFixed(4))
+                    });
+                }
             }
 
             // 2. Add Random Cross-Links (Ring/Mesh) - 30% density
@@ -3380,8 +3427,7 @@
                 const idxA = Math.floor(Math.random() * buses.length);
                 let idxB = Math.floor(Math.random() * buses.length);
 
-                // Ensure distinct and not already connected
-                if (idxA !== idxB && Math.abs(idxA - idxB) > 1) { // Avoid duplicates of backbone
+                if (idxA !== idxB && Math.abs(idxA - idxB) > 1) {
                     const from = buses[idxA];
                     const to = buses[idxB];
                     const exists = activeBranches.some(b => (b.from === from && b.to === to) || (b.from === to && b.to === from));
@@ -3392,9 +3438,9 @@
                             id: newId,
                             from: from,
                             to: to,
+                            type: 'line', // Cross-links are usually lines within same tier
                             r: parseFloat((0.01 + Math.random() * 0.05).toFixed(4)),
-                            x: parseFloat((0.04 + Math.random() * 0.15).toFixed(4)),
-
+                            x: parseFloat((0.04 + Math.random() * 0.15).toFixed(4))
                         });
                     }
                 }
