@@ -379,6 +379,94 @@
         .tour-btn-skip:hover {
             color: #64748b;
         }
+
+        /* PRINT STYLES */
+        @media print {
+            body {
+                overflow: visible !important;
+                height: auto !important;
+                background: white !important;
+            }
+
+            /* Hide everything but the modal content */
+            body>*:not(#manualCalcModal) {
+                display: none !important;
+            }
+
+            #manualCalcModal {
+                position: static !important;
+                display: block !important;
+                visibility: visible !important;
+                background: white !important;
+                height: auto !important;
+                width: 100% !important;
+                overflow: visible !important;
+                z-index: auto !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            #manualCalcModal>div {
+                height: auto !important;
+                max-width: none !important;
+                width: 100% !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                display: block !important;
+                overflow: visible !important;
+            }
+
+            /* Hide Modal Header and scrollbars during print */
+            #manualCalcModal .bg-slate-900,
+            #manualCalcModal button,
+            #manualCalcModal .scroll-custom::-webkit-scrollbar {
+                display: none !important;
+            }
+
+            #manualCalcModal .overflow-y-auto {
+                overflow: visible !important;
+                height: auto !important;
+                width: 100% !important;
+                padding: 0 !important;
+            }
+
+            #manualCalcContent {
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 2cm !important;
+                /* Standards for margins */
+            }
+
+            /* Ensure text is readable */
+            .text-white,
+            .text-slate-400,
+            .text-slate-500,
+            .text-blue-100 {
+                color: #000 !important;
+            }
+
+            .bg-slate-950,
+            .bg-slate-900,
+            .bg-slate-800,
+            .bg-slate-50 {
+                background-color: #fff !important;
+                color: #000 !important;
+                border: 1px solid #eee !important;
+            }
+
+            /* MathJax scaling for print */
+            .mjx-chtml {
+                font-size: 100% !important;
+            }
+
+            /* Page breaks */
+            section,
+            .bg-white.rounded-2xl {
+                page-break-inside: avoid;
+                margin-bottom: 2rem !important;
+            }
+        }
     </style>
 </head>
 
@@ -622,21 +710,13 @@
                                 <span class="hidden lg:inline">Web-Based Power Flow Simulator</span>
                                 <span class="lg:hidden">PowerSim</span>
                             </h1>
-                            <p class="text-xs text-slate-400 font-medium truncate hidden sm:block">IEEE 30-Bus • PGC
-                                Compliant</p>
+
                         </div>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-1.5 md:gap-2">
-                    <!-- Operator Badge (Hidden on Mobile) -->
-                    <div class="hidden lg:flex flex-col items-end mr-1">
-                        <span class="text-[10px] text-slate-400 font-bold tracking-wider uppercase">Operator</span>
-                        <div class="flex items-center gap-1.5">
-                            <i class="ph ph-user-circle text-blue-400"></i>
-                            <span class="text-sm font-medium text-blue-100" id="displayUserName">Guest</span>
-                        </div>
-                    </div>
+
 
                     <!-- Vertical Divider -->
                     <div class="h-6 w-px bg-slate-700 mx-1 hidden lg:block"></div>
@@ -2063,7 +2143,11 @@
                 <div class="flex items-center gap-4">
                     <button onclick="playSound(); printManualCalc()"
                         class="px-4 py-2 text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 flex items-center gap-2 transition">
-                        <i class="ph ph-printer"></i> Print Proof
+                        <i class="ph ph-printer"></i> Print
+                    </button>
+                    <button onclick="playSound(); exportManualCalcToPDF()"
+                        class="px-4 py-2 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded shadow-lg flex items-center gap-2 transition">
+                        <i class="ph ph-file-pdf"></i> Save PDF
                     </button>
                     <button onclick="playSound(); closeManualCalcModal()"
                         class="text-slate-400 hover:text-white bg-slate-800 hover:bg-red-600 w-8 h-8 rounded flex items-center justify-center transition">
@@ -2349,7 +2433,8 @@
             }
 
             userName = nameInput.value;
-            document.getElementById('displayUserName').innerText = userName;
+            const displayEl = document.getElementById('displayUserName');
+            if (displayEl) displayEl.innerText = userName;
             const pdfUserEl = document.getElementById('pdfUserName');
             if (pdfUserEl) pdfUserEl.innerText = userName;
 
@@ -2467,7 +2552,8 @@
 
             // Reset User Identity
             document.getElementById('introNameInput').value = '';
-            document.getElementById('displayUserName').innerText = "Guest";
+            const displayEl = document.getElementById('displayUserName');
+            if (displayEl) displayEl.innerText = "Guest";
             userName = "Guest";
 
             // Reset Inputs
@@ -3905,8 +3991,21 @@
         }
 
         function printManualCalc() {
-            const content = document.getElementById('manualCalcModal');
             window.print();
+        }
+
+        function exportManualCalcToPDF() {
+            const element = document.getElementById('manualCalcContent');
+            const opt = {
+                margin: [0.5, 0.5],
+                filename: `NR-PowerFlow-Proof-${userName.replace(/\s+/g, '-')}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+
+            html2pdf().set(opt).from(element).save();
         }
 
         function showManualNRCalculation() {
