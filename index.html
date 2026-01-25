@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -1044,8 +1043,8 @@
                                     <tr>
                                         <th class="px-3 py-2 w-[8%]">ID</th>
                                         <th class="px-3 py-2 w-[12%]">Type (Line/Transformer)</th>
-                                        <th class="px-3 py-2 w-[12%]">F_BUS</th>
-                                        <th class="px-3 py-2 w-[12%]">T_BUS</th>
+                                        <th class="px-3 py-2 w-[12%]">From Bus</th>
+                                        <th class="px-3 py-2 w-[12%]">To Bus</th>
                                         <th class="px-3 py-2 w-[15%] text-center">R / %Z</th>
                                         <th class="px-3 py-2 w-[15%] text-center">X / Voltages (kV)</th>
                                         <th class="px-3 py-2 w-[18%] text-center">Calculated Z</th>
@@ -1233,13 +1232,13 @@
                                     <tr>
                                         <th class="px-6 py-3 w-[8%]">From Bus</th>
                                         <th class="px-6 py-3 w-[8%]">To Bus</th>
-                                        <th class="px-6 py-3 text-emerald-600 w-[16%]">Voltages (Vf | Vt) <div
+                                        <th class="px-6 py-3 text-emerald-600 w-[16%]">Voltages (From | To) <div
                                                 class="text-[9px] font-normal">[p.u.] / [kV] / [&ang;&deg;]</div>
                                         </th>
-                                        <th class="px-6 py-3 text-right w-[12%]">Flow (F&rarr;T) <div
+                                        <th class="px-6 py-3 text-right w-[12%]">Flow (From&rarr;To) <div
                                                 class="text-[9px] font-normal">[p.u.] / [MW]</div>
                                         </th>
-                                        <th class="px-6 py-3 text-right w-[12%]">Flow (T&rarr;F) <div
+                                        <th class="px-6 py-3 text-right w-[12%]">Flow (To&rarr;From) <div
                                                 class="text-[9px] font-normal">[p.u.] / [MW]</div>
                                         </th>
                                         <th class="px-6 py-3 text-right text-blue-600 w-[16%]">Current (I) <div
@@ -3187,8 +3186,8 @@
                         </td>
                         <td class="px-3 py-2 text-center font-mono text-[10px]">
                             ${isTransformer ? `
-                                <div class="text-blue-600 font-bold">X ≈ ${(b.z_pct / 100).toFixed(4)}j</div>
-                                <div class="text-[8px] text-gray-400">Tap: ${(b.tap || 1).toFixed(3)}:1</div>
+                                <div class="text-blue-600 font-bold">X ≈ ${((parseFloat(b.z_pct) || 10) / 100).toFixed(4)}j</div>
+                                <div class="text-[8px] text-gray-400">Tap: ${(parseFloat(b.tap) || 1).toFixed(3)}:1</div>
                             ` : `
                                 <div class="text-gray-600">${(b.r || 0).toFixed(4)} + ${(b.x || 0.1).toFixed(4)}j</div>
                             `}
@@ -3204,25 +3203,37 @@
 
         function updateBranchData(index, field, val) {
             if (activeBranches[index]) {
+                const branch = activeBranches[index];
                 if (field === 'type') {
-                    activeBranches[index][field] = val;
+                    branch[field] = val;
                     if (val === 'transformer') {
                         // Default to current bus voltage for v_prim
-                        const fromBus = currentData.find(b => b.bus === activeBranches[index].from);
+                        const fromBus = currentData.find(b => b.bus === branch.from);
                         const vBase = fromBus ? (fromBus.baseKV || 230) : 230;
-                        activeBranches[index].v_prim = vBase;
-                        activeBranches[index].v_sec = vBase / 2; // Default 2:1 ratio
-                        activeBranches[index].tap = 2.0;
+                        branch.v_prim = vBase;
+                        branch.v_sec = vBase / 2; // Default 2:1 ratio
+                        branch.tap = 2.0;
+                        branch.z_pct = 10; // New default
+                        // Also sync with others immediately
+                        syncTransformerVoltages(branch.from, branch.v_prim);
+                        syncTransformerVoltages(branch.to, branch.v_sec);
                     }
                 } else {
                     const parsed = parseFloat(val);
-                    activeBranches[index][field] = isNaN(parsed) ? val : parsed;
+                    branch[field] = isNaN(parsed) ? val : parsed;
+
+                    // Sync Vp / Vs across all connected IDs
+                    if (field === 'v_prim') {
+                        syncTransformerVoltages(branch.from, branch.v_prim);
+                    } else if (field === 'v_sec') {
+                        syncTransformerVoltages(branch.to, branch.v_sec);
+                    }
 
                     // Recalculate Tap if Vp or Vs changes
-                    if (field === 'v_prim' || field === 'v_sec') {
-                        const vp = activeBranches[index].v_prim || 230;
-                        const vs = activeBranches[index].v_sec || 115;
-                        activeBranches[index].tap = vp / vs;
+                    if (branch.type === 'transformer') {
+                        const vp = branch.v_prim || 230;
+                        const vs = branch.v_sec || 115;
+                        branch.tap = vp / vs;
                     }
                 }
 
@@ -3231,6 +3242,29 @@
                 renderSidebarTopology();
                 renderInputTable();
             }
+        }
+
+        // Helper to propagate Vp/Vs changes to all transformers on the same bus
+        function syncTransformerVoltages(busId, voltage) {
+            if (!busId) return;
+            activeBranches.forEach(br => {
+                if (br.type !== 'transformer') return;
+                let changed = false;
+                if (br.from === busId) {
+                    br.v_prim = voltage;
+                    changed = true;
+                }
+                if (br.to === busId) {
+                    br.v_sec = voltage;
+                    changed = true;
+                }
+                if (changed) {
+                    br.tap = (br.v_prim || 1) / (br.v_sec || 1);
+                }
+            });
+            // Update the bus baseKV in currentData as well
+            const bus = currentData.find(b => b.bus === busId);
+            if (bus) bus.baseKV = voltage;
         }
 
         function calculateVoltageBases() {
@@ -3269,17 +3303,12 @@
                         const neighborBus = currentData.find(b => b.bus === neighborId);
                         if (neighborBus) {
                             if (branch.type === 'transformer') {
-                                // NEW: Sync transformer ratings with the current bus base to avoid mismatches
+                                // If current bus has a base, but neighbor doesn't, we define neighbor based on transformer rating
                                 if (isForward) {
-                                    // Primary side connected to 'current' bus
-                                    branch.v_prim = currentBase;
                                     neighborBus.baseKV = branch.v_sec;
                                 } else {
-                                    // Secondary side connected to 'current' bus
-                                    branch.v_sec = currentBase;
                                     neighborBus.baseKV = branch.v_prim;
                                 }
-                                // Recalculate tap ratio based on synced voltages
                                 branch.tap = (branch.v_prim || 1) / (branch.v_sec || 1);
                             } else {
                                 // Line - propagates the same base
@@ -3392,41 +3421,21 @@
 
             activeBranches = [];
             const buses = currentData.map(b => b.bus);
-            const hierarchy = [230, 138, 115, 69, 34, 13.2];
 
-            // 1. Create a Cascading Backbone to demonstrate voltage tiers
+            // Generate a simple radial backbone with LINES (User requested default type: Lines)
             for (let i = 0; i < buses.length - 1; i++) {
-                const canStepDown = i < hierarchy.length - 1;
-
-                if (canStepDown) {
-                    // Create Transformer for Step-Down
-                    activeBranches.push({
-                        id: i + 1,
-                        from: buses[i],
-                        to: buses[i + 1],
-                        type: 'transformer',
-                        r: 0.001,
-                        x: 0.05, // Standard reactor X
-                        z_pct: 10,
-                        v_prim: hierarchy[i],
-                        v_sec: hierarchy[i + 1],
-                        tap: hierarchy[i] / hierarchy[i + 1]
-                    });
-                } else {
-                    // Standard Line for same-voltage connections
-                    activeBranches.push({
-                        id: i + 1,
-                        from: buses[i],
-                        to: buses[i + 1],
-                        type: 'line',
-                        r: parseFloat((0.005 + Math.random() * 0.04).toFixed(4)),
-                        x: parseFloat((0.02 + Math.random() * 0.10).toFixed(4))
-                    });
-                }
+                activeBranches.push({
+                    id: i + 1,
+                    from: buses[i],
+                    to: buses[i + 1],
+                    type: 'line',
+                    r: parseFloat((0.001 + Math.random() * 0.01).toFixed(4)),
+                    x: parseFloat((0.02 + Math.random() * 0.05).toFixed(4))
+                });
             }
 
-            // 2. Add Random Cross-Links (Ring/Mesh) - 30% density
-            const maxLinks = Math.floor(buses.length * 0.3);
+            // Add Random Cross-Links (Ring/Mesh) - 20% density
+            const maxLinks = Math.floor(buses.length * 0.2);
             for (let k = 0; k < maxLinks; k++) {
                 const idxA = Math.floor(Math.random() * buses.length);
                 let idxB = Math.floor(Math.random() * buses.length);
@@ -3442,7 +3451,7 @@
                             id: newId,
                             from: from,
                             to: to,
-                            type: 'line', // Cross-links are usually lines within same tier
+                            type: 'line',
                             r: parseFloat((0.01 + Math.random() * 0.05).toFixed(4)),
                             x: parseFloat((0.04 + Math.random() * 0.15).toFixed(4))
                         });
@@ -3567,9 +3576,8 @@
                 from: from,
                 to: to,
                 type: 'line',
-                r: null,
-                x: null,
-
+                r: 0.001,
+                x: 0.05,
             });
             calculateVoltageBases();
             renderTopologyInput();
@@ -4496,11 +4504,11 @@
                         </td>
                         <td class="px-6 py-3 font-mono text-emerald-700 text-[10px] leading-tight">
                             <div class="flex items-center gap-1">
-                                <span class="text-gray-400 w-3">f:</span> 
+                                <span class="text-gray-400 font-bold min-w-[60px]">From Bus:</span> 
                                 <span>${busFrom.mag.toFixed(3)} <span class="text-gray-400">p.u.</span> | ${(busFrom.mag * (busFrom.baseKV || baseKV)).toFixed(1)} <span class="text-gray-400">kV</span> | ${busFrom.ang.toFixed(1)}&deg;</span>
                             </div>
                             <div class="flex items-center gap-1 mt-1">
-                                <span class="text-gray-400 w-3">t:</span> 
+                                <span class="text-gray-400 font-bold min-w-[60px]">To Bus:</span> 
                                 <span>${busTo.mag.toFixed(3)} <span class="text-gray-400">p.u.</span> | ${(busTo.mag * (busTo.baseKV || baseKV)).toFixed(1)} <span class="text-gray-400">kV</span> | ${busTo.ang.toFixed(1)}&deg;</span>
                             </div>
                         </td>
@@ -4849,11 +4857,17 @@
                 legend.id = 'sldLegend';
                 legend.className = 'absolute bottom-4 left-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur p-3 rounded-lg border border-gray-200 dark:border-slate-700 shadow-lg text-xs z-10 dark:text-gray-200';
                 legend.innerHTML = `
-                    <div class="font-bold text-gray-700 dark:text-gray-200 mb-2 border-b dark:border-gray-600 pb-1">Line Loading Legend</div>
-                    <div class="flex items-center gap-2 mb-1"><div class="w-4 h-1 bg-emerald-500 rounded"></div> <span>Normal (&lt; 50%)</span></div>
-                    <div class="flex items-center gap-2 mb-1"><div class="w-4 h-1 bg-amber-500 rounded"></div> <span>Heavy (50 - 85%)</span></div>
-                    <div class="flex items-center gap-2"><div class="w-4 h-1 bg-red-500 rounded"></div> <span>Critical (&gt; 85%)</span></div>
-                `;
+            <div class="font-bold text-gray-700 dark:text-gray-200 mb-2 border-b dark:border-gray-600 pb-1">Line Loading Legend</div>
+            <div class="flex items-center gap-2 mb-1"><div class="w-4 h-1 bg-[#3b82f6] rounded"></div> <span>Normal (&lt; 50%)</span></div>
+            <div class="flex items-center gap-2 mb-1"><div class="w-4 h-1 bg-[#f59e0b] rounded"></div> <span>Heavy (50 - 85%)</span></div>
+            <div class="flex items-center gap-2 mb-2"><div class="w-4 h-1 bg-[#ef4444] rounded"></div> <span>Critical (&gt; 85%)</span></div>
+            <div class="flex items-center gap-2 mb-2"><div class="w-4 h-1 bg-[#8b5cf6] border-t border-dashed border-white rounded"></div> <span>Transformer</span></div>
+
+            <div class="font-bold text-gray-700 dark:text-gray-200 mt-3 mb-2 border-b dark:border-gray-600 pb-1">Bus Voltage Health</div>
+            <div class="flex items-center gap-2 mb-1"><div class="w-3 h-3 bg-[#10b981] rounded-full"></div> <span>Normal (0.98 - 1.02)</span></div>
+            <div class="flex items-center gap-2 mb-1"><div class="w-3 h-3 bg-[#f59e0b] rounded-full"></div> <span>Warning (±5%)</span></div>
+            <div class="flex items-center gap-2"><div class="w-3 h-3 bg-[#ef4444] rounded-full"></div> <span>Critical (&gt; ±5%)</span></div>
+        `;
                 // Ensure container is relative for absolute positioning
                 if (container.style.position !== 'relative') container.style.position = 'relative';
                 container.appendChild(legend);
