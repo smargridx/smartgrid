@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -1074,7 +1075,7 @@
                                             class="px-4 py-2 bg-gray-50 dark:bg-slate-800 text-right font-normal border-l border-gray-200 dark:border-slate-700">
                                             Mag</th>
                                         <th class="px-4 py-2 bg-gray-50 dark:bg-slate-800 text-right font-normal">Angle
-                                            (deg)</th>
+                                        </th>
                                         <th
                                             class="px-4 py-2 bg-gray-50 dark:bg-slate-800 text-right font-normal border-l border-gray-200 dark:border-slate-700">
                                             P (MW)</th>
@@ -1785,7 +1786,7 @@
                                     <tr>
                                         <th class="px-6 py-3">Bus ID</th>
                                         <th class="px-6 py-3">Optimal Mag (p.u.)</th>
-                                        <th class="px-6 py-3">Optimal Angle (deg)</th>
+                                        <th class="px-6 py-3">Angle</th>
                                         <th class="px-6 py-3 text-right">Gen P <div class="text-[9px] font-normal">[MW]
                                                 / [p.u.]</div>
                                         </th>
@@ -4368,6 +4369,7 @@
                                         <th class="px-4 py-3">$Q_{flow}$ (MVar)</th>
                                         <th class="px-4 py-3">$S_{total}$ (MVA)</th>
                                         <th class="px-4 py-3">Actual Current (A)</th>
+                                        <th class="px-4 py-3">I Angle</th>
                                         <th class="px-4 py-3">Loss (MW)</th>
                                     </tr>
                                 </thead>
@@ -4379,27 +4381,47 @@
                         const toBus = currentData.find(b => b.bus == branch.to);
                         const fromV = fromBus.mag;
                         const toV = toBus.mag;
+                        const busBaseKV = fromBus.baseKV || 230;
+                        const baseAmps = (baseMVA * 1000) / (Math.sqrt(3) * busBaseKV);
                         const r = parseFloat(branch.r) || 0.02;
                         const x = parseFloat(branch.x) || 0.1;
 
-                        const busBaseKV = fromBus.baseKV || 230;
-                        const baseAmps = (baseMVA * 1000) / (Math.sqrt(3) * busBaseKV);
+                        const a1 = fromBus.ang * Math.PI / 180;
+                        const a2 = toBus.ang * Math.PI / 180;
+                        const da = a1 - a2;
+                        const isXfmr = branch.type === 'transformer';
+                        const tap = isXfmr ? (branch.tap || 1.0) : 1.0;
 
-                        // Simulated calc for proof
-                        const p_pu = (fromV * toV * Math.sin(0.05) / x) * 50;
-                        const q_pu = ((fromV * fromV) / x - (fromV * toV * Math.cos(0.05)) / x) * 30;
-                        const s_mva = Math.sqrt(p_pu * p_pu + q_pu * q_pu);
-                        const i_pu = s_mva / (Math.sqrt(3) * fromV * (baseMVA / 100)); // Rough approximation
-                        const loss = (i_pu * i_pu * r) * baseMVA * 0.1;
+                        const r_br = isXfmr ? 0.001 : (parseFloat(branch.r) || 0.02);
+                        const x_br = isXfmr ? ((branch.z_pct || 10) / 100) : (parseFloat(branch.x) || 0.1);
+                        const den_z = r_br * r_br + x_br * x_br;
+                        const g_br = r_br / den_z;
+                        const b_br = -x_br / den_z;
+
+                        // Pft = (V1/a)^2 * g - (V1/a)*V2*(g*cos(da) + b*sin(da))
+                        const p_pu = Math.pow(fromV / tap, 2) * g_br - (fromV / tap) * toV * (g_br * Math.cos(da) + b_br * Math.sin(da));
+                        const q_pu = -Math.pow(fromV / tap, 2) * b_br - (fromV / tap) * toV * (g_br * Math.sin(da) - b_br * Math.cos(da));
+
+                        const s_mva_val = Math.sqrt(p_pu * p_pu + q_pu * q_pu);
+                        const s_mva = s_mva_val * baseMVA;
+                        const i_pu = s_mva_val / fromV;
+                        const i_amps = i_pu * baseAmps;
+
+                        const i_ang_rad = Math.atan2(-q_pu, p_pu) + a1;
+                        const i_ang_deg = i_ang_rad * 180 / Math.PI;
+
+                        const loss_pu = (p_pu + (toV * toV * g_br - (toV * (fromV / tap)) * (g_br * Math.cos(-da) + b_br * Math.sin(-da))));
+                        const loss_mw = loss_pu * baseMVA;
 
                         flowRows += `
                                         <tr class="hover:bg-slate-50 transition">
                                             <td class="px-4 py-3 font-bold text-slate-800">${branch.from} $\to$ ${branch.to} (${busBaseKV} kV)</td>
-                                            <td class="px-4 py-3 text-emerald-600">${(p_pu * baseMVA / 100).toFixed(2)}</td>
-                                            <td class="px-4 py-3 text-amber-600">${(q_pu * baseMVA / 100).toFixed(2)}</td>
-                                            <td class="px-4 py-3">${(s_mva * baseMVA / 100).toFixed(2)}</td>
-                                            <td class="px-4 py-3 font-bold text-slate-900">${(i_pu * baseAmps).toFixed(1)} A</td>
-                                            <td class="px-4 py-3 text-red-500">${loss.toFixed(4)}</td>
+                                            <td class="px-4 py-3 text-emerald-600">${(p_pu * baseMVA).toFixed(2)}</td>
+                                            <td class="px-4 py-3 text-amber-600">${(q_pu * baseMVA).toFixed(2)}</td>
+                                            <td class="px-4 py-3">${s_mva.toFixed(2)}</td>
+                                            <td class="px-4 py-3 font-bold text-slate-900">${i_amps.toFixed(2)} A</td>
+                                            <td class="px-4 py-3 text-blue-500">${i_ang_deg.toFixed(2)}&deg;</td>
+                                            <td class="px-4 py-3 text-red-500">${loss_mw.toFixed(4)}</td>
                                         </tr>
                                     `;
                     });
@@ -4425,10 +4447,13 @@
                                         <th class="px-4 py-3">Bus</th>
                                         <th class="px-4 py-3">$V$ (p.u.)</th>
                                         <th class="px-4 py-3">$V$ (kV)</th>
-                                        <th class="px-4 py-3">Angle ($\delta^\circ$)</th>
+                                        <th class="px-4 py-3">Angle</th>
                                         <th class="px-4 py-3">P (MW)</th>
                                         <th class="px-4 py-3">Q (MVar)</th>
                                         <th class="px-4 py-3">S (MVA)</th>
+                                        <th class="px-4 py-3">I (p.u.)</th>
+                                        <th class="px-4 py-3">I (Amps)</th>
+                                        <th class="px-4 py-3">I Angle</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 font-mono text-slate-600">
@@ -4439,7 +4464,16 @@
                         const v_kv = (b.mag * busBaseKV).toFixed(2);
                         const p_mw = (b.gp - b.lp).toFixed(2);
                         const q_mvar = (b.gq - b.lq).toFixed(2);
-                        const s_mva = Math.sqrt(Math.pow(p_mw, 2) + Math.pow(q_mvar, 2)).toFixed(2);
+                        const s_mva_val = Math.sqrt(Math.pow(p_mw, 2) + Math.pow(q_mvar, 2));
+                        const s_mva = s_mva_val.toFixed(2);
+                        const i_pu = (s_mva_val / baseMVA) / b.mag;
+                        const i_base = (baseMVA * 1000) / (Math.sqrt(3) * busBaseKV);
+                        const i_amps = i_pu * i_base;
+
+                        // Current angle = Angle(S*) + Bus Angle
+                        // S* = P - jQ
+                        const s_star_angle_rad = Math.atan2(-q_mvar, p_mw);
+                        const cur_angle_deg = (s_star_angle_rad * 180 / Math.PI) + b.ang;
 
                         rows += `
                                         <tr class="hover:bg-slate-50 transition">
@@ -4450,6 +4484,9 @@
                                             <td class="px-4 py-3 text-emerald-600">${p_mw}</td>
                                             <td class="px-4 py-3 text-amber-600">${q_mvar}</td>
                                             <td class="px-4 py-3 font-bold">${s_mva}</td>
+                                            <td class="px-4 py-3 text-indigo-600">${i_pu.toFixed(5)}</td>
+                                            <td class="px-4 py-3 font-bold text-slate-900">${i_amps.toFixed(2)} A</td>
+                                            <td class="px-4 py-3 text-blue-500">${cur_angle_deg.toFixed(2)}&deg;</td>
                                         </tr>
                                     `;
                     });
