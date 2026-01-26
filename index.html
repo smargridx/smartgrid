@@ -4100,6 +4100,8 @@
             const branchAdmittances = [];
 
             activeBranches.forEach((branch, idx) => {
+                const fromBus = currentData.find(b => b.bus == branch.from);
+                const busBaseKV = fromBus ? (fromBus.baseKV || 230) : 230;
                 const isXfmr = branch.type === 'transformer';
                 let r = parseFloat(branch.r); if (isNaN(r)) r = isXfmr ? 0.001 : 0.02;
                 let x = parseFloat(branch.x); if (isNaN(x)) x = isXfmr ? 0.05 : 0.1;
@@ -4109,18 +4111,31 @@
                 const g = r / z_mag2;
                 const b = -x / z_mag2;
 
+                // Base Derivations (Item 2)
+                const z_base = (busBaseKV * busBaseKV) / baseMVA;
+                const i_base = (baseMVA * 1000) / (Math.sqrt(3) * busBaseKV);
+
                 branchAdmittances.push({ from: branch.from, to: branch.to, g, b, tap });
 
                 branchCalcHTML += `
                     <div class="p-4 border-l-2 border-blue-200 bg-blue-50/30 rounded-r-lg">
-                        <div class="font-bold text-blue-900 mb-2">Line L${branch.id} (Bus ${branch.from} to ${branch.to}):</div>
+                        <div class="font-bold text-blue-900 mb-2 flex justify-between items-center">
+                            <span>Line L${branch.id} (Bus ${branch.from} to ${branch.to})</span>
+                            <span class="text-[9px] bg-blue-100 px-2 py-0.5 rounded text-blue-600 font-mono tracking-tighter">$Z_{base}=${z_base.toFixed(2)}\\Omega, I_{base}=${i_base.toFixed(2)}A$</span>
+                        </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-xs font-mono">
                             <div>$z_{${branch.from}${branch.to}} = ${r.toFixed(4)} + j${x.toFixed(4)}$ p.u.</div>
-                            <div>$y_{${branch.from}${branch.to}} = \\frac{1}{z_{${branch.from}${branch.to}}} = \\frac{1}{${r.toFixed(4)} + j${x.toFixed(4)}}$</div>
-                            <div class="col-span-full text-blue-700">
-                                $y_{${branch.from}${branch.to}} = \\frac{${r.toFixed(4)} - j${x.toFixed(4)}}{${r.toFixed(4)}^2 + ${x.toFixed(4)}^2} = ${g.toFixed(6)} - j${Math.abs(b).toFixed(6)}$ p.u.
-                                ${isXfmr ? `<br/><span class="text-amber-700">Transformer Tap ($a$): ${tap.toFixed(3)}:1</span>` : ''}
-                            </div>
+                            <div>$y_{${branch.from}${branch.to}} = \\frac{1}{z_{${branch.from}${branch.to}}} = ${g.toFixed(6)} - j${Math.abs(b).toFixed(6)}$ p.u.</div>
+                            
+                            ${isXfmr ? `
+                            <div class="col-span-full border-t border-blue-100/50 pt-2 mt-1">
+                                <div class="text-[9px] font-bold text-amber-600 uppercase mb-1">$\\pi$-Equivalent Transformer Model (Tap $a=${tap.toFixed(3)}$)</div>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <div class="bg-white/50 p-1.5 rounded">$y_{series} = \\frac{y}{a} = ${(g / tap).toFixed(4)} ${b / tap >= 0 ? '+' : '-'} j${Math.abs(b / tap).toFixed(4)}$</div>
+                                    <div class="bg-white/50 p-1.5 rounded">$y_{from} = \\frac{1-a}{a^2} y = ${(((1 - tap) / (tap * tap)) * g).toFixed(4)} ${((1 - tap) / (tap * tap)) * b >= 0 ? '+' : '-'} j${Math.abs(((1 - tap) / (tap * tap)) * b).toFixed(4)}$</div>
+                                    <div class="bg-white/50 p-1.5 rounded">$y_{to} = \\frac{a-1}{a} y = ${(((tap - 1) / tap) * g).toFixed(4)} ${((tap - 1) / tap) * b >= 0 ? '+' : '-'} j${Math.abs(((tap - 1) / tap) * b).toFixed(4)}$</div>
+                                </div>
+                            </div>` : ''}
                         </div>
                     </div>
                 `;
@@ -4237,12 +4252,40 @@
 
                     let jacobianProof = "";
                     if (k === 1) {
+                        // Full Jacobian Assembly (Item 1)
+                        let jEntries = [];
+                        for (let i = 0; i < Math.min(n - 1, 3); i++) {
+                            let row = [];
+                            for (let j = 0; j < Math.min(n - 1, 3); j++) {
+                                if (i === j) row.push(`H_{${i + 2}${i + 2}}`);
+                                else row.push(`H_{${i + 2}${j + 2}}`);
+                            }
+                            jEntries.push(row.join(' & '));
+                        }
+
                         jacobianProof = `
-                        <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-6">
-                            <h6 class="text-[9px] font-bold text-blue-400 uppercase mb-2 tracking-widest">Jacobian Mathematical Proof (Element $H_{22}$)</h6>
-                            <div class="text-[10px] font-mono text-blue-700">
-                                $H_{22} = \\frac{\\partial P_2}{\\partial \\delta_2} = -Q_{2,calc} - B_{22}|V_2|^2$<br/>
-                                $H_{22} = -(${(currentMismatch * 0.1).toFixed(4)}$) - (${B[1][1].toFixed(3)}) (${v_states[1].toFixed(2)})^2 = ${(-currentMismatch * 0.1 - B[1][1] * v_states[1] * v_states[1]).toFixed(4)}$
+                        <div class="bg-blue-50 p-6 rounded-2xl border border-blue-100 mb-8">
+                            <h6 class="text-[10px] font-bold text-blue-500 uppercase mb-4 tracking-widest flex items-center gap-2"><i class="ph ph-grid-four"></i> Full Jacobian Assembly ($J^{(1)}$)</h6>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <div class="text-[10px] font-mono text-blue-800">
+                                    \\[ J = \\begin{bmatrix} H & N \\\\ M & L \\end{bmatrix} = 
+                                    \\begin{bmatrix} 
+                                        ${jEntries.join(' & \\dots \\\\ ')} & \\dots \\\\
+                                        \\vdots & \\vdots & \\ddots
+                                    \\end{bmatrix} \\]
+                                    <p class="mt-4 text-[9px] text-blue-400 italic">Total Matrix Size: $(2n-2) \\times (2n-2)$ for slack reference.</p>
+                                </div>
+                                <div class="bg-white/60 p-4 rounded-xl space-y-3">
+                                    <div class="text-[9px] font-bold text-slate-400 uppercase">Diagonal Entry $H_{22}$ Sample:</div>
+                                    <div class="text-[10px] font-mono text-blue-700">
+                                        $H_{22} = \\frac{\\partial P_2}{\\partial \\delta_2} = -Q_{2,calc} - B_{22}|V_2|^2$<br/>
+                                        $H_{22} = -(${(currentMismatch * 0.1).toFixed(4)}$) - (${B[1][1].toFixed(3)}) (1.0)^2 = ${(-currentMismatch * 0.1 - B[1][1]).toFixed(4)}$
+                                    </div>
+                                    <div class="text-[9px] font-bold text-slate-400 uppercase mt-2">Off-Diagonal $N_{23}$ Sample:</div>
+                                    <div class="text-[10px] font-mono text-blue-700">
+                                        $N_{23} = |V_2|(G_{23}\\cos\\delta_{23} + B_{23}\\sin\\delta_{23}) \\approx ${G[1][2].toFixed(4)}$
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -4334,23 +4377,45 @@
                         <h3 class="text-2xl font-bold text-slate-800">Step 2: Formation of $[Y_{bus}]$</h3>
                     </div>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-widest">Assembly Log</h4>
-                            <div class="max-h-80 overflow-y-auto pr-4 scroll-custom">
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-widest flex items-center justify-between">
+                                Assembly Log
+                                <span class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-[8px]">Stevenson Algorithm</span>
+                            </h4>
+                            <div class="flex-1 max-h-80 overflow-y-auto pr-4 scroll-custom">
                                 ${yBusStepsHTML}
                             </div>
                         </div>
-                        <div class="bg-slate-900 p-6 rounded-2xl shadow-xl overflow-x-auto text-blue-200">
-                             <h4 class="text-xs font-bold text-slate-500 uppercase mb-4 tracking-widest">Resultant Matrix</h4>
-                             <div class="text-[10px] font-mono leading-relaxed">
-                                \\[ [Y_{bus}] = \\begin{bmatrix} 
-                                    ${G.map((row, i) => Array.from(row).map((val, k) => {
-                const gVal = val.toFixed(3);
-                const bVal = B[i][k].toFixed(3);
+                        <div class="space-y-4">
+                            <div class="bg-slate-900 p-6 rounded-2xl shadow-xl overflow-x-auto text-blue-200">
+                                 <h4 class="text-xs font-bold text-slate-500 uppercase mb-4 tracking-widest">Rectangular Form $[G + jB]$</h4>
+                                 <div class="text-[10px] font-mono leading-relaxed">
+                                    \\[ [Y_{bus}] = \\begin{bmatrix} 
+                                        ${G.map((row, i) => Array.from(row).map((val, k) => {
+                const gVal = val.toFixed(2);
+                const bVal = B[i][k].toFixed(2);
                 return `${gVal}${B[i][k] >= 0 ? '+' : ''}${bVal}j`;
             }).join(' & ')).join(' \\\\ ')}
-                                \\end{bmatrix} \\]
-                             </div>
+                                    \\end{bmatrix} \\]
+                                 </div>
+                            </div>
+                            <!-- Polar Form Table (Item 4) -->
+                            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
+                                <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-widest">Polar Admittance Proof ($|Y_{ij}| \\angle \\theta_{ij}$)</h4>
+                                <table class="w-full text-[9px] font-mono text-left">
+                                    <thead class="bg-slate-50 text-slate-500">
+                                        <tr><th class="p-2">Element</th><th class="p-2">Magnitude</th><th class="p-2">Angle ($^{\\circ}$)</th></tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-50">
+                                        ${G.slice(0, 4).map((row, i) => Array.from(row).slice(0, 4).map((val, k) => {
+                const mag = Math.sqrt(val * val + B[i][k] * B[i][k]);
+                const ang = Math.atan2(B[i][k], val) * 180 / Math.PI;
+                return `<tr><td class="p-1.5 font-bold">Y_{${i + 1}${k + 1}}</td><td class="p-1.5">${mag.toFixed(4)}</td><td class="p-1.5">${ang.toFixed(2)}^\\circ</td></tr>`;
+            }).join('')).join('')}
+                                        ${n > 4 ? `<tr><td colspan="3" class="p-2 text-center text-slate-300 italic">... truncated for display ...</td></tr>` : ''}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -4580,6 +4645,13 @@
                                                                 $Q_{${branch.from}${branch.to}} = -|\\frac{V_i}{a}|^2 b_{ij} - |\\frac{V_i}{a}||V_j|(g_{ij}\\sin\\delta_{ij} - b_{ij}\\cos\\delta_{ij})$<br/>
                                                                 $Q = -|\\frac{${fromV.toFixed(4)}}{${tap.toFixed(2)}}|^2(${b_br.toFixed(4)}) - |\\frac{${fromV.toFixed(4)}}{${tap.toFixed(2)}}|(${toV.toFixed(4)})(${g_br.toFixed(4)}\\sin(${(da * 180 / Math.PI).toFixed(2)}^\\circ) - ${b_br.toFixed(4)}\\cos(${(da * 180 / Math.PI).toFixed(2)}^\\circ)) = ${q_pu.toFixed(6)}$ p.u.<br/>
                                                                 <span class="text-amber-600 font-bold">$Q_{Actual} = ${q_pu.toFixed(6)} \\times ${baseMVA} = ${(q_pu * baseMVA).toFixed(2)}$ Mvar</span>
+                                                                
+                                                                <!-- Detailed Component Breakdown (Item 6) -->
+                                                                <div class="mt-3 bg-slate-50/50 p-2 rounded border border-slate-100 text-[8px] flex gap-4">
+                                                                    <div><span class="text-slate-400 uppercase font-black">Line Current (Mag):</span> ${i_pu.toFixed(5)} p.u.</div>
+                                                                    <div><span class="text-slate-400 uppercase font-black">$I^2R$ Loss:</span> ${(Math.pow(i_pu, 2) * g_br * baseMVA).toFixed(4)} MW</div>
+                                                                    <div><span class="text-slate-400 uppercase font-black">$I^2X$ Loss:</span> ${(Math.pow(i_pu, 2) * Math.abs(b_br) * baseMVA).toFixed(4)} Mvar</div>
+                                                                </div>
                                                             </div>
                                                         </div>
 
