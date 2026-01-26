@@ -2220,17 +2220,67 @@
                 <div id="sld-container" class="w-full h-full"></div>
 
                 <!-- Legend Overlay -->
-                <div
-                    class="absolute bottom-4 left-4 bg-white/90 backdrop-blur border border-gray-200 p-3 rounded-lg shadow-sm text-xs text-gray-600 pointer-events-none">
-                    <div class="flex items-center gap-3">
-                        <span class="flex items-center gap-1"><span class="w-4 h-1 bg-black inline-block"></span>
-                            Bus</span>
-                        <span class="flex items-center gap-1"><span
-                                class="w-2 h-2 rounded-full bg-blue-100 border border-blue-600 inline-block"></span>
-                            Gen</span>
-                        <span class="flex items-center gap-1"><span
-                                class="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[6px] border-t-purple-600 inline-block"></span>
-                            Load</span>
+                <div id="sldLegend"
+                    class="absolute bottom-6 left-6 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-gray-200 dark:border-slate-700 p-5 rounded-2xl shadow-2xl text-[10px] text-gray-600 dark:text-gray-300 z-[20] w-56 flex flex-col gap-4 transition-all duration-300 hover:scale-105">
+
+                    <!-- Basic Components -->
+                    <div>
+                        <div
+                            class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 dark:border-slate-800 pb-1 flex items-center gap-1">
+                            <i class="ph ph-grid-four"></i> Legend
+                        </div>
+                        <div class="flex flex-wrap gap-x-4 gap-y-2">
+                            <span class="flex items-center gap-1.5"><span
+                                    class="w-3 h-0.5 bg-gray-900 dark:bg-white inline-block"></span> Bus</span>
+                            <span class="flex items-center gap-1.5"><span
+                                    class="w-2.5 h-2.5 rounded-full bg-emerald-50 border border-emerald-600 inline-block"></span>
+                                Gen</span>
+                            <span class="flex items-center gap-1.5"><span
+                                    class="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[6px] border-t-purple-600 inline-block"></span>
+                                Load</span>
+                        </div>
+                    </div>
+
+                    <!-- Line Loading -->
+                    <div id="loadingLegendSection">
+                        <div
+                            class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 dark:border-slate-800 pb-1 flex items-center gap-1">
+                            <i class="ph ph-lightning"></i> Line Loading
+                        </div>
+                        <div class="space-y-1.5">
+                            <span class="flex items-center gap-2">
+                                <div class="w-3 h-1 bg-[#3b82f6] rounded-full"></div> &lt; 50% (Normal)
+                            </span>
+                            <span class="flex items-center gap-2">
+                                <div class="w-3 h-1 bg-[#f59e0b] rounded-full"></div> 50 - 85% (Heavy)
+                            </span>
+                            <span class="flex items-center gap-2">
+                                <div class="w-3 h-1 bg-[#ef4444] rounded-full"></div> &gt; 85% (Critical)
+                            </span>
+                            <span class="flex items-center gap-2">
+                                <div class="w-3 h-1 bg-[#8b5cf6] rounded-full border-t border-dashed border-white/30">
+                                </div> Transformer
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Bus Health (Heatmap) -->
+                    <div id="heatmapLegendSection">
+                        <div
+                            class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 dark:border-slate-800 pb-1 flex items-center gap-1">
+                            <i class="ph ph-heartbeat"></i> Health (Heatmap)
+                        </div>
+                        <div class="space-y-1.5">
+                            <span class="flex items-center gap-2">
+                                <div class="w-2.5 h-2.5 rounded-full bg-[#10b981]"></div> Normal (0.98 - 1.02)
+                            </span>
+                            <span class="flex items-center gap-2">
+                                <div class="w-2.5 h-2.5 rounded-full bg-[#f59e0b]"></div> Warning (±5%)
+                            </span>
+                            <span class="flex items-center gap-2">
+                                <div class="w-2.5 h-2.5 rounded-full bg-[#ef4444]"></div> Critical (&gt; ±5%)
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -5010,28 +5060,8 @@
             const container = document.getElementById('sld-container');
             const isDark = document.documentElement.classList.contains('dark');
 
-            // Add Legend (if not exists)
-            let legend = document.getElementById('sldLegend');
-            if (!legend) {
-                legend = document.createElement('div');
-                legend.id = 'sldLegend';
-                legend.className = 'absolute bottom-4 left-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur p-3 rounded-lg border border-gray-200 dark:border-slate-700 shadow-lg text-xs z-10 dark:text-gray-200';
-                legend.innerHTML = `
-            <div class="font-bold text-gray-700 dark:text-gray-200 mb-2 border-b dark:border-gray-600 pb-1">Line Loading Legend</div>
-            <div class="flex items-center gap-2 mb-1"><div class="w-4 h-1 bg-[#3b82f6] rounded"></div> <span>Normal (&lt; 50%)</span></div>
-            <div class="flex items-center gap-2 mb-1"><div class="w-4 h-1 bg-[#f59e0b] rounded"></div> <span>Heavy (50 - 85%)</span></div>
-            <div class="flex items-center gap-2 mb-2"><div class="w-4 h-1 bg-[#ef4444] rounded"></div> <span>Critical (&gt; 85%)</span></div>
-            <div class="flex items-center gap-2 mb-2"><div class="w-4 h-1 bg-[#8b5cf6] border-t border-dashed border-white rounded"></div> <span>Transformer</span></div>
-
-            <div class="font-bold text-gray-700 dark:text-gray-200 mt-3 mb-2 border-b dark:border-gray-600 pb-1">Bus Voltage Health</div>
-            <div class="flex items-center gap-2 mb-1"><div class="w-3 h-3 bg-[#10b981] rounded-full"></div> <span>Normal (0.98 - 1.02)</span></div>
-            <div class="flex items-center gap-2 mb-1"><div class="w-3 h-3 bg-[#f59e0b] rounded-full"></div> <span>Warning (±5%)</span></div>
-            <div class="flex items-center gap-2"><div class="w-3 h-3 bg-[#ef4444] rounded-full"></div> <span>Critical (&gt; ±5%)</span></div>
-        `;
-                // Ensure container is relative for absolute positioning
-                if (container.style.position !== 'relative') container.style.position = 'relative';
-                container.appendChild(legend);
-            }
+            // Ensure container is relative for absolute positioning
+            if (container.style.position !== 'relative') container.style.position = 'relative';
 
             const nodes = new vis.DataSet();
             const edges = new vis.DataSet();
@@ -5042,6 +5072,12 @@
             const showComponents = document.getElementById('sldShowComponents').checked;
             const showPF = document.getElementById('sldShowPF') ? document.getElementById('sldShowPF').checked : false;
             const useHeatmap = document.getElementById('sldHeatmap') ? document.getElementById('sldHeatmap').checked : false;
+
+            // Toggle dynamic legend sections
+            const heatmapSection = document.getElementById('heatmapLegendSection');
+            const loadingSection = document.getElementById('loadingLegendSection');
+            if (heatmapSection) heatmapSection.style.display = useHeatmap ? 'block' : 'none';
+            if (loadingSection) loadingSection.style.display = showPower ? 'block' : 'none';
 
             // 1. Calculate Levels using BFS (Breadth-First Search) starting from Slack Bus (1)
             // Improved: Use multiple roots for better distribution in larger systems
