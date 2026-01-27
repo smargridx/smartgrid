@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -1309,6 +1310,11 @@
                                 <i class="ph ph-chart-line"></i> Profile
                             </button>
 
+                            <button onclick="playSound(); switchTab('proof')" id="tab-proof"
+                                class="tab-inactive py-3 px-2 border-b-2 border-transparent font-medium text-[10px] md:text-xs whitespace-nowrap flex items-center gap-1 text-blue-600 hover:text-blue-700">
+                                <i class="ph ph-math-operations"></i> Mechanical
+                            </button>
+
                             <button onclick="playSound(); switchTab('pv-curve')" id="tab-pv-curve"
                                 class="tab-inactive py-3 px-2 border-b-2 border-transparent font-medium text-[10px] md:text-xs whitespace-nowrap flex items-center gap-1 transition-all">
                                 <i class="ph ph-monitor"></i> PV Curve
@@ -1455,6 +1461,11 @@
                                     <div
                                         class="absolute right-2 top-1/2 bottom-12 w-4 border-r border-dashed border-gray-300 rounded-r-lg pointer-events-none opacity-50">
                                     </div>
+
+                                    <button onclick="playSound(); switchTab('proof')"
+                                        class="mt-4 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-bold border border-blue-100 hover:bg-blue-100 transition flex items-center justify-center gap-2 w-full">
+                                        <i class="ph ph-math-operations"></i> View Newton-Raphson Mechanics
+                                    </button>
                                 </div>
 
                                 <div
@@ -1489,6 +1500,37 @@
                                         to
                                         visualize logic.</span>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mechanical Proof Tab -->
+                    <div id="content-proof"
+                        class="hidden bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden animate-fadeIn flex flex-col p-6 min-h-[800px]">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold text-slate-800">Newton-Raphson Mechanical Analysis</h3>
+                            <div class="flex gap-2">
+                                <button onclick="playSound(); showManualNRCalculation()" id="btnGenerateProof"
+                                    class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition-all shadow-md flex items-center gap-2 text-sm">
+                                    <i class="ph ph-lightning"></i> Generate Report
+                                </button>
+                                <button onclick="playSound(); printManualCalc()"
+                                    class="px-4 py-2 bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 font-bold rounded-lg transition-all flex items-center gap-2 text-sm">
+                                    <i class="ph ph-printer"></i> Print
+                                </button>
+                                <button onclick="playSound(); exportManualCalcToPDF()"
+                                    class="px-4 py-2 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 font-bold rounded-lg transition-all flex items-center gap-2 text-sm">
+                                    <i class="ph ph-file-pdf"></i> Export
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="manualCalcContent" class="flex-1 overflow-y-auto pr-4 scroll-custom">
+                            <div class="flex flex-col items-center justify-center h-full text-slate-400 py-20">
+                                <i class="ph ph-math-operations text-6xl mb-4 opacity-20"></i>
+                                <p class="text-lg font-medium">Mathematical Model Ready</p>
+                                <p class="text-sm italic">Click "Generate Report" to expand the full Newton-Raphson
+                                    mechanics.</p>
                             </div>
                         </div>
                     </div>
@@ -2141,46 +2183,7 @@
         </div>
     </div>
 
-    <!-- MANUAL CALCULATION MODAL -->
-    <div id="manualCalcModal"
-        class="hidden fixed inset-0 z-[1000] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm">
-        <div
-            class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full h-full md:w-[95vw] md:h-[95vh] overflow-hidden animate-[fadeIn_0.3s_ease-out] flex flex-col">
-            <!-- Modal Header -->
-            <div class="bg-slate-900 p-4 text-white flex justify-between items-center shadow-md">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg">
-                        <i class="ph ph-math-operations text-2xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-lg">Step-by-Step Manual Calculation</h3>
-                        <p class="text-xs text-slate-400">Newton-Raphson Power Flow (Mathematical Proof)</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4">
-                    <button onclick="playSound(); printManualCalc()"
-                        class="px-4 py-2 text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 flex items-center gap-2 transition">
-                        <i class="ph ph-printer"></i> Print
-                    </button>
-                    <button onclick="playSound(); exportManualCalcToPDF()"
-                        class="px-4 py-2 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded shadow-lg flex items-center gap-2 transition">
-                        <i class="ph ph-file-pdf"></i> Save PDF
-                    </button>
-                    <button onclick="playSound(); closeManualCalcModal()"
-                        class="text-slate-400 hover:text-white bg-slate-800 hover:bg-red-600 w-8 h-8 rounded flex items-center justify-center transition">
-                        <i class="ph ph-x text-lg"></i>
-                    </button>
-                </div>
-            </div>
 
-            <!-- Modal Body (Scrollable Content) -->
-            <div class="flex-1 overflow-y-auto scroll-custom p-8 bg-slate-50 dark:bg-slate-950">
-                <div id="manualCalcContent" class="max-w-5xl mx-auto space-y-12 pb-20">
-                    <!-- Dynamic Content Loaded Here -->
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- SLD MODAL (Separate Window) -->
     <div id="sldModal"
@@ -3311,10 +3314,18 @@
                         </td>
                         <td class="px-3 py-2 text-center">
                             <div class="flex flex-col gap-1 items-center">
-                                <span class="text-[9px] text-gray-400 uppercase font-bold">${isTransformer ? '%Z' : 'R (p.u)'}</span>
+                                <span class="text-[9px] text-gray-400 uppercase font-bold">R (p.u)</span>
                                 <input type="number" step="0.0001" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full max-w-[80px] text-center focus:outline-none font-bold" 
-                                       value="${isTransformer ? (b.z_pct || 10) : (b.r || 0)}" 
-                                       onchange="updateBranchData(${index}, '${isTransformer ? 'z_pct' : 'r'}', this.value)">
+                                       value="${b.r || 0}" 
+                                       onchange="updateBranchData(${index}, 'r', this.value)">
+                            </div>
+                        </td>
+                        <td class="px-3 py-2 text-center">
+                            <div class="flex flex-col gap-1 items-center">
+                                <span class="text-[9px] text-gray-400 uppercase font-bold">X (p.u)</span>
+                                <input type="number" step="0.0001" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full max-w-[80px] text-center focus:outline-none font-bold" 
+                                       value="${b.x || 0.1}" 
+                                       onchange="updateBranchData(${index}, 'x', this.value)">
                             </div>
                         </td>
                         <td class="px-3 py-2 text-center">
@@ -3330,34 +3341,21 @@
                                                value="${b.v_sec || 69}" 
                                                onchange="updateBranchData(${index}, 'v_sec', this.value)">
                                         <span class="text-gray-400">/</span>
-                                        <input type="number" step="0.001" placeholder="a" class="input-edit text-emerald-600 dark:text-emerald-400 dark:bg-transparent w-10 text-center focus:outline-none font-bold text-[10px]" 
-                                               value="${(b.tap || 1).toFixed(3)}" 
+                                        <input type="number" step="0.00001" placeholder="a" class="input-edit text-emerald-600 dark:text-emerald-400 dark:bg-transparent w-14 text-center focus:outline-none font-bold text-[10px]" 
+                                               value="${(b.tap || 1).toFixed(5)}" 
                                                onchange="updateBranchData(${index}, 'tap', this.value)">
                                     </div>
                                 ` : `
-                                    <span class="text-[9px] text-gray-400 uppercase font-bold">X (p.u)</span>
+                                    <span class="text-[9px] text-gray-400 uppercase font-bold">B/2 (p.u)</span>
                                     <input type="number" step="0.0001" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full max-w-[80px] text-center focus:outline-none font-bold" 
-                                           value="${b.x || 0.1}" 
-                                           onchange="updateBranchData(${index}, 'x', this.value)">
+                                           value="${b.b_charging || 0}" 
+                                           onchange="updateBranchData(${index}, 'b_charging', this.value)">
                                 `}
                             </div>
                         </td>
-                        <td class="px-3 py-2 text-center">
-                            <div class="flex flex-col gap-1 items-center">
-                                <span class="text-[9px] text-gray-400 uppercase font-bold">B/2 (p.u)</span>
-                                <input type="number" step="0.0001" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full max-w-[80px] text-center focus:outline-none font-bold" 
-                                       value="${b.b_charging || 0}" 
-                                       onchange="updateBranchData(${index}, 'b_charging', this.value)"
-                                       ${isTransformer ? 'readonly disabled opacity-50' : ''}>
-                            </div>
-                        </td>
                         <td class="px-3 py-2 text-center font-mono text-[10px]">
-                            ${isTransformer ? `
-                                <div class="text-blue-600 font-bold">X ≈ ${((parseFloat(b.z_pct) || 10) / 100).toFixed(4)}j</div>
-                                <div class="text-[8px] text-gray-400">Tap: ${(parseFloat(b.tap) || 1).toFixed(3)}:1</div>
-                            ` : `
-                                <div class="text-gray-600">${(b.r || 0).toFixed(4)} + ${(b.x || 0.1).toFixed(4)}j</div>
-                            `}
+                            <div class="text-gray-600 font-bold">${(parseFloat(b.r) || 0).toFixed(4)} + ${(parseFloat(b.x) || 0.1).toFixed(4)}j</div>
+                            ${isTransformer ? `<div class="text-[8px] text-gray-400">a = ${(parseFloat(b.tap) || 1).toFixed(5)}</div>` : ''}
                         </td>
 
                         <td class="px-3 py-2 text-right">
@@ -4098,36 +4096,56 @@
         }
 
         function showManualNRCalculation() {
-            const modal = document.getElementById('manualCalcModal');
             const content = document.getElementById('manualCalcContent');
-            modal.classList.remove('hidden');
+            const btn = document.getElementById('btnGenerateProof');
 
-            const baseMVA = parseFloat(document.getElementById('baseMVAInput').value) || 100;
-            const n = currentData.length;
+            // Switch to tab first
+            switchTab('proof');
 
-            // 1. BRANCH ADMITTANCE CALCULATIONS (The "Human" Step)
-            let branchCalcHTML = "";
-            const branchAdmittances = [];
+            // Show Loading State
+            btn.innerHTML = `<i class="ph ph-circle-notch animate-spin"></i> Analyzing...`;
+            btn.disabled = true;
+            content.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full text-slate-500 py-32 space-y-4">
+                    <div class="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    <div class="text-center">
+                        <p class="text-xl font-bold">Constructing Mechanical Proof</p>
+                        <p class="text-sm italic opacity-70">Applying Stevenson methodology across the grid topology...</p>
+                    </div>
+                </div>
+            `;
 
-            activeBranches.forEach((branch, idx) => {
-                const fromBus = currentData.find(b => b.bus == branch.from);
-                const busBaseKV = fromBus ? (fromBus.baseKV || 230) : 230;
-                const isXfmr = branch.type === 'transformer';
-                let r = parseFloat(branch.r); if (isNaN(r)) r = isXfmr ? 0.001 : 0.02;
-                let x = parseFloat(branch.x); if (isNaN(x)) x = isXfmr ? 0.05 : 0.1;
-                const tap = parseFloat(branch.tap) || 1.0;
+            // Use setTimeout to allow the UI to render the loading state before the heavy calculation
+            setTimeout(() => {
+                const baseMVA = parseFloat(document.getElementById('baseMVAInput').value) || 100;
+                const n = currentData.length;
 
-                const z_mag2 = r * r + x * x;
-                const g = r / z_mag2;
-                const b = -x / z_mag2;
+                // Use a buffer array for better performance
+                const htmlBuffer = [];
 
-                // Base Derivations (Item 2)
-                const z_base = (busBaseKV * busBaseKV) / baseMVA;
-                const i_base = (baseMVA * 1000) / (Math.sqrt(3) * busBaseKV);
+                // 1. BRANCH ADMITTANCE CALCULATIONS (The "Human" Step)
+                let branchCalcHTML = "";
+                const branchAdmittances = [];
 
-                branchAdmittances.push({ from: branch.from, to: branch.to, g, b, tap });
+                activeBranches.forEach((branch, idx) => {
+                    const fromBus = currentData.find(b => b.bus == branch.from);
+                    const busBaseKV = fromBus ? (fromBus.baseKV || 230) : 230;
+                    const isXfmr = branch.type === 'transformer';
+                    let r = parseFloat(branch.r); if (isNaN(r)) r = isXfmr ? 0.001 : 0.02;
+                    let x = parseFloat(branch.x); if (isNaN(x)) x = isXfmr ? 0.05 : 0.1;
+                    const tap = parseFloat(branch.tap) || 1.0;
 
-                branchCalcHTML += `
+                    const z_mag2 = r * r + x * x;
+                    const g = r / z_mag2;
+                    const b = -x / z_mag2;
+
+                    // Base Derivations (Item 2)
+                    const z_base = (busBaseKV * busBaseKV) / baseMVA;
+                    const i_base = (baseMVA * 1000) / (Math.sqrt(3) * busBaseKV);
+
+                    branchAdmittances.push({ from: branch.from, to: branch.to, g, b, tap });
+
+                    branchCalcHTML += `
                     <div class="p-4 border-l-2 border-blue-200 bg-blue-50/30 rounded-r-lg">
                         <div class="font-bold text-blue-900 mb-2 flex justify-between items-center">
                             <span>Line L${branch.id} (Bus ${branch.from} to ${branch.to})</span>
@@ -4149,27 +4167,27 @@
                         </div>
                     </div>
                 `;
-            });
+                });
 
-            // 0. BUS INDEX MAPPING (Robust against non-sequential IDs)
-            const b2idx = {};
-            currentData.forEach((b, idx) => { b2idx[b.bus] = idx; });
+                // 0. BUS INDEX MAPPING (Robust against non-sequential IDs)
+                const b2idx = {};
+                currentData.forEach((b, idx) => { b2idx[b.bus] = idx; });
 
-            // 1. BRANCH ADMITTANCE CALCULATIONS
-            const G = Array.from({ length: n }, () => new Float64Array(n).fill(0));
-            const B = Array.from({ length: n }, () => new Float64Array(n).fill(0));
-            let yBusStepsHTML = "";
+                // 1. BRANCH ADMITTANCE CALCULATIONS
+                const G = Array.from({ length: n }, () => new Float64Array(n).fill(0));
+                const B = Array.from({ length: n }, () => new Float64Array(n).fill(0));
+                let yBusStepsHTML = "";
 
-            branchAdmittances.forEach(ba => {
-                const i = b2idx[ba.from];
-                const k = b2idx[ba.to];
-                const tap = ba.tap;
+                branchAdmittances.forEach(ba => {
+                    const i = b2idx[ba.from];
+                    const k = b2idx[ba.to];
+                    const tap = ba.tap;
 
-                // Off-diagonals
-                const g_ik = -ba.g / tap;
-                const b_ik = -ba.b / tap;
+                    // Off-diagonals
+                    const g_ik = -ba.g / tap;
+                    const b_ik = -ba.b / tap;
 
-                yBusStepsHTML += `
+                    yBusStepsHTML += `
                     <div class="text-[10px] font-mono py-1 border-b border-slate-100 last:border-0">
                         <span class="text-slate-400">Add branch ${ba.from}-${ba.to}:</span><br/>
                         $Y_{${ba.from}${ba.to}} = Y_{${ba.to}${ba.from}} = -y_{${ba.from}${ba.to}}/a = ${g_ik.toFixed(4)} ${b_ik >= 0 ? '+' : '-'}$ j${Math.abs(b_ik).toFixed(4)}<br/>
@@ -4178,40 +4196,40 @@
                     </div>
                 `;
 
-                G[i][k] += g_ik; B[i][k] += b_ik;
-                G[k][i] += g_ik; B[k][i] += b_ik;
-                G[i][i] += ba.g / (tap * tap); B[i][i] += ba.b / (tap * tap);
-                G[k][k] += ba.g; B[k][k] += ba.b;
-            });
+                    G[i][k] += g_ik; B[i][k] += b_ik;
+                    G[k][i] += g_ik; B[k][i] += b_ik;
+                    G[i][i] += ba.g / (tap * tap); B[i][i] += ba.b / (tap * tap);
+                    G[k][k] += ba.g; B[k][k] += ba.b;
+                });
 
-            // 3. MISMATCH EXPANSION (Show full summation for Bus 2)
-            let mismatchLogicHTML = "";
-            if (n >= 2) {
-                const i = 1; // Bus 2
-                const bus = currentData[1];
-                const pi_sch = (bus.gp - bus.lp) / baseMVA;
-                const qi_sch = (bus.gq - bus.lq) / baseMVA;
+                // 3. MISMATCH EXPANSION (Show full summation for Bus 2)
+                let mismatchLogicHTML = "";
+                if (n >= 2) {
+                    const i = 1; // Bus 2
+                    const bus = currentData[1];
+                    const pi_sch = (bus.gp - bus.lp) / baseMVA;
+                    const qi_sch = (bus.gq - bus.lq) / baseMVA;
 
-                const slackBus = currentData[0];
-                const v_slack = slackBus.mag;
-                const d_slack = slackBus.ang * (Math.PI / 180);
+                    const slackBus = currentData[0];
+                    const v_slack = slackBus.mag;
+                    const d_slack = slackBus.ang * (Math.PI / 180);
 
-                let pSumString = "";
-                let pSumVal = 0;
-                for (let j = 0; j < n; j++) {
-                    const bj = currentData[j];
-                    const v_j = bj.mag;
-                    const d_j = bj.ang * (Math.PI / 180);
-                    // For iteration 0 proof, we usually assume flat start for PQ but actual for Slack/PV
-                    const term_mag = (j === 0 || bj.type === 'PV') ? v_j : 1.0;
+                    let pSumString = "";
+                    let pSumVal = 0;
+                    for (let j = 0; j < n; j++) {
+                        const bj = currentData[j];
+                        const v_j = bj.mag;
+                        const d_j = bj.ang * (Math.PI / 180);
+                        // For iteration 0 proof, we usually assume flat start for PQ but actual for Slack/PV
+                        const term_mag = (j === 0 || bj.type === 'PV') ? v_j : 1.0;
 
-                    pSumString += `(${term_mag.toFixed(2)} \\cdot ${G[i][j].toFixed(4)})`;
-                    if (j < n - 1) pSumString += " + ";
-                    // Simple G-sum for the proof text illustration
-                    pSumVal += term_mag * G[i][j];
-                }
+                        pSumString += `(${term_mag.toFixed(2)} \\cdot ${G[i][j].toFixed(4)})`;
+                        if (j < n - 1) pSumString += " + ";
+                        // Simple G-sum for the proof text illustration
+                        pSumVal += term_mag * G[i][j];
+                    }
 
-                mismatchLogicHTML = `
+                    mismatchLogicHTML = `
                     <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-4">
                         <div class="font-bold text-slate-800">Example: Power Mismatch at Bus ${bus.bus} (Iteration 0)</div>
                         <div class="text-sm text-slate-600">Using Stevenson's Eq. 9.32 with Specified Slack ($|V_1|=${v_slack}$):</div>
@@ -4223,52 +4241,52 @@
                         </div>
                     </div>
                 `;
-            }
+                }
 
-            // 5. GENERATE ITERATION JOURNAL FROM REAL SOLVER DATA
-            let iterationJournalHTML = "";
-            const solData = window.lastSolverSolution;
+                // 5. GENERATE ITERATION JOURNAL FROM REAL SOLVER DATA
+                let iterationJournalHTML = "";
+                const solData = window.lastSolverSolution;
 
-            if (!solData || !solData.history || solData.history.length === 0) {
-                iterationJournalHTML = `<div class="p-8 text-center bg-white rounded-2xl border border-slate-200 shadow-sm text-slate-400 italic">No convergence data available. Run simulation first.</div>`;
-            } else {
-                solData.history.forEach((h, kIdx) => {
-                    const k = kIdx + 1;
-                    let busMismatchRowsHTML = "";
-                    let mismatchVectorValues = [];
+                if (!solData || !solData.history || solData.history.length === 0) {
+                    iterationJournalHTML = `<div class="p-8 text-center bg-white rounded-2xl border border-slate-200 shadow-sm text-slate-400 italic">No convergence data available. Run simulation first.</div>`;
+                } else {
+                    solData.history.forEach((h, kIdx) => {
+                        const k = kIdx + 1;
+                        let busMismatchRowsHTML = "";
+                        let mismatchVectorValues = [];
 
-                    // Extract actual bus-by-bus mismatches from dP and dQ
-                    let dpIdx = 0;
-                    currentData.forEach((bus, bIdx) => {
-                        if (bus.bus === 1) return; // Slack
-                        const dpVal = h.dP[dpIdx] || 0;
-                        busMismatchRowsHTML += `
+                        // Extract actual bus-by-bus mismatches from dP and dQ
+                        let dpIdx = 0;
+                        currentData.forEach((bus, bIdx) => {
+                            if (bus.bus === 1) return; // Slack
+                            const dpVal = h.dP[dpIdx] || 0;
+                            busMismatchRowsHTML += `
                             <div class="pl-4 border-l border-slate-200 py-1">
                                 <span class="font-bold text-slate-700">Bus ${bus.bus}:</span><br/>
                                 $\\Delta P_{${bus.bus}} = P_{sch} - P_{calc} = ${dpVal.toFixed(6)}$ p.u.
                             </div>
                         `;
-                        mismatchVectorValues.push(dpVal.toFixed(6));
-                        dpIdx++;
-                    });
+                            mismatchVectorValues.push(dpVal.toFixed(6));
+                            dpIdx++;
+                        });
 
-                    let dqIdx = 0;
-                    currentData.forEach((bus, bIdx) => {
-                        if (bus.bus === 1 || bus.type === 'PV') return;
-                        const dqVal = h.dQ[dqIdx] || 0;
-                        busMismatchRowsHTML += `
+                        let dqIdx = 0;
+                        currentData.forEach((bus, bIdx) => {
+                            if (bus.bus === 1 || bus.type === 'PV') return;
+                            const dqVal = h.dQ[dqIdx] || 0;
+                            busMismatchRowsHTML += `
                             <div class="pl-4 border-l border-orange-200 py-1 bg-orange-50/20">
                                 <span class="font-bold text-orange-700">Bus ${bus.bus} (Q):</span><br/>
                                 $\\Delta Q_{${bus.bus}} = Q_{sch} - Q_{calc} = ${dqVal.toFixed(6)}$ p.u.
                             </div>
                         `;
-                        mismatchVectorValues.push(dqVal.toFixed(6));
-                        dqIdx++;
-                    });
+                            mismatchVectorValues.push(dqVal.toFixed(6));
+                            dqIdx++;
+                        });
 
-                    let jacobianProof = "";
-                    if (k === 1) {
-                        jacobianProof = `
+                        let jacobianProof = "";
+                        if (k === 1) {
+                            jacobianProof = `
                         <div class="bg-blue-50 p-6 rounded-2xl border border-blue-100 mb-8">
                             <h6 class="text-[10px] font-bold text-blue-500 uppercase mb-4 tracking-widest flex items-center gap-2"><i class="ph ph-grid-four"></i> Full Jacobian Assembly ($J^{(1)}$)</h6>
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -4286,9 +4304,9 @@
                             </div>
                         </div>
                     `;
-                    }
+                        }
 
-                    iterationJournalHTML += `
+                        iterationJournalHTML += `
                     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-fadeIn mb-12">
                         <div class="bg-slate-900 px-6 py-4 flex justify-between items-center">
                             <h4 class="text-white font-bold">Iteration ${k}</h4>
@@ -4321,22 +4339,22 @@
                                     <h5 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">C. Updated Coordinate Workspace</h5>
                                     <div class="space-y-2">
                                         ${currentData.map((b, bIdx) => {
-                        return `<div class="flex justify-between text-[11px] font-mono border-b pb-1">
+                            return `<div class="flex justify-between text-[11px] font-mono border-b pb-1">
                                                 <span class="text-slate-500 font-bold">Bus ${b.bus}</span>
                                                 <span>$V = ${h.V[bIdx].toFixed(5)}, \\delta = ${(h.Delta[bIdx] * 180 / Math.PI).toFixed(4)}^{\\circ}$</span>
                                             </div>`;
-                    }).join('')}
+                        }).join('')}
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 `;
-                });
-            }
+                    });
+                }
 
-            // Assemble Final HTML
-            let html = `
+                // Assemble Final HTML
+                let html = `
                 <div class="text-center space-y-4 mb-16">
                     <h2 class="text-5xl font-black text-slate-900 leading-tight">Newton-Raphson Final Proof</h2>
                     <p class="text-slate-500 max-w-2xl mx-auto italic">Step-by-step mathematical derivation following William D. Stevenson, Jr.'s "Elements of Power System Analysis".</p>
@@ -4383,10 +4401,10 @@
                                  <div class="text-[10px] font-mono leading-relaxed">
                                     \\[ [Y_{bus}] = \\begin{bmatrix} 
                                         ${G.map((row, i) => Array.from(row).map((val, k) => {
-                const gVal = val.toFixed(2);
-                const bVal = B[i][k].toFixed(2);
-                return `${gVal}${B[i][k] >= 0 ? '+' : ''}${bVal}j`;
-            }).join(' & ')).join(' \\\\ ')}
+                    const gVal = val.toFixed(2);
+                    const bVal = B[i][k].toFixed(2);
+                    return `${gVal}${B[i][k] >= 0 ? '+' : ''}${bVal}j`;
+                }).join(' & ')).join(' \\\\ ')}
                                     \\end{bmatrix} \\]
                                  </div>
                             </div>
@@ -4399,10 +4417,10 @@
                                     </thead>
                                     <tbody class="divide-y divide-slate-50">
                                         ${G.slice(0, 4).map((row, i) => Array.from(row).slice(0, 4).map((val, k) => {
-                const mag = Math.sqrt(val * val + B[i][k] * B[i][k]);
-                const ang = Math.atan2(B[i][k], val) * 180 / Math.PI;
-                return `<tr><td class="p-1.5 font-bold">Y_{${i + 1}${k + 1}}</td><td class="p-1.5">${mag.toFixed(4)}</td><td class="p-1.5">${ang.toFixed(2)}^\\circ</td></tr>`;
-            }).join('')).join('')}
+                    const mag = Math.sqrt(val * val + B[i][k] * B[i][k]);
+                    const ang = Math.atan2(B[i][k], val) * 180 / Math.PI;
+                    return `<tr><td class="p-1.5 font-bold">Y_{${i + 1}${k + 1}}</td><td class="p-1.5">${mag.toFixed(4)}</td><td class="p-1.5">${ang.toFixed(2)}^\\circ</td></tr>`;
+                }).join('')).join('')}
                                         ${n > 4 ? `<tr><td colspan="3" class="p-2 text-center text-slate-300 italic">... truncated for display ...</td></tr>` : ''}
                                     </tbody>
                                 </table>
@@ -4420,11 +4438,11 @@
                     <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
                         <p class="text-slate-600">Substituting $V, \delta$ and $Y_{bus}$ elements into the non-linear power flow summation for every bus:</p>
                         ${currentData.filter(b => b.bus > 1).map(bus => {
-                const iIdx = b2idx[bus.bus];
-                const pi_sch = (bus.gp - bus.lp) / baseMVA;
-                let pSumVal = 0;
-                currentData.forEach((bj, jIdx) => { pSumVal += G[iIdx][jIdx]; });
-                return `
+                    const iIdx = b2idx[bus.bus];
+                    const pi_sch = (bus.gp - bus.lp) / baseMVA;
+                    let pSumVal = 0;
+                    currentData.forEach((bj, jIdx) => { pSumVal += G[iIdx][jIdx]; });
+                    return `
                             <div class="p-4 bg-slate-50 border rounded-xl mb-4">
                                 <div class="font-bold text-slate-700 text-[10px] mb-2 uppercase tracking-tighter">Bus ${bus.bus} P-Equation Proof:</div>
                                 <div class="font-mono text-[9px] text-slate-600 overflow-x-auto">
@@ -4433,7 +4451,7 @@
                                     $\Delta P_{${bus.bus}} = P_{sch} - P_{calc} = ${pi_sch.toFixed(4)} - ${pSumVal.toFixed(4)} = ${(pi_sch - pSumVal).toFixed(4)}$
                                 </div>
                             </div>`;
-            }).join('')}
+                }).join('')}
                     </div>
                 </section>
 
@@ -4493,43 +4511,43 @@
                         <p class="text-sm text-slate-600 mb-4">Using converged voltages to calculate complex power flow $S_{ij}$ and line current magnitude $I_{Actual}$ in Amperes.</p>
                         
                         ${(() => {
-                    let totalLossP_sum = 0;
-                    let maxCurrent = 0;
-                    let maxCurrentLine = "";
+                        let totalLossP_sum = 0;
+                        let maxCurrent = 0;
+                        let maxCurrentLine = "";
 
-                    activeBranches.forEach(branch => {
-                        const fromBus = currentData.find(b => b.bus == branch.from);
-                        const toBus = currentData.find(b => b.bus == branch.to);
-                        const fromV = fromBus.mag;
-                        const toV = toBus.mag;
-                        const isXfmr = branch.type === 'transformer';
-                        const tap = isXfmr ? (branch.tap || 1.0) : 1.0;
-                        const r_br = isXfmr ? 0.001 : (parseFloat(branch.r) || 0.02);
-                        const x_br = isXfmr ? ((branch.z_pct || 10) / 100) : (parseFloat(branch.x) || 0.1);
-                        const den_z = r_br * r_br + x_br * x_br;
-                        const g_br = r_br / den_z;
-                        const b_br = -x_br / den_z;
-                        const a1 = fromBus.ang * Math.PI / 180;
-                        const a2 = toBus.ang * Math.PI / 180;
-                        const da = a1 - a2;
+                        activeBranches.forEach(branch => {
+                            const fromBus = currentData.find(b => b.bus == branch.from);
+                            const toBus = currentData.find(b => b.bus == branch.to);
+                            const fromV = fromBus.mag;
+                            const toV = toBus.mag;
+                            const isXfmr = branch.type === 'transformer';
+                            const tap = isXfmr ? (branch.tap || 1.0) : 1.0;
+                            const r_br = isXfmr ? 0.001 : (parseFloat(branch.r) || 0.02);
+                            const x_br = isXfmr ? ((branch.z_pct || 10) / 100) : (parseFloat(branch.x) || 0.1);
+                            const den_z = r_br * r_br + x_br * x_br;
+                            const g_br = r_br / den_z;
+                            const b_br = -x_br / den_z;
+                            const a1 = fromBus.ang * Math.PI / 180;
+                            const a2 = toBus.ang * Math.PI / 180;
+                            const da = a1 - a2;
 
-                        const p_pu = Math.pow(fromV / tap, 2) * g_br - (fromV / tap) * toV * (g_br * Math.cos(da) + b_br * Math.sin(da));
-                        const q_pu = -Math.pow(fromV / tap, 2) * b_br - (fromV / tap) * toV * (g_br * Math.sin(da) - b_br * Math.cos(da));
-                        const s_mva_val = Math.sqrt(p_pu * p_pu + q_pu * q_pu);
-                        const busBaseKV = fromBus.baseKV || 230;
-                        const baseAmps = (baseMVA * 1000) / (Math.sqrt(3) * busBaseKV);
-                        const current = (s_mva_val / fromV) * baseAmps;
+                            const p_pu = Math.pow(fromV / tap, 2) * g_br - (fromV / tap) * toV * (g_br * Math.cos(da) + b_br * Math.sin(da));
+                            const q_pu = -Math.pow(fromV / tap, 2) * b_br - (fromV / tap) * toV * (g_br * Math.sin(da) - b_br * Math.cos(da));
+                            const s_mva_val = Math.sqrt(p_pu * p_pu + q_pu * q_pu);
+                            const busBaseKV = fromBus.baseKV || 230;
+                            const baseAmps = (baseMVA * 1000) / (Math.sqrt(3) * busBaseKV);
+                            const current = (s_mva_val / fromV) * baseAmps;
 
-                        if (current > maxCurrent) {
-                            maxCurrent = current;
-                            maxCurrentLine = `Line L${branch.id} (Bus ${branch.from} to ${branch.to})`;
-                        }
+                            if (current > maxCurrent) {
+                                maxCurrent = current;
+                                maxCurrentLine = `Line L${branch.id} (Bus ${branch.from} to ${branch.to})`;
+                            }
 
-                        const loss_pu = (p_pu + (toV * toV * g_br - (toV * (fromV / tap)) * (g_br * Math.cos(-da) + b_br * Math.sin(-da))));
-                        totalLossP_sum += loss_pu * baseMVA;
-                    });
+                            const loss_pu = (p_pu + (toV * toV * g_br - (toV * (fromV / tap)) * (g_br * Math.cos(-da) + b_br * Math.sin(-da))));
+                            totalLossP_sum += loss_pu * baseMVA;
+                        });
 
-                    return `
+                        return `
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                                     <div class="p-6 bg-red-50 rounded-2xl border border-red-100 shadow-sm">
                                         <h5 class="text-[10px] font-bold text-red-400 uppercase tracking-widest mb-1">Total Real Power Loss</h5>
@@ -4546,7 +4564,7 @@
                                     </div>
                                 </div>
                             `;
-                })()}
+                    })()}
                         
                         <div class="overflow-x-auto">
                             <table class="w-full text-[10px] text-left">
@@ -4563,47 +4581,47 @@
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 font-mono text-slate-600">
                                     ${(() => {
-                    let summaryRows = "";
-                    let detailedRows = "";
+                        let summaryRows = "";
+                        let detailedRows = "";
 
-                    activeBranches.forEach(branch => {
-                        const fromBus = currentData.find(b => b.bus == branch.from);
-                        const toBus = currentData.find(b => b.bus == branch.to);
-                        const fromV = fromBus.mag;
-                        const toV = toBus.mag;
-                        const busBaseKV = fromBus.baseKV || 230;
-                        const baseAmps = (baseMVA * 1000) / (Math.sqrt(3) * busBaseKV);
-                        const r = parseFloat(branch.r) || 0.02;
-                        const x = parseFloat(branch.x) || 0.1;
+                        activeBranches.forEach(branch => {
+                            const fromBus = currentData.find(b => b.bus == branch.from);
+                            const toBus = currentData.find(b => b.bus == branch.to);
+                            const fromV = fromBus.mag;
+                            const toV = toBus.mag;
+                            const busBaseKV = fromBus.baseKV || 230;
+                            const baseAmps = (baseMVA * 1000) / (Math.sqrt(3) * busBaseKV);
+                            const r = parseFloat(branch.r) || 0.02;
+                            const x = parseFloat(branch.x) || 0.1;
 
-                        const a1 = fromBus.ang * Math.PI / 180;
-                        const a2 = toBus.ang * Math.PI / 180;
-                        const da = a1 - a2;
-                        const isXfmr = branch.type === 'transformer';
-                        const tap = isXfmr ? (branch.tap || 1.0) : 1.0;
+                            const a1 = fromBus.ang * Math.PI / 180;
+                            const a2 = toBus.ang * Math.PI / 180;
+                            const da = a1 - a2;
+                            const isXfmr = branch.type === 'transformer';
+                            const tap = isXfmr ? (branch.tap || 1.0) : 1.0;
 
-                        const r_br = isXfmr ? 0.001 : (parseFloat(branch.r) || 0.02);
-                        const x_br = isXfmr ? ((branch.z_pct || 10) / 100) : (parseFloat(branch.x) || 0.1);
-                        const den_z = r_br * r_br + x_br * x_br;
-                        const g_br = r_br / den_z;
-                        const b_br = -x_br / den_z;
+                            const r_br = isXfmr ? 0.001 : (parseFloat(branch.r) || 0.02);
+                            const x_br = isXfmr ? ((branch.z_pct || 10) / 100) : (parseFloat(branch.x) || 0.1);
+                            const den_z = r_br * r_br + x_br * x_br;
+                            const g_br = r_br / den_z;
+                            const b_br = -x_br / den_z;
 
-                        const p_pu = Math.pow(fromV / tap, 2) * g_br - (fromV / tap) * toV * (g_br * Math.cos(da) + b_br * Math.sin(da));
-                        const q_pu = -Math.pow(fromV / tap, 2) * b_br - (fromV / tap) * toV * (g_br * Math.sin(da) - b_br * Math.cos(da));
+                            const p_pu = Math.pow(fromV / tap, 2) * g_br - (fromV / tap) * toV * (g_br * Math.cos(da) + b_br * Math.sin(da));
+                            const q_pu = -Math.pow(fromV / tap, 2) * b_br - (fromV / tap) * toV * (g_br * Math.sin(da) - b_br * Math.cos(da));
 
-                        const s_mva_val = Math.sqrt(p_pu * p_pu + q_pu * q_pu);
-                        const s_mva = s_mva_val * baseMVA;
-                        const i_pu = s_mva_val / fromV;
-                        const i_amps = i_pu * baseAmps;
+                            const s_mva_val = Math.sqrt(p_pu * p_pu + q_pu * q_pu);
+                            const s_mva = s_mva_val * baseMVA;
+                            const i_pu = s_mva_val / fromV;
+                            const i_amps = i_pu * baseAmps;
 
-                        const i_ang_rad = Math.atan2(-q_pu, p_pu) + a1;
-                        const i_ang_deg = i_ang_rad * 180 / Math.PI;
+                            const i_ang_rad = Math.atan2(-q_pu, p_pu) + a1;
+                            const i_ang_deg = i_ang_rad * 180 / Math.PI;
 
-                        const loss_pu = (p_pu + (toV * toV * g_br - (toV * (fromV / tap)) * (g_br * Math.cos(-da) + b_br * Math.sin(-da))));
-                        const loss_mw = loss_pu * baseMVA;
+                            const loss_pu = (p_pu + (toV * toV * g_br - (toV * (fromV / tap)) * (g_br * Math.cos(-da) + b_br * Math.sin(-da))));
+                            const loss_mw = loss_pu * baseMVA;
 
-                        // 1. Build Summary Row
-                        summaryRows += `
+                            // 1. Build Summary Row
+                            summaryRows += `
                             <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                                 <td class="px-4 py-3 font-bold text-slate-900">${branch.from} $\\to$ ${branch.to} <span class="text-[8px] font-normal text-slate-400 font-sans">(${busBaseKV}kV)</span></td>
                                 <td class="px-4 py-3 text-emerald-600">${(p_pu * baseMVA).toFixed(2)}</td>
@@ -4615,8 +4633,8 @@
                             </tr>
                         `;
 
-                        // 2. Build Detailed Row (Calculations)
-                        detailedRows += `
+                            // 2. Build Detailed Row (Calculations)
+                            detailedRows += `
                                         <tr class="bg-slate-50/50">
                                             <td colspan="7" class="px-4 py-4">
                                                 <div class="flex flex-col gap-3">
@@ -4664,16 +4682,16 @@
                                             </td>
                                         </tr>
                                     `;
-                    });
+                        });
 
-                    return summaryRows + `
+                        return summaryRows + `
                         <tr class="bg-indigo-50/50">
                             <td colspan="7" class="px-4 py-2 font-bold text-indigo-900 text-[9px] uppercase tracking-widest text-center border-y border-indigo-100">
                                 Detailed Mathematical Proofs Below
                             </td>
                         </tr>
                     ` + detailedRows;
-                })()}$
+                    })()}$
                                 </tbody>
                             </table>
                         </div>
@@ -4704,34 +4722,34 @@
                             </thead>
                             <tbody class="divide-y divide-slate-100 font-mono text-slate-700">
                                 ${(() => {
-                    let rows = "";
-                    activeBranches.forEach(branch => {
-                        const fromBus = currentData.find(b => b.bus == branch.from);
-                        const toBus = currentData.find(b => b.bus == branch.to);
-                        if (!fromBus || !toBus) return;
+                        let rows = "";
+                        activeBranches.forEach(branch => {
+                            const fromBus = currentData.find(b => b.bus == branch.from);
+                            const toBus = currentData.find(b => b.bus == branch.to);
+                            if (!fromBus || !toBus) return;
 
-                        const v1 = fromBus.mag;
-                        const v2 = toBus.mag;
-                        const a1 = fromBus.ang * Math.PI / 180;
-                        const a2 = toBus.ang * Math.PI / 180;
-                        const da = a1 - a2;
+                            const v1 = fromBus.mag;
+                            const v2 = toBus.mag;
+                            const a1 = fromBus.ang * Math.PI / 180;
+                            const a2 = toBus.ang * Math.PI / 180;
+                            const da = a1 - a2;
 
-                        const isXfmr = branch.type === 'transformer';
-                        const tap = isXfmr ? (branch.tap || 1.0) : 1.0;
-                        const r = isXfmr ? 0.001 : (parseFloat(branch.r) || 0.02);
-                        const x = isXfmr ? ((branch.z_pct || 10) / 100) : (parseFloat(branch.x) || 0.1);
-                        const b_sh = parseFloat(branch.b_charging) || 0;
+                            const isXfmr = branch.type === 'transformer';
+                            const tap = isXfmr ? (branch.tap || 1.0) : 1.0;
+                            const r = isXfmr ? 0.001 : (parseFloat(branch.r) || 0.02);
+                            const x = isXfmr ? ((branch.z_pct || 10) / 100) : (parseFloat(branch.x) || 0.1);
+                            const b_sh = parseFloat(branch.b_charging) || 0;
 
-                        const den = r * r + x * x;
-                        const g = r / den;
-                        const b = -x / den;
+                            const den = r * r + x * x;
+                            const g = r / den;
+                            const b = -x / den;
 
-                        const p_ft = Math.pow(v1 / tap, 2) * g - (v1 / tap) * v2 * (g * Math.cos(da) + b * Math.sin(da));
-                        const q_ft = -Math.pow(v1 / tap, 2) * (b + b_sh) - (v1 / tap) * v2 * (g * Math.sin(da) - b * Math.cos(da));
-                        const p_tf = v2 * v2 * g - (v2 * (v1 / tap)) * (g * Math.cos(-da) + b * Math.sin(-da));
-                        const q_tf = -v2 * v2 * (b + b_sh) - (v2 * (v1 / tap)) * (g * Math.sin(-da) - b * Math.cos(-da));
+                            const p_ft = Math.pow(v1 / tap, 2) * g - (v1 / tap) * v2 * (g * Math.cos(da) + b * Math.sin(da));
+                            const q_ft = -Math.pow(v1 / tap, 2) * (b + b_sh) - (v1 / tap) * v2 * (g * Math.sin(da) - b * Math.cos(da));
+                            const p_tf = v2 * v2 * g - (v2 * (v1 / tap)) * (g * Math.cos(-da) + b * Math.sin(-da));
+                            const q_tf = -v2 * v2 * (b + b_sh) - (v2 * (v1 / tap)) * (g * Math.sin(-da) - b * Math.cos(-da));
 
-                        rows += `
+                            rows += `
                                             <tr class="hover:bg-slate-50 transition-colors">
                                                 <td class="border border-slate-200 px-3 py-2 font-bold text-slate-900">${branch.from}</td>
                                                 <td class="border border-slate-200 px-3 py-2 font-bold text-slate-900">${branch.to}</td>
@@ -4741,9 +4759,9 @@
                                                 <td class="border border-slate-200 px-3 py-2 text-red-600">${(q_tf * baseMVA).toFixed(3)}</td>
                                             </tr>
                                         `;
-                    });
-                    return rows;
-                })()}
+                        });
+                        return rows;
+                    })()}
                             </tbody>
                         </table>
                     </div>
@@ -4756,18 +4774,18 @@
                     
                     <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-8">
                         ${(() => {
-                    let totalPGen = 0, totalPRes = 0;
-                    let minVMag = 2, minVBus = 0;
-                    let maxVMag = -1, maxVBus = 0;
+                        let totalPGen = 0, totalPRes = 0;
+                        let minVMag = 2, minVBus = 0;
+                        let maxVMag = -1, maxVBus = 0;
 
-                    currentData.forEach(b => {
-                        totalPGen += b.gp;
-                        totalPRes += b.lp;
-                        if (b.mag < minVMag) { minVMag = b.mag; minVBus = b.bus; }
-                        if (b.mag > maxVMag) { maxVMag = b.mag; maxVBus = b.bus; }
-                    });
+                        currentData.forEach(b => {
+                            totalPGen += b.gp;
+                            totalPRes += b.lp;
+                            if (b.mag < minVMag) { minVMag = b.mag; minVBus = b.bus; }
+                            if (b.mag > maxVMag) { maxVMag = b.mag; maxVBus = b.bus; }
+                        });
 
-                    return `
+                        return `
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                                     <div class="p-6 bg-slate-900 rounded-3xl shadow-xl text-white relative overflow-hidden group">
                                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl group-hover:bg-blue-500/30 transition-colors"></div>
@@ -4809,10 +4827,10 @@
                                     </div>
                                 </div>
                             `;
-                })()}
+                    })()}
                         <div class="space-y-8">
                                     ${(() => {
-                    let summaryTableHTML = `
+                        let summaryTableHTML = `
                         <div class="overflow-x-auto mb-12 bg-white rounded-xl border border-slate-200">
                             <table class="w-full text-[10px] text-left">
                                 <thead class="bg-slate-900 text-slate-300 uppercase font-bold tracking-tighter">
@@ -4832,22 +4850,22 @@
                                 <tbody class="divide-y divide-slate-100 font-mono text-slate-600">
                     `;
 
-                    let derivationsHTML = "";
-                    currentData.forEach(b => {
-                        const busBaseKV = b.baseKV || 230;
-                        const v_kv = (b.mag * busBaseKV).toFixed(2);
-                        const p_mw = (b.gp - b.lp).toFixed(2);
-                        const q_mvar = (b.gq - b.lq).toFixed(2);
-                        const s_mva_val = Math.sqrt(Math.pow(p_mw, 2) + Math.pow(q_mvar, 2));
-                        const s_mva = s_mva_val.toFixed(2);
-                        const i_pu = (s_mva_val / baseMVA) / b.mag;
-                        const i_base = (baseMVA * 1000) / (Math.sqrt(3) * busBaseKV);
-                        const i_amps = i_pu * i_base;
+                        let derivationsHTML = "";
+                        currentData.forEach(b => {
+                            const busBaseKV = b.baseKV || 230;
+                            const v_kv = (b.mag * busBaseKV).toFixed(2);
+                            const p_mw = (b.gp - b.lp).toFixed(2);
+                            const q_mvar = (b.gq - b.lq).toFixed(2);
+                            const s_mva_val = Math.sqrt(Math.pow(p_mw, 2) + Math.pow(q_mvar, 2));
+                            const s_mva = s_mva_val.toFixed(2);
+                            const i_pu = (s_mva_val / baseMVA) / b.mag;
+                            const i_base = (baseMVA * 1000) / (Math.sqrt(3) * busBaseKV);
+                            const i_amps = i_pu * i_base;
 
-                        const s_star_angle_rad = Math.atan2(-q_mvar, p_mw);
-                        const cur_angle_deg = (s_star_angle_rad * 180 / Math.PI) + b.ang;
+                            const s_star_angle_rad = Math.atan2(-q_mvar, p_mw);
+                            const cur_angle_deg = (s_star_angle_rad * 180 / Math.PI) + b.ang;
 
-                        summaryTableHTML += `
+                            summaryTableHTML += `
                             <tr class="hover:bg-slate-50 transition-colors">
                                 <td class="px-4 py-3 font-bold text-slate-900">${b.bus} <span class="text-[8px] font-normal text-slate-400 font-sans">(${busBaseKV}kV)</span></td>
                                 <td class="px-4 py-3 text-blue-600 font-bold">${b.mag.toFixed(4)}</td>
@@ -4862,7 +4880,7 @@
                             </tr>
                         `;
 
-                        derivationsHTML += `
+                            derivationsHTML += `
                             <div class="bg-slate-50 rounded-2xl border border-slate-200 p-6 mb-8 hover:border-blue-300 transition-colors shadow-sm relative group">
                                 <div class="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <span class="bg-blue-100 text-blue-700 text-[8px] px-2 py-1 rounded-full font-bold uppercase tracking-widest">Mathematical Proof</span>
@@ -4925,18 +4943,18 @@
                                 </div>
                             </div>
                         `;
-                    });
+                        });
 
-                    summaryTableHTML += `</tbody></table></div>`;
+                        summaryTableHTML += `</tbody></table></div>`;
 
-                    return summaryTableHTML + `
+                        return summaryTableHTML + `
                         <div class="flex items-center gap-2 mb-6">
                             <div class="h-px flex-1 bg-slate-200"></div>
                             <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Step-by-Step Mathematical Derivations</span>
                             <div class="h-px flex-1 bg-slate-200"></div>
                         </div>
                     ` + derivationsHTML;
-                })()}
+                    })()}
                         </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -4961,11 +4979,22 @@
                 </div>
             `;
 
-            content.innerHTML = html;
+                content.innerHTML = html;
 
-            if (window.MathJax) {
-                MathJax.typesetPromise([content]);
-            }
+                if (window.MathJax) {
+                    MathJax.typesetPromise([content]).then(() => {
+                        btn.innerHTML = `<i class="ph ph-arrows-counter-clockwise"></i> Regenerate`;
+                        btn.disabled = false;
+                    }).catch(err => {
+                        console.error("MathJax error:", err);
+                        btn.innerHTML = `<i class="ph ph-arrows-counter-clockwise"></i> Regenerate`;
+                        btn.disabled = false;
+                    });
+                } else {
+                    btn.innerHTML = `<i class="ph ph-arrows-counter-clockwise"></i> Regenerate`;
+                    btn.disabled = false;
+                }
+            }, 100);
         }
 
 
@@ -4998,8 +5027,8 @@
                 if (i === undefined || k === undefined) return;
 
                 const isTrans = br.type === 'transformer';
-                const r = isTrans ? 0.0001 : (parseFloat(br.r) || 0);
-                const x = isTrans ? ((br.z_pct || 10) / 100) : (parseFloat(br.x) || 0.0001);
+                const r = parseFloat(br.r) || 0;
+                const x = parseFloat(br.x) || 0.0001;
                 const a = isTrans ? (parseFloat(br.tap) || 1.0) : 1.0;
                 const b_sh = parseFloat(br.b_charging) || 0;
 
@@ -5012,12 +5041,12 @@
                 G[i][k] -= g_line / a; B[i][k] -= b_line / a;
                 G[k][i] -= g_line / a; B[k][i] -= b_line / a;
 
-                // Diagonals
+                // Diagonals (using the standard pi-model with transformer tap)
                 G[i][i] += g_line / (a * a);
-                B[i][i] += b_line / (a * a) + b_sh / 2;
+                B[i][i] += b_line / (a * a) + b_sh;
 
                 G[k][k] += g_line;
-                B[k][k] += b_line + b_sh / 2;
+                B[k][k] += b_line + b_sh;
             });
 
             let history = [];
@@ -5211,6 +5240,23 @@
                 renderCompliance(currentData);
                 runArcFlashAnalysis();
 
+                // Reset Mechanical Proof Tab state as results have changed
+                const proofContent = document.getElementById('manualCalcContent');
+                if (proofContent) {
+                    proofContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center h-full text-slate-400 py-20">
+                            <i class="ph ph-math-operations text-6xl mb-4 opacity-20"></i>
+                            <p class="text-lg font-medium">Mathematical Model Updated</p>
+                            <p class="text-sm italic">Click "Generate Report" to expand the new Newton-Raphson mechanics.</p>
+                        </div>
+                    `;
+                    const proofBtn = document.getElementById('btnGenerateProof');
+                    if (proofBtn) {
+                        proofBtn.innerHTML = `<i class="ph ph-lightning"></i> Generate Report`;
+                        proofBtn.disabled = false;
+                    }
+                }
+
                 // NEW: Populate Math Dashboard
                 updateSolverParametersDisplay();
 
@@ -5257,8 +5303,8 @@
                 const a2 = busTo.ang * Math.PI / 180;
 
                 const isTransformer = branch.type === 'transformer';
-                const r = isTransformer ? 0.0001 : (parseFloat(branch.r) || 0);
-                const x = isTransformer ? ((branch.z_pct || 10) / 100) : (parseFloat(branch.x) || 0.0001);
+                const r = parseFloat(branch.r) || 0;
+                const x = parseFloat(branch.x) || 0.0001;
                 const a = isTransformer ? (branch.tap || 1.0) : 1.0;
 
                 const den = r * r + x * x;
@@ -5271,11 +5317,11 @@
                 // Power flow with tap ratio 'a' on 'from' bus
                 // Pft = (V1/a)^2 * g - (V1/a)*V2*(g*cos(da) + b*sin(da))
                 const p_ft = Math.pow(v1 / a, 2) * g - (v1 / a) * v2 * (g * Math.cos(da) + b * Math.sin(da));
-                const q_ft = -Math.pow(v1 / a, 2) * (b + b_sh) - (v1 / a) * v2 * (g * Math.sin(da) - b * Math.cos(da));
+                const q_ft = -Math.pow(v1 / a, 2) * b - Math.pow(v1, 2) * b_sh - (v1 / a) * v2 * (g * Math.sin(da) - b * Math.cos(da));
 
                 // Ptf = V2^2 * g - (V2*(V1/a))*(g*cos(-da) + b*sin(-da))
                 const p_tf = v2 * v2 * g - (v2 * (v1 / a)) * (g * Math.cos(-da) + b * Math.sin(-da));
-                const q_tf = -v2 * v2 * (b + b_sh) - (v2 * (v1 / a)) * (g * Math.sin(-da) - b * Math.cos(-da));
+                const q_tf = -v2 * v2 * b - Math.pow(v2, 2) * b_sh - (v2 * (v1 / a)) * (g * Math.sin(-da) - b * Math.cos(-da));
 
                 // Current I = S*/V* => |I| = |S|/|V|
                 const s_ft_mag = Math.sqrt(p_ft * p_ft + q_ft * q_ft);
@@ -6536,7 +6582,7 @@
         }
 
         function switchTab(id) {
-            ['line-flows', 'opf', 'compliance', 'voltage', 'math', 'sld', 'contingency', 'pv-curve', 'fault', 'arc-flash', 'harmonics', 'stability'].forEach(t => {
+            ['line-flows', 'opf', 'compliance', 'voltage', 'math', 'sld', 'contingency', 'pv-curve', 'fault', 'arc-flash', 'harmonics', 'stability', 'proof'].forEach(t => {
                 const content = document.getElementById(`content-${t}`);
                 const tab = document.getElementById(`tab-${t}`);
                 if (content && tab) {
