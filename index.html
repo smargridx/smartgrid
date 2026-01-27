@@ -4998,12 +4998,13 @@
                 if (i === undefined || k === undefined) return;
 
                 const isTrans = br.type === 'transformer';
-                const r = isTrans ? 0.001 : (parseFloat(br.r) || 0.0001);
+                const r = isTrans ? 0.0001 : (parseFloat(br.r) || 0);
                 const x = isTrans ? ((br.z_pct || 10) / 100) : (parseFloat(br.x) || 0.0001);
                 const a = isTrans ? (parseFloat(br.tap) || 1.0) : 1.0;
                 const b_sh = parseFloat(br.b_charging) || 0;
 
                 const den = r * r + x * x;
+                if (den === 0) return;
                 const g_line = r / den;
                 const b_line = -x / den;
 
@@ -5020,6 +5021,8 @@
             });
 
             let history = [];
+            let P_final = new Float64Array(n);
+            let Q_final = new Float64Array(n);
 
             for (let iter = 0; iter < maxIter; iter++) {
                 const P_calc = new Float64Array(n);
@@ -5033,6 +5036,8 @@
                         Q_calc[i] += V[i] * V[j] * (G[i][j] * Math.sin(d_ij) - B[i][j] * Math.cos(d_ij));
                     }
                 }
+                P_final = P_calc;
+                Q_final = Q_calc;
 
                 // 2. Calculate Mismatches
                 const dP = [], dQ = [];
@@ -5067,7 +5072,7 @@
                 });
 
                 if (maxError < tolerance) {
-                    return { converged: true, V, Delta, iterations: iter + 1, history };
+                    return { converged: true, V, Delta, iterations: iter + 1, history, P: P_final, Q: Q_final };
                 }
 
                 // 3. Build Jacobian
@@ -5112,7 +5117,7 @@
                 }
             }
 
-            return { converged: false, V, Delta, iterations: maxIter, history };
+            return { converged: false, V, Delta, iterations: maxIter, history, P: P_final, Q: Q_final };
         }
 
         function solveLinearSystem(A, b) {
@@ -5174,11 +5179,15 @@
                     currentData.forEach((bus, i) => {
                         bus.mag = solution.V[i];
                         bus.ang = solution.Delta[i] * 180 / Math.PI;
+                        // For Slack and PV buses, update the generation values to match solved power
+                        if (bus.type === 'Slack' || bus.type === 'PV') {
+                            bus.gp = (solution.P[i] * baseMVA) + bus.lp;
+                            bus.gq = (solution.Q[i] * baseMVA) + bus.lq - (bus.injQ || 0);
+                        }
                     });
                     console.log(`NR Converged in ${solution.iterations} iterations.`);
                 } else {
                     console.warn("NR Solver failed to converge within limits.");
-                    // Optionally keep current values anyway for visualization
                     currentData.forEach((bus, i) => {
                         bus.mag = solution.V[i];
                         bus.ang = solution.Delta[i] * 180 / Math.PI;
@@ -5188,9 +5197,13 @@
                 // Store solution history for manual calc modal
                 window.lastSolverSolution = solution;
 
+                // Recalculate Total Gen from solved state
+                let finalTotalGenP = 0;
+                currentData.forEach(d => { finalTotalGenP += d.gp; });
+
                 const baseKV = parseFloat(document.getElementById('baseKVInput').value) || 230;
 
-                document.getElementById('totalGenDisplay').innerText = totalGenP.toFixed(2) + " MW";
+                document.getElementById('totalGenDisplay').innerText = finalTotalGenP.toFixed(2) + " MW";
                 document.getElementById('totalLoadDisplay').innerText = totalLoadP.toFixed(2) + " MW";
 
                 renderLineFlows(baseMVA, baseKV);
@@ -5244,7 +5257,7 @@
                 const a2 = busTo.ang * Math.PI / 180;
 
                 const isTransformer = branch.type === 'transformer';
-                const r = isTransformer ? 0.001 : (parseFloat(branch.r) || 0.0001);
+                const r = isTransformer ? 0.0001 : (parseFloat(branch.r) || 0);
                 const x = isTransformer ? ((branch.z_pct || 10) / 100) : (parseFloat(branch.x) || 0.0001);
                 const a = isTransformer ? (branch.tap || 1.0) : 1.0;
 
