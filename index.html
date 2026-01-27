@@ -4226,75 +4226,62 @@
                 `;
             }
 
-            // 5. GENERATE ITERATION JOURNAL BEFORE ASSEMBLE (Prevents backslash double-evaluation)
+            // 5. GENERATE ITERATION JOURNAL FROM REAL SOLVER DATA
             let iterationJournalHTML = "";
-            let v_states = currentData.map(b => b.mag);
-            let d_states = currentData.map(b => b.ang);
+            const solData = window.lastSolverSolution;
 
-            const totalLoadP = currentData.reduce((s, b) => s + b.lp, 0);
-            const loadFactor = totalLoadP / baseMVA;
-            const tolerance = (document.getElementById('toleranceInput')) ? (parseFloat(document.getElementById('toleranceInput').value) || 0.0001) : 0.0001;
-
-            let currentMismatch = loadFactor * 2.5;
-            let k = 0;
-            const maxIter = 20;
-
-            if (loadFactor === 0) {
-                iterationJournalHTML = `<div class="p-8 text-center bg-white rounded-2xl border border-slate-200 shadow-sm text-slate-400 italic">No load detected. System is balanced at 0.00 p.u. mismatch.</div>`;
+            if (!solData || !solData.history || solData.history.length === 0) {
+                iterationJournalHTML = `<div class="p-8 text-center bg-white rounded-2xl border border-slate-200 shadow-sm text-slate-400 italic">No convergence data available. Run simulation first.</div>`;
             } else {
-                while (currentMismatch > tolerance && k < maxIter) {
-                    k++;
+                solData.history.forEach((h, kIdx) => {
+                    const k = kIdx + 1;
                     let busMismatchRowsHTML = "";
                     let mismatchVectorValues = [];
-                    currentData.filter(b => b.bus > 1).forEach(bus => {
-                        const p_sch = (bus.gp - bus.lp) / baseMVA;
-                        const p_calc = (p_sch - currentMismatch * 0.4).toFixed(4);
-                        const dp = (p_sch - p_calc).toFixed(4);
 
+                    // Extract actual bus-by-bus mismatches from dP and dQ
+                    let dpIdx = 0;
+                    currentData.forEach((bus, bIdx) => {
+                        if (bus.bus === 1) return; // Slack
+                        const dpVal = h.dP[dpIdx] || 0;
                         busMismatchRowsHTML += `
                             <div class="pl-4 border-l border-slate-200 py-1">
                                 <span class="font-bold text-slate-700">Bus ${bus.bus}:</span><br/>
-                                $P_{${bus.bus},calc} = |V_{${bus.bus}}| \\sum_{j=1}^{${currentData.length}} |V_j| (G_{${bus.bus}j} \\cos \\delta_{${bus.bus}j} + B_{${bus.bus}j} \\sin \\delta_{${bus.bus}j}) = ${p_calc}$ p.u.<br/>
-                                $\\Delta P_{${bus.bus}} = ${p_sch.toFixed(4)} - ${p_calc} = ${dp}$
+                                $\\Delta P_{${bus.bus}} = P_{sch} - P_{calc} = ${dpVal.toFixed(6)}$ p.u.
                             </div>
                         `;
-                        mismatchVectorValues.push(dp);
+                        mismatchVectorValues.push(dpVal.toFixed(6));
+                        dpIdx++;
+                    });
+
+                    let dqIdx = 0;
+                    currentData.forEach((bus, bIdx) => {
+                        if (bus.bus === 1 || bus.type === 'PV') return;
+                        const dqVal = h.dQ[dqIdx] || 0;
+                        busMismatchRowsHTML += `
+                            <div class="pl-4 border-l border-orange-200 py-1 bg-orange-50/20">
+                                <span class="font-bold text-orange-700">Bus ${bus.bus} (Q):</span><br/>
+                                $\\Delta Q_{${bus.bus}} = Q_{sch} - Q_{calc} = ${dqVal.toFixed(6)}$ p.u.
+                            </div>
+                        `;
+                        mismatchVectorValues.push(dqVal.toFixed(6));
+                        dqIdx++;
                     });
 
                     let jacobianProof = "";
                     if (k === 1) {
-                        // Full Jacobian Assembly (Item 1)
-                        let jEntries = [];
-                        for (let i = 0; i < Math.min(n - 1, 3); i++) {
-                            let row = [];
-                            for (let j = 0; j < Math.min(n - 1, 3); j++) {
-                                if (i === j) row.push(`H_{${i + 2}${i + 2}}`);
-                                else row.push(`H_{${i + 2}${j + 2}}`);
-                            }
-                            jEntries.push(row.join(' & '));
-                        }
-
                         jacobianProof = `
                         <div class="bg-blue-50 p-6 rounded-2xl border border-blue-100 mb-8">
                             <h6 class="text-[10px] font-bold text-blue-500 uppercase mb-4 tracking-widest flex items-center gap-2"><i class="ph ph-grid-four"></i> Full Jacobian Assembly ($J^{(1)}$)</h6>
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                 <div class="text-[10px] font-mono text-blue-800">
-                                    \\[ J = \\begin{bmatrix} H & N \\\\ M & L \\end{bmatrix} = 
-                                    \\begin{bmatrix} 
-                                        ${jEntries.join(' & \\dots \\\\ ')} & \\dots \\\\
-                                        \\vdots & \\vdots & \\ddots
-                                    \\end{bmatrix} \\]
-                                    <p class="mt-4 text-[9px] text-blue-400 italic">Total Matrix Size: $(2n-2) \\times (2n-2)$ for slack reference.</p>
+                                    \\[ J = \\begin{bmatrix} H & N \\\\ M & L \\end{bmatrix} = \\begin{bmatrix} \\frac{\\partial P}{\\partial \\delta} & \\frac{\\partial P}{\\partial |V|} \\\\ \\frac{\\partial Q}{\\partial \\delta} & \\frac{\\partial Q}{\\partial |V|} \\end{bmatrix} \\]
+                                    <p class="mt-4 text-[9px] text-blue-400 italic">Matrix size: ${mismatchVectorValues.length}x${mismatchVectorValues.length} initialized using ${currentData.length} bus system topology.</p>
                                 </div>
                                 <div class="bg-white/60 p-4 rounded-xl space-y-3">
-                                    <div class="text-[9px] font-bold text-slate-400 uppercase">Diagonal Entry $H_{22}$ Sample:</div>
+                                    <div class="text-[9px] font-bold text-slate-400 uppercase">Diagonal Entry $H_{ii}$ Proof:</div>
                                     <div class="text-[10px] font-mono text-blue-700">
-                                        $H_{22} = \\frac{\\partial P_2}{\\partial \\delta_2} = -Q_{2,calc} - B_{22}|V_2|^2$<br/>
-                                        $H_{22} = -(${(currentMismatch * 0.1).toFixed(4)}$) - (${B[1][1].toFixed(3)}) (1.0)^2 = ${(-currentMismatch * 0.1 - B[1][1]).toFixed(4)}$
-                                    </div>
-                                    <div class="text-[9px] font-bold text-slate-400 uppercase mt-2">Off-Diagonal $N_{23}$ Sample:</div>
-                                    <div class="text-[10px] font-mono text-blue-700">
-                                        $N_{23} = |V_2|(G_{23}\\cos\\delta_{23} + B_{23}\\sin\\delta_{23}) \\approx ${G[1][2].toFixed(4)}$
+                                        $H_{ii} = -Q_{i,calc} - B_{ii}|V_i|^2$<br/>
+                                        Status: Computed for all active state variables.
                                     </div>
                                 </div>
                             </div>
@@ -4306,18 +4293,18 @@
                     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-fadeIn mb-12">
                         <div class="bg-slate-900 px-6 py-4 flex justify-between items-center">
                             <h4 class="text-white font-bold">Iteration ${k}</h4>
-                            <span class="text-[10px] text-slate-400 font-mono">Status: $\\max|\\Delta P| = ${currentMismatch.toExponential(3)}$</span>
+                            <span class="text-[10px] text-slate-400 font-mono">Status: $\\max|\\Delta P, \\Delta Q| = ${h.maxError.toExponential(3)}$</span>
                         </div>
                         
                         <div class="p-8 space-y-6">
                             ${jacobianProof}
                             <div>
                                 <h5 class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-4">A. Mismatch Vector Construction ($\\Delta S$)</h5>
-                                <div class="flex flex-col md:flex-row gap-8 items-center bg-slate-50 p-6 rounded-xl">
-                                    <div class="text-[10px] font-mono">
+                                <div class="flex flex-col md:flex-row gap-8 items-center bg-slate-50 p-6 rounded-xl overflow-x-auto">
+                                    <div class="text-[10px] font-mono shrink-0">
                                         \\[ \\Delta S^{(k)} = \\begin{bmatrix} ${mismatchVectorValues.join(' \\\\ ')} \\end{bmatrix} \\]
                                     </div>
-                                    <div class="grid grid-cols-1 gap-2 text-[10px] font-mono leading-relaxed text-slate-500">
+                                    <div class="grid grid-cols-2 gap-x-8 gap-y-2 text-[10px] font-mono leading-relaxed text-slate-500">
                                         ${busMismatchRowsHTML}
                                     </div>
                                 </div>
@@ -4328,21 +4315,16 @@
                                     <h5 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">B. Linear System Update</h5>
                                     <p class="text-xs text-slate-600 mb-4">Solving the sensitivity matrix equation:</p>
                                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-[10px] font-mono">
-                                        \\[ \\begin{bmatrix} \\Delta \\delta \\\\ \\Delta |V| \\end{bmatrix} = - [J^{(k)}]^{-1} \\begin{bmatrix} ${mismatchVectorValues.join(' \\\\ ')} \\end{bmatrix} \\]
-                                        <div class="text-center text-blue-600 mt-2">
-                                            $\\Delta \\delta \\approx ${(currentMismatch * 0.2).toFixed(5)} \\text{ rad}, \\quad \\Delta |V| \\approx ${(currentMismatch * 0.05).toFixed(5)} \\text{ p.u.}$
-                                        </div>
+                                        \\[ \\begin{bmatrix} \\Delta \\delta \\\\ \\Delta |V| \\end{bmatrix} = - [J^{(k)}]^{-1} \\begin{bmatrix} \\Delta P \\\\ \\Delta Q \\end{bmatrix} \\]
                                     </div>
                                 </div>
                                 <div>
                                     <h5 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">C. Updated Coordinate Workspace</h5>
                                     <div class="space-y-2">
                                         ${currentData.map((b, bIdx) => {
-                        const newV = (v_states[bIdx] - (currentMismatch * 0.05)).toFixed(4);
-                        const newD = (d_states[bIdx] - (currentMismatch * 5.2)).toFixed(2);
                         return `<div class="flex justify-between text-[11px] font-mono border-b pb-1">
                                                 <span class="text-slate-500 font-bold">Bus ${b.bus}</span>
-                                                <span>$V = ${newV}, \\delta = ${newD}^{\\circ}$</span>
+                                                <span>$V = ${h.V[bIdx].toFixed(5)}, \\delta = ${(h.Delta[bIdx] * 180 / Math.PI).toFixed(4)}^{\\circ}$</span>
                                             </div>`;
                     }).join('')}
                                     </div>
@@ -4351,8 +4333,7 @@
                         </div>
                     </div>
                 `;
-                    currentMismatch *= 0.15;
-                }
+                });
             }
 
             // Assemble Final HTML
@@ -4989,6 +4970,187 @@
         }
 
 
+        // --- RIGOROUS NEWTON-RAPHSON SOLVER ---
+        function solvePowerFlow(busData, branchData, baseMVA = 100, maxIter = 20, tolerance = 0.0001) {
+            const n = busData.length;
+            const busMap = new Map();
+            busData.forEach((b, i) => busMap.set(b.bus, i));
+
+            // Identify Bus Types
+            const pqBuses = [], pvBuses = [];
+            let slackIdx = -1;
+            busData.forEach((b, i) => {
+                if (b.bus === 1) slackIdx = i; // Fixed Slack at Bus 1
+                else if (b.gp > 0 && b.lp === 0) pvBuses.push(i); // Simplified PV detection
+                else pqBuses.push(i); // Default to PQ
+            });
+
+            // Initialize State Variables (Float Start)
+            let V = busData.map(b => b.mag || 1.0);
+            let Delta = busData.map(b => (b.ang || 0) * Math.PI / 180);
+
+            // Construct Y-Bus Matrix
+            const G = Array.from({ length: n }, () => new Float64Array(n).fill(0));
+            const B = Array.from({ length: n }, () => new Float64Array(n).fill(0));
+
+            branchData.forEach(br => {
+                const i = busMap.get(br.from);
+                const k = busMap.get(br.to);
+                if (i === undefined || k === undefined) return;
+
+                const isTrans = br.type === 'transformer';
+                const r = isTrans ? 0.001 : (parseFloat(br.r) || 0.0001);
+                const x = isTrans ? ((br.z_pct || 10) / 100) : (parseFloat(br.x) || 0.0001);
+                const a = isTrans ? (parseFloat(br.tap) || 1.0) : 1.0;
+                const b_sh = parseFloat(br.b_charging) || 0;
+
+                const den = r * r + x * x;
+                const g_line = r / den;
+                const b_line = -x / den;
+
+                // Off-diagonals: Yik = Yki = -y / a
+                G[i][k] -= g_line / a; B[i][k] -= b_line / a;
+                G[k][i] -= g_line / a; B[k][i] -= b_line / a;
+
+                // Diagonals
+                G[i][i] += g_line / (a * a);
+                B[i][i] += b_line / (a * a) + b_sh / 2;
+
+                G[k][k] += g_line;
+                B[k][k] += b_line + b_sh / 2;
+            });
+
+            let history = [];
+
+            for (let iter = 0; iter < maxIter; iter++) {
+                const P_calc = new Float64Array(n);
+                const Q_calc = new Float64Array(n);
+
+                // 1. Calculate Power at each bus
+                for (let i = 0; i < n; i++) {
+                    for (let j = 0; j < n; j++) {
+                        const d_ij = Delta[i] - Delta[j];
+                        P_calc[i] += V[i] * V[j] * (G[i][j] * Math.cos(d_ij) + B[i][j] * Math.sin(d_ij));
+                        Q_calc[i] += V[i] * V[j] * (G[i][j] * Math.sin(d_ij) - B[i][j] * Math.cos(d_ij));
+                    }
+                }
+
+                // 2. Calculate Mismatches
+                const dP = [], dQ = [];
+                const stateMap = []; // Maps Jacobian indices to [busIdx, type (0=delta, 1=V)]
+
+                // Delta sub-vector (for all but Slack)
+                busData.forEach((b, i) => {
+                    if (i === slackIdx) return;
+                    const P_sch = (b.gp - b.lp) / baseMVA;
+                    dP.push(P_sch - P_calc[i]);
+                    stateMap.push({ busIdx: i, type: 0 });
+                });
+
+                // Magnitude sub-vector (for PQ only)
+                busData.forEach((b, i) => {
+                    if (i === slackIdx || pvBuses.includes(i)) return;
+                    const Q_sch = (b.gq - b.lq + (b.injQ || 0)) / baseMVA;
+                    dQ.push(Q_sch - Q_calc[i]);
+                    stateMap.push({ busIdx: i, type: 1 });
+                });
+
+                const mismatches = dP.concat(dQ);
+                const maxError = Math.max(...mismatches.map(Math.abs));
+                // Rigorous update: Store full mismatch vectors for manual calc modal
+                history.push({
+                    iter: iter + 1,
+                    maxError,
+                    dP: [...dP],
+                    dQ: [...dQ],
+                    V: [...V],
+                    Delta: [...Delta]
+                });
+
+                if (maxError < tolerance) {
+                    return { converged: true, V, Delta, iterations: iter + 1, history };
+                }
+
+                // 3. Build Jacobian
+                const m = mismatches.length;
+                const J = Array.from({ length: m }, () => new Float64Array(m).fill(0));
+
+                for (let row = 0; row < m; row++) {
+                    const i = stateMap[row].busIdx;
+                    const rowType = stateMap[row].type;
+
+                    for (let col = 0; col < m; col++) {
+                        const k = stateMap[col].busIdx;
+                        const colType = stateMap[col].type;
+
+                        if (rowType === 0 && colType === 0) { // H = dP/dDelta
+                            if (i === k) J[row][col] = -Q_calc[i] - B[i][i] * V[i] * V[i];
+                            else J[row][col] = V[i] * V[k] * (G[i][k] * Math.sin(Delta[i] - Delta[k]) - B[i][k] * Math.cos(Delta[i] - Delta[k]));
+                        }
+                        else if (rowType === 0 && colType === 1) { // N = dP/dV * V
+                            if (i === k) J[row][col] = P_calc[i] + G[i][i] * V[i] * V[i];
+                            else J[row][col] = V[i] * V[k] * (G[i][k] * Math.cos(Delta[i] - Delta[k]) + B[i][k] * Math.sin(Delta[i] - Delta[k]));
+                        }
+                        else if (rowType === 1 && colType === 0) { // M = dQ/dDelta
+                            if (i === k) J[row][col] = P_calc[i] - G[i][i] * V[i] * V[i];
+                            else J[row][col] = -V[i] * V[k] * (G[i][k] * Math.cos(Delta[i] - Delta[k]) + B[i][k] * Math.sin(Delta[i] - Delta[k]));
+                        }
+                        else if (rowType === 1 && colType === 1) { // L = dQ/dV * V
+                            if (i === k) J[row][col] = Q_calc[i] - B[i][i] * V[i] * V[i];
+                            else J[row][col] = V[i] * V[k] * (G[i][k] * Math.sin(Delta[i] - Delta[k]) - B[i][k] * Math.cos(Delta[i] - Delta[k]));
+                        }
+                    }
+                }
+
+                // 4. Solve J * dx = mismatches
+                const dx = solveLinearSystem(J, mismatches);
+
+                // 5. Update State
+                for (let i = 0; i < m; i++) {
+                    const busIdx = stateMap[i].busIdx;
+                    if (stateMap[i].type === 0) Delta[busIdx] += dx[i];
+                    else V[busIdx] += dx[i] * V[busIdx]; // Here we solved for dV/V
+                }
+            }
+
+            return { converged: false, V, Delta, iterations: maxIter, history };
+        }
+
+        function solveLinearSystem(A, b) {
+            const n = b.length;
+            for (let i = 0; i < n; i++) {
+                let max = Math.abs(A[i][i]);
+                let maxRow = i;
+                for (let k = i + 1; k < n; k++) {
+                    if (Math.abs(A[k][i]) > max) {
+                        max = Math.abs(A[k][i]);
+                        maxRow = k;
+                    }
+                }
+                [A[i], A[maxRow]] = [A[maxRow], A[i]];
+                [b[i], b[maxRow]] = [b[maxRow], b[i]];
+
+                for (let k = i + 1; k < n; k++) {
+                    let c = -A[k][i] / A[i][i];
+                    for (let j = i; j < n; j++) {
+                        if (i === j) A[k][j] = 0;
+                        else A[k][j] += c * A[i][j];
+                    }
+                    b[k] += c * b[i];
+                }
+            }
+
+            const x = new Float64Array(n);
+            for (let i = n - 1; i >= 0; i--) {
+                x[i] = b[i] / A[i][i];
+                for (let k = i - 1; k >= 0; k--) {
+                    b[k] -= A[k][i] * x[i];
+                }
+            }
+            return x;
+        }
+
+
         // --- SIMULATION ---
         function runSimulation() {
             document.getElementById('inputState').classList.add('hidden');
@@ -5005,17 +5167,27 @@
                 totalLoadP += d.lp;
             });
 
-            // 2. Perform Simplified Power Flow Calculation
+            // 2. Perform Rigorous Newton-Raphson Calculation
             setTimeout(() => {
-                // Heuristic Solver
-                currentData.forEach(bus => {
-                    if (bus.bus === 1) return;
-                    const p_pu = bus.lp / baseMVA;
-                    const q_pu = bus.lq / baseMVA;
-                    bus.mag = 1.0 - (p_pu * 0.05) - (q_pu * 0.02);
-                    bus.ang = -(p_pu * 20) - (Math.random() * 2);
-                    if (bus.mag < 0.8) bus.mag = 0.8;
-                });
+                const solution = solvePowerFlow(currentData, activeBranches, baseMVA);
+
+                if (solution.converged) {
+                    currentData.forEach((bus, i) => {
+                        bus.mag = solution.V[i];
+                        bus.ang = solution.Delta[i] * 180 / Math.PI;
+                    });
+                    console.log(`NR Converged in ${solution.iterations} iterations.`);
+                } else {
+                    console.warn("NR Solver failed to converge within limits.");
+                    // Optionally keep current values anyway for visualization
+                    currentData.forEach((bus, i) => {
+                        bus.mag = solution.V[i];
+                        bus.ang = solution.Delta[i] * 180 / Math.PI;
+                    });
+                }
+
+                // Store solution history for manual calc modal
+                window.lastSolverSolution = solution;
 
                 const baseKV = parseFloat(document.getElementById('baseKVInput').value) || 230;
 
@@ -5041,7 +5213,7 @@
 
                 isSimulationSolved = true;
                 renderInputTable();
-            }, 1200);
+            }, 1000);
 
             switchTab('line-flows');
         }
@@ -6020,78 +6192,19 @@
             renderPVCurve(results, probeBusId);
         }
 
-        // Simplified Newton-Raphson Solver for Analysis tasks (No UI updates)
+        // Newton-Raphson Solver for Analysis tasks
         function solveLoadFlowHeadless(busData, branchData) {
-            // Basic params
-            const maxIter = 20;
-            const tolerance = 0.001;
+            const baseMVA = parseFloat(document.getElementById('baseMVAInput').value) || 100;
+            const res = solvePowerFlow(busData, branchData, baseMVA, 20, 0.001);
 
-            // Init
-            let buses = JSON.parse(JSON.stringify(busData));
-            // Flat start for unknowns
-            buses.forEach(b => {
-                if (b.bus !== 1) { // 1 is Slack
-                    b.mag = 1.0;
-                    b.ang = 0.0;
-                } else {
-                    b.mag = 1.0; // Slack fixed
-                    b.ang = 0.0;
-                }
+            // Build the same structure back
+            const buses = JSON.parse(JSON.stringify(busData));
+            buses.forEach((b, i) => {
+                b.mag = res.V[i];
+                b.ang = res.Delta[i] * 180 / Math.PI;
             });
 
-            // Ybus Construction (Simplified for speed)
-            const size = buses.length;
-            const busMap = new Map(buses.map((b, i) => [b.bus, i]));
-
-            let Y = Array.from({ length: size }, () => Array(size).fill({ g: 0, b: 0 }));
-
-            // Populate Y (Naive O(N^2) but fine for 30 buses)
-            branchData.forEach(br => {
-                const i = busMap.get(br.from);
-                const k = busMap.get(br.to);
-                if (i === undefined || k === undefined) return;
-
-                const r = br.r || 0.01;
-                const x = br.x || 0.1;
-                const den = r * r + x * x;
-                const g = r / den;
-                const b = -x / den; // b_series
-
-                // Off-diagonal
-                Y[i][k] = { g: -g, b: -b };
-                Y[k][i] = { g: -g, b: -b };
-
-                // Diagonal accumulation
-                // (Need better matrix logic for robust solver, but heuristic approximation sufficient for demo trends)
-            });
-            // Note: This headless solver is a placeholder. 
-            // Implementing a full robust NR solver in 50 lines is hard.
-            // For the purpose of the "Visualization" we will use a Trend Function 
-            // that mimics physics if exact solver is too heavy.
-
-            // Heuristic Fallback for Demo Stability (Robustness)
-            // Real NR is brittle. We simulate the PV curve shape: V = sqrt(1 - (P/Pmax)^2) approx
-            // We'll use the inputs to create a "Simulated" result if calculation is complex.
-
-            // Actually, let's use the Heuristic voltage drop from DailySim logic
-            // V_new = V_old - (I * Z)
-
-            let converged = true;
-            // Iterate buses to apply voltage drop
-            buses.forEach(b => {
-                if (b.bus !== 1) {
-                    // Voltage drops proportional to total system load P^2
-                    // Normalized:
-                    const totalGen = buses[0].gp || 100; // Slack
-                    const pFactor = (b.lp * 0.05); // Rough impedance factor
-                    b.mag = 1.02 - (pFactor * 0.1) - (Math.random() * 0.001);
-
-                    // Collapse condition
-                    if (b.mag < 0.6) converged = false;
-                }
-            });
-
-            return { converged: converged, buses: buses };
+            return { converged: res.converged, buses: buses };
         }
 
         // Use a more realistic "Physics-lite" curve generator for the chart
