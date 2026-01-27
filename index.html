@@ -4701,7 +4701,75 @@
 
                 <section class="space-y-8">
                     <div class="flex items-center gap-4">
-                        <span class="w-12 h-12 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-xl shadow-lg">7</span>
+                        <span class="w-12 h-12 bg-slate-800 text-white rounded-full flex items-center justify-center font-bold text-xl shadow-lg">7</span>
+                        <h3 class="text-2xl font-bold text-slate-800">Sending & Receiving End Power Summary</h3>
+                    </div>
+                    <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
+                        <table class="w-full text-[11px] text-center border-collapse border border-slate-300">
+                            <thead>
+                                <tr class="bg-slate-50 font-bold text-slate-700">
+                                    <th colspan="2" class="border border-slate-300 px-3 py-2">Line</th>
+                                    <th colspan="2" class="border border-slate-300 px-3 py-2">Sending end</th>
+                                    <th colspan="2" class="border border-slate-300 px-3 py-2">Receiving end</th>
+                                </tr>
+                                <tr class="bg-slate-50 text-[9px] uppercase tracking-wider text-slate-500 font-bold">
+                                    <th class="border border-slate-300 px-3 py-2">From</th>
+                                    <th class="border border-slate-300 px-3 py-2">To</th>
+                                    <th class="border border-slate-300 px-3 py-2">P (MW)</th>
+                                    <th class="border border-slate-300 px-3 py-2">Q (Mvar)</th>
+                                    <th class="border border-slate-300 px-3 py-2">P (MW)</th>
+                                    <th class="border border-slate-300 px-3 py-2">Q (Mvar)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 font-mono text-slate-700">
+                                ${(() => {
+                    let rows = "";
+                    activeBranches.forEach(branch => {
+                        const fromBus = currentData.find(b => b.bus == branch.from);
+                        const toBus = currentData.find(b => b.bus == branch.to);
+                        if (!fromBus || !toBus) return;
+
+                        const v1 = fromBus.mag;
+                        const v2 = toBus.mag;
+                        const a1 = fromBus.ang * Math.PI / 180;
+                        const a2 = toBus.ang * Math.PI / 180;
+                        const da = a1 - a2;
+
+                        const isXfmr = branch.type === 'transformer';
+                        const tap = isXfmr ? (branch.tap || 1.0) : 1.0;
+                        const r = isXfmr ? 0.001 : (parseFloat(branch.r) || 0.02);
+                        const x = isXfmr ? ((branch.z_pct || 10) / 100) : (parseFloat(branch.x) || 0.1);
+                        const b_sh = parseFloat(branch.b_charging) || 0;
+
+                        const den = r * r + x * x;
+                        const g = r / den;
+                        const b = -x / den;
+
+                        const p_ft = Math.pow(v1 / tap, 2) * g - (v1 / tap) * v2 * (g * Math.cos(da) + b * Math.sin(da));
+                        const q_ft = -Math.pow(v1 / tap, 2) * (b + b_sh) - (v1 / tap) * v2 * (g * Math.sin(da) - b * Math.cos(da));
+                        const p_tf = v2 * v2 * g - (v2 * (v1 / tap)) * (g * Math.cos(-da) + b * Math.sin(-da));
+                        const q_tf = -v2 * v2 * (b + b_sh) - (v2 * (v1 / tap)) * (g * Math.sin(-da) - b * Math.cos(-da));
+
+                        rows += `
+                                            <tr class="hover:bg-slate-50 transition-colors">
+                                                <td class="border border-slate-200 px-3 py-2 font-bold text-slate-900">${branch.from}</td>
+                                                <td class="border border-slate-200 px-3 py-2 font-bold text-slate-900">${branch.to}</td>
+                                                <td class="border border-slate-200 px-3 py-2 text-emerald-600 font-bold">${(p_ft * baseMVA).toFixed(3)}</td>
+                                                <td class="border border-slate-200 px-3 py-2 text-emerald-600">${(q_ft * baseMVA).toFixed(3)}</td>
+                                                <td class="border border-slate-200 px-3 py-2 text-red-600 font-bold">${(p_tf * baseMVA).toFixed(3)}</td>
+                                                <td class="border border-slate-200 px-3 py-2 text-red-600">${(q_tf * baseMVA).toFixed(3)}</td>
+                                            </tr>
+                                        `;
+                    });
+                    return rows;
+                })()}
+                            </tbody>
+                        </table>
+                    </div>
+
+                <section class="space-y-8">
+                    <div class="flex items-center gap-4">
+                        <span class="w-12 h-12 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-xl shadow-lg">8</span>
                         <h3 class="text-2xl font-bold text-slate-800">Final System State (Converged Results)</h3>
                     </div>
                     
