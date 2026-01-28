@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -3833,20 +3832,13 @@
         let solverInterval = null;
         let currentSolverStep = 0;
 
-        function prepareSolverData(loadFactor) {
+        function prepareSolverData(solution) {
             solverQueue = [];
             currentSolverStep = 0;
 
-            // Get User Defined Limits
             const toleranceInput = document.getElementById('toleranceInput');
-            const busCountDisplay = document.getElementById('busCountDisplay');
-
-            const maxIter = 20;
             const tolerance = toleranceInput ? (parseFloat(toleranceInput.value) || 0.0001) : 0.0001;
-            // Use currentData length if available, otherwise fallback to display
-            const busCount = (typeof currentData !== 'undefined' && currentData.length > 0)
-                ? currentData.length
-                : (busCountDisplay ? (parseInt(busCountDisplay.innerText) || 0) : 0);
+            const busCount = currentData.length;
 
             // Step 1: Init
             solverQueue.push({
@@ -3855,157 +3847,180 @@
                 eq: "$$ |V_i| = 1.0, \\delta_i = 0 \\quad \\forall i \\in \\text{PQ Buses} $$"
             });
 
-            if (loadFactor === 0) {
-                solverQueue.push({ node: 'flow-check', text: "> Max Mismatch: 0.0000. System balanced.", eq: "$$ \\Delta P \\approx 0, \\Delta Q \\approx 0 $$" });
-                return;
-            }
-
-            // Step 2: Y-Bus Matrix Construction (Full Calculation)
-            // Simulate Impedances (since not stored by user input)
+            // Step 2: Y-Bus Matrix Construction
             const buses = currentData.map(b => b.bus);
             const size = buses.length;
+            let Ybus = Array.from({ length: size }, () => Array.from({ length: size }, () => ({ g: 0, b: 0 })));
 
-            // Init YBus Complex Array [real, imag]
-            // Use distinct objects for each cell
-            let Ybus = Array.from({ length: size }, () =>
-                Array.from({ length: size }, () => ({ g: 0, b: 0 }))
-            );
-
-            // Populate Ybus Structure
             activeBranches.forEach(br => {
                 const i = buses.indexOf(br.from);
                 const k = buses.indexOf(br.to);
                 if (i === -1 || k === -1) return;
-
-                // Default values if undefined
-                const r = br.r !== undefined ? br.r : 0.01;
-                const x = br.x !== undefined ? br.x : 0.08;
+                const r = br.r !== undefined ? br.r : (br.type === 'transformer' ? 0 : 0.01);
+                const x = br.x !== undefined ? br.x : (br.type === 'transformer' ? 0.05 : 0.08);
                 const b_sh = br.b_charging !== undefined ? br.b_charging : 0;
+                const isTrans = br.type === 'transformer';
+                const tap = isTrans ? (parseFloat(br.tap) || 1.0) : 1.0;
 
-                // Series Admittance y = 1/(r+jx) = (r - jx)/(r^2 + x^2)
                 const den = r * r + x * x;
                 const G_s = den > 0 ? r / den : 10000;
                 const B_s = den > 0 ? -x / den : -10000;
 
-                // Off-diagonal: Y_ik = -y_ik
-                Ybus[i][k].g -= G_s;
-                Ybus[i][k].b -= B_s;
-
-                Ybus[k][i].g -= G_s;
-                Ybus[k][i].b -= B_s;
-
-                // Diagonal: Y_ii = sum(y_ik + j B_ik/2)
-                Ybus[i][i].g += G_s;
-                Ybus[i][i].b += (B_s + b_sh);
-
+                const g_ik = G_s * tap;
+                const b_ik = B_s * tap;
+                Ybus[i][k].g -= g_ik; Ybus[i][k].b -= b_ik;
+                Ybus[k][i].g -= g_ik; Ybus[k][i].b -= b_ik;
+                Ybus[i][i].g += G_s * (tap * tap);
+                Ybus[i][i].b += (B_s * (tap * tap) + b_sh);
                 Ybus[k][k].g += G_s;
                 Ybus[k][k].b += (B_s + b_sh);
             });
 
-            // Re-calc Diagonals properly
             let yMatrixHTML = "$$ \\begin{bmatrix} ";
-
-            // Limiting display to 10x10 to prevent browser crash on render, or scrollable full text
-            // User asked for "Full Ybus". Showing all elements as the system is capped at 15 buses.
-            const displayLimit = size;
-
-            for (let r = 0; r < displayLimit; r++) {
-                for (let c = 0; c < displayLimit; c++) {
+            for (let r = 0; r < size; r++) {
+                for (let c = 0; c < size; c++) {
                     const cell = Ybus[r][c];
-
-                    // Format Complex Number
-                    // If near zero
-                    if (Math.abs(cell.g) < 0.001 && Math.abs(cell.b) < 0.001) {
-                        yMatrixHTML += "0";
-                    } else {
+                    if (Math.abs(cell.g) < 0.001 && Math.abs(cell.b) < 0.001) yMatrixHTML += "0";
+                    else {
                         const sign = cell.b >= 0 ? "+" : "-";
                         yMatrixHTML += `${cell.g.toFixed(2)} ${sign} j${Math.abs(cell.b).toFixed(2)}`;
                     }
-
-                    if (c < displayLimit - 1) yMatrixHTML += " & ";
+                    if (c < size - 1) yMatrixHTML += " & ";
                 }
-                if (r < displayLimit - 1) yMatrixHTML += " \\\\ ";
+                if (r < size - 1) yMatrixHTML += " \\\\ ";
             }
             yMatrixHTML += " \\end{bmatrix} $$";
 
             solverQueue.push({
                 node: 'flow-start',
-                text: `> Step 2: Build Admittance Matrix (Ybus). System Size: ${size}x${size}.<div class='text-white my-1 pl-4 text-xs opacity-90 max-h-60 overflow-y-auto scroll-custom border border-slate-600 p-2 bg-slate-800 rounded'>
-            ${yMatrixHTML}
-        </div>`,
+                text: `> Step 2: Build Admittance Matrix (Ybus). System Size: ${size}x${size}.<div class='text-white my-1 pl-4 text-xs opacity-90 max-h-60 overflow-y-auto scroll-custom border border-slate-600 p-2 bg-slate-800 rounded'>${yMatrixHTML}</div>`,
                 eq: "$$ Y_{bus} = G + jB $$"
             });
 
-            let maxMismatch = loadFactor * 2.5;
             let iterations = 0;
-
             let iterationData = [];
 
-            // Updated Loop Condition with maxIter and dynamic tolerance
-            while (maxMismatch > tolerance && iterations < maxIter) {
-                iterations++;
-                iterationData.push({ mismatch: maxMismatch });
+            if (solution && solution.history) {
+                solution.history.forEach((h, idx) => {
+                    iterations = h.iter;
+                    iterationData.push({ mismatch: h.maxError });
 
-                // Mismatches - Detailed Formula
-                solverQueue.push({
-                    node: 'flow-mismatch',
-                    text: `> Iteration ${iterations}: Calculating Flows.<div class='text-white my-1 pl-4 text-xs opacity-90'>$$ P_{calc} \\approx ${(1.0 - maxMismatch / 2).toFixed(4)} \\text{ p.u.}, \\quad Q_{calc} \\approx ${(0.5 - maxMismatch / 4).toFixed(4)} \\text{ p.u.} $$</div>`,
-                    eq: "$$ P_i^{calc} = \\sum_{k=1}^N |V_i||V_k|(G_{ik}\\cos\\theta_{ik} + B_{ik}\\sin\\theta_{ik}) $$"
-                });
-                solverQueue.push({
-                    node: 'flow-mismatch',
-                    text: `> Computing Residuals(Delta).<div class='text-white my-1 pl-4 text-xs opacity-90'>$$ \\Delta P \\approx ${maxMismatch.toFixed(5)}, \\quad \\Delta Q \\approx ${(maxMismatch * 0.8).toFixed(5)} $$</div>`,
-                    eq: "$$ \\Delta P_i = P_i^{sch} - P_i^{calc} \\\\ \\Delta Q_i = Q_i^{sch} - Q_i^{calc} $$"
-                });
+                    solverQueue.push({
+                        node: 'flow-mismatch',
+                        text: `> Iteration ${iterations}: Calculating Flows.<div class='text-white my-1 pl-4 text-xs opacity-90'>Newton-Raphson mismatch evaluation...</div>`,
+                        eq: "$$ P_i^{calc} = \\sum_{k=1}^N |V_i||V_k|(G_{ik}\\cos\\theta_{ik} + B_{ik}\\sin\\theta_{ik}) $$"
+                    });
 
-                solverQueue.push({
-                    node: 'flow-check',
-                    text: `  Convergence Check.<div class='text-white my-1 pl-4 text-xs opacity-90'>$$ \\max(\\Delta P) \\approx ${maxMismatch.toFixed(5)}, \\quad \\max(\\Delta Q) \\approx ${(maxMismatch * 0.9).toFixed(5)} $$</div>`,
-                    eq: `$$ \\max(|\\Delta P |, |\\Delta Q |) > \\epsilon(${tolerance}) $$`,
-                    iterationNum: iterations,
-                    mismatchVal: maxMismatch
-                });
+                    solverQueue.push({
+                        node: 'flow-mismatch',
+                        text: `> Computing Residuals.<div class='text-white my-1 pl-4 text-xs opacity-90'>$$ \\max|\\Delta P, \\Delta Q| = ${h.maxError.toExponential(4)} $$</div>`,
+                        eq: "$$ \\Delta P_i = P_i^{sch} - P_i^{calc} \\\\ \\Delta Q_i = Q_i^{sch} - Q_i^{calc} $$"
+                    });
 
-                // Jacobian - Matrix Structure (Detailed)
-                solverQueue.push({
-                    node: 'flow-jacobian',
-                    text: "> Building Jacobian Matrix J.<div class='text-white my-1 pl-4 text-xs opacity-90'>$$ \\begin{aligned} \\frac{\\partial P}{\\partial \\delta} &\\approx ${(10 + iterations).toFixed(1)} & \\frac{\\partial P}{\\partial V} &\\approx ${(2 + iterations * 0.1).toFixed(1)} \\\\ \\frac{\\partial Q}{\\partial \\delta} &\\approx ${(1 + iterations * 0.1).toFixed(1)} & \\frac{\\partial Q}{\\partial V} &\\approx ${(8 + iterations).toFixed(1)} \\end{aligned} $$</div>",
-                    eq: "$$ J = \\begin{bmatrix} \\frac{\\partial P}{\\partial \\delta} & \\frac{\\partial P}{\\partial |V|} \\\\ \\frac{\\partial Q}{\\partial \\delta} & \\frac{\\partial Q}{\\partial |V|} \\end{bmatrix} $$"
-                });
+                    solverQueue.push({
+                        node: 'flow-check',
+                        text: `  Convergence Check.<div class='text-white my-1 pl-4 text-xs opacity-90'>$$ ${h.maxError.toFixed(6)} ${h.maxError <= tolerance ? '\\le' : '>'} ${tolerance} $$</div>`,
+                        eq: `$$ \\max(|\\Delta S |) > \\epsilon $$`,
+                        iterationNum: iterations,
+                        mismatchVal: h.maxError
+                    });
 
-                // Update - Matrix Equation
-                solverQueue.push({
-                    node: 'flow-update',
-                    text: "> Solving Linear System (Ax = b).<div class='text-white my-1 pl-4 text-xs opacity-90'>$$ \\Delta \\delta \\approx ${(maxMismatch * 0.5).toFixed(5)} rad, \\quad \\Delta V \\approx ${(maxMismatch * 0.1).toFixed(5)} p.u. $$</div>",
-                    eq: "$$ \\begin{bmatrix} \\Delta \\delta \\\\ \\Delta |V| \\end{bmatrix} = - [J]^{-1} \\begin{bmatrix} \\Delta P \\\\ \\Delta Q \\end{bmatrix} $$"
-                });
-
-                // Update - State Variables
-                solverQueue.push({
-                    node: 'flow-update',
-                    text: "> Applying corrections.<div class='text-white my-1 pl-4 text-xs opacity-90'>$$ \\begin{aligned} |V|_{new} &= |V|_{old} + ${(maxMismatch * 0.1).toFixed(4)} \\\\ \\delta_{new} &= \\delta_{old} + ${(maxMismatch * 0.5).toFixed(4)} \\end{aligned} $$</div>",
-                    eq: "$$ \\delta_i^{(k+1)} = \\delta_i^{(k)} + \\Delta \\delta_i \\\\ |V_i|^{(k+1)} = |V_i|^{(k)} + \\Delta |V_i| $$"
+                    if (h.maxError > tolerance) {
+                        solverQueue.push({
+                            node: 'flow-jacobian',
+                            text: "> Updating Jacobian sensitivities.",
+                            eq: "$$ J = \\begin{bmatrix} \\frac{\\partial P}{\\partial \\delta} & \\frac{\\partial P}{\\partial |V|} \\\\ \\frac{\\partial Q}{\\partial \\delta} & \\frac{\\partial Q}{\\partial |V|} \\end{bmatrix} $$"
+                        });
+                        solverQueue.push({
+                            node: 'flow-update',
+                            text: "> Solving linearized system.",
+                            eq: "$$ [\\Delta x] = - [J]^{-1} [\\Delta S] $$"
+                        });
+                        solverQueue.push({
+                            node: 'flow-update',
+                            text: "> Applying state updates.",
+                            eq: "$$ x^{(k+1)} = x^{(k)} + \\Delta x $$"
+                        });
+                    }
                 });
 
-                maxMismatch *= 0.15; // Simulate convergence
-            }
-
-            // Check Convergence against custom tolerance
-            if (maxMismatch <= tolerance) {
-                solverQueue.push({
-                    node: 'flow-check',
-                    text: "> Converged! Solution found.<div class='text-white my-1 pl-4 text-xs opacity-90'>$$ \\max(\\epsilon) = ${maxMismatch.toExponential(2)} \\le ${tolerance} $$</div>",
-                    eq: "$$ \\text{Solution Found in } " + iterations + " \\text{ Iterations} $$"
-                });
+                if (solution.converged) {
+                    solverQueue.push({
+                        node: 'flow-check',
+                        text: `> Converged! Solution found in ${iterations} iterations.<div class='text-white my-1 pl-4 text-xs opacity-90'>$$ \\max(\\epsilon) = ${solution.history[solution.history.length - 1].maxError.toExponential(2)} $$</div>`,
+                        eq: `$$ \\text{Converged at Iteration } ${iterations} $$`
+                    });
+                } else {
+                    solverQueue.push({
+                        node: 'flow-check',
+                        text: `> FAILED TO CONVERGE.<div class='text-white my-1 pl-4 text-xs opacity-90'>$$ \\text{Limit reached: } ${iterations} \\text{ iterations} $$</div>`,
+                        eq: `$$ \\text{Final Mismatch: } ${solution.history[solution.history.length - 1].maxError.toFixed(5)} $$`
+                    });
+                }
             } else {
-                solverQueue.push({
-                    node: 'flow-check',
-                    text: `> FAILED TO CONVERGE.<div class='text-white my-1 pl-4 text-xs opacity-90'>$$ \\max(\\epsilon) = ${maxMismatch.toFixed(5)} > ${tolerance} $$</div>`,
-                    eq: `$$ \\text{Final Mismatch: } ${maxMismatch.toFixed(5)} > \\epsilon $$`
-                });
+                // Fallback to simulated loop if no real solution is provided
+                let maxMismatch = 0.5; // Start with a simulated mismatch
+                const maxIter = 20;
+
+                while (maxMismatch > tolerance && iterations < maxIter) {
+                    iterations++;
+                    iterationData.push({ mismatch: maxMismatch });
+
+                    solverQueue.push({
+                        node: 'flow-mismatch',
+                        text: `> Iteration ${iterations}: Calculating Flows.<div class='text-white my-1 pl-4 text-xs opacity-90'>$$ P_{calc} \\approx ${(1.0 - maxMismatch / 2).toFixed(4)} \\text{ p.u.}, \\quad Q_{calc} \\approx ${(0.5 - maxMismatch / 4).toFixed(4)} \\text{ p.u.} $$</div>`,
+                        eq: "$$ P_i^{calc} = \\sum_{k=1}^N |V_i||V_k|(G_{ik}\\cos\\theta_{ik} + B_{ik}\\sin\\theta_{ik}) $$"
+                    });
+                    solverQueue.push({
+                        node: 'flow-mismatch',
+                        text: `> Computing Residuals(Delta).<div class='text-white my-1 pl-4 text-xs opacity-90'>$$ \\Delta P \\approx ${maxMismatch.toFixed(5)}, \\quad \\Delta Q \\approx ${(maxMismatch * 0.8).toFixed(5)} $$</div>`,
+                        eq: "$$ \\Delta P_i = P_i^{sch} - P_i^{calc} \\\\ \\Delta Q_i = Q_i^{sch} - Q_i^{calc} $$"
+                    });
+
+                    solverQueue.push({
+                        node: 'flow-check',
+                        text: `  Convergence Check.<div class='text-white my-1 pl-4 text-xs opacity-90'>$$ \\max(\\Delta P) \\approx ${maxMismatch.toFixed(5)}, \\quad \\max(\\Delta Q) \\approx ${(maxMismatch * 0.9).toFixed(5)} $$</div>`,
+                        eq: `$$ \\max(|\\Delta P |, |\\Delta Q |) > \\epsilon(${tolerance}) $$`,
+                        iterationNum: iterations,
+                        mismatchVal: maxMismatch
+                    });
+
+                    solverQueue.push({
+                        node: 'flow-jacobian',
+                        text: "> Building Jacobian Matrix J.<div class='text-white my-1 pl-4 text-xs opacity-90'>$$ \\begin{aligned} \\frac{\\partial P}{\\partial \\delta} &\\approx ${(10 + iterations).toFixed(1)} & \\frac{\\partial P}{\\partial V} &\\approx ${(2 + iterations * 0.1).toFixed(1)} \\\\ \\frac{\\partial Q}{\\partial \\delta} &\\approx ${(1 + iterations * 0.1).toFixed(1)} & \\frac{\\partial Q}{\\partial V} &\\approx ${(8 + iterations).toFixed(1)} \\end{aligned} $$</div>",
+                        eq: "$$ J = \\begin{bmatrix} \\frac{\\partial P}{\\partial \\delta} & \\frac{\\partial P}{\\partial |V|} \\\\ \\frac{\\partial Q}{\\partial \\delta} & \\frac{\\partial Q}{\\partial |V|} \\end{bmatrix} $$"
+                    });
+
+                    solverQueue.push({
+                        node: 'flow-update',
+                        text: "> Solving Linear System (Ax = b).<div class='text-white my-1 pl-4 text-xs opacity-90'>$$ \\Delta \\delta \\approx ${(maxMismatch * 0.5).toFixed(5)} rad, \\quad \\Delta V \\approx ${(maxMismatch * 0.1).toFixed(5)} p.u. $$</div>",
+                        eq: "$$ \\begin{bmatrix} \\Delta \\delta \\\\ \\Delta |V| \\end{bmatrix} = - [J]^{-1} \\begin{bmatrix} \\Delta P \\\\ \\Delta Q \\end{bmatrix} $$"
+                    });
+
+                    solverQueue.push({
+                        node: 'flow-update',
+                        text: "> Applying corrections.<div class='text-white my-1 pl-4 text-xs opacity-90'>$$ \\begin{aligned} |V|_{new} &= |V|_{old} + ${(maxMismatch * 0.1).toFixed(4)} \\\\ \\delta_{new} &= \\delta_{old} + ${(maxMismatch * 0.5).toFixed(4)} \\end{aligned} $$</div>",
+                        eq: "$$ \\delta_i^{(k+1)} = \\delta_i^{(k)} + \\Delta \\delta_i \\\\ |V_i|^{(k+1)} = |V_i|^{(k)} + \\Delta |V_i| $$"
+                    });
+
+                    maxMismatch *= 0.15; // Simulate convergence
+                }
+
+                if (maxMismatch <= tolerance) {
+                    solverQueue.push({
+                        node: 'flow-check',
+                        text: "> Converged! Solution found.<div class='text-white my-1 pl-4 text-xs opacity-90'>$$ \\max(\\epsilon) = ${maxMismatch.toExponential(2)} \\le ${tolerance} $$</div>",
+                        eq: "$$ \\text{Solution Found in } " + iterations + " \\text{ Iterations} $$"
+                    });
+                } else {
+                    solverQueue.push({
+                        node: 'flow-check',
+                        text: `> FAILED TO CONVERGE.<div class='text-white my-1 pl-4 text-xs opacity-90'>$$ \\max(\\epsilon) = ${maxMismatch.toFixed(5)} > ${tolerance} $$</div>`,
+                        eq: `$$ \\text{Final Mismatch: } ${maxMismatch.toFixed(5)} > \\epsilon $$`
+                    });
+                }
             }
 
-            // Render Convergence Chart
             renderConvergenceChart(iterationData);
         }
 
@@ -4131,7 +4146,7 @@
                     const fromBus = currentData.find(b => b.bus == branch.from);
                     const busBaseKV = fromBus ? (fromBus.baseKV || 230) : 230;
                     const isXfmr = branch.type === 'transformer';
-                    let r = parseFloat(branch.r); if (isNaN(r)) r = isXfmr ? 0.001 : 0.02;
+                    let r = parseFloat(branch.r); if (isNaN(r)) r = isXfmr ? 0 : 0.02;
                     let x = parseFloat(branch.x); if (isNaN(x)) x = isXfmr ? 0.05 : 0.1;
                     const tap = parseFloat(branch.tap) || 1.0;
 
@@ -4157,11 +4172,11 @@
                             
                             ${isXfmr ? `
                             <div class="col-span-full border-t border-blue-100/50 pt-2 mt-1">
-                                <div class="text-[9px] font-bold text-amber-600 uppercase mb-1">$\\pi$-Equivalent Transformer Model (Tap $a=${tap.toFixed(3)}$)</div>
+                                <div class="text-[9px] font-bold text-amber-600 uppercase mb-1">$\pi$-Equivalent Transformer Model (Tap $a=V_s/V_p=${tap.toFixed(3)}$)</div>
                                 <div class="grid grid-cols-3 gap-2">
-                                    <div class="bg-white/50 p-1.5 rounded">$y_{series} = \\frac{y}{a} = ${(g / tap).toFixed(4)} ${b / tap >= 0 ? '+' : '-'} j${Math.abs(b / tap).toFixed(4)}$</div>
-                                    <div class="bg-white/50 p-1.5 rounded">$y_{from} = \\frac{1-a}{a^2} y = ${(((1 - tap) / (tap * tap)) * g).toFixed(4)} ${((1 - tap) / (tap * tap)) * b >= 0 ? '+' : '-'} j${Math.abs(((1 - tap) / (tap * tap)) * b).toFixed(4)}$</div>
-                                    <div class="bg-white/50 p-1.5 rounded">$y_{to} = \\frac{a-1}{a} y = ${(((tap - 1) / tap) * g).toFixed(4)} ${((tap - 1) / tap) * b >= 0 ? '+' : '-'} j${Math.abs(((tap - 1) / tap) * b).toFixed(4)}$</div>
+                                    <div class="bg-white/50 p-1.5 rounded">$y_{series} = a \cdot y = ${(g * tap).toFixed(4)} ${b * tap >= 0 ? '+' : '-'} j${Math.abs(b * tap).toFixed(4)}$</div>
+                                    <div class="bg-white/50 p-1.5 rounded">$y_{from} = (a^2-a) y = ${((tap * tap - tap) * g).toFixed(4)} ${(tap * tap - tap) * b >= 0 ? '+' : '-'} j${Math.abs((tap * tap - tap) * b).toFixed(4)}$</div>
+                                    <div class="bg-white/50 p-1.5 rounded">$y_{to} = (1-a) y = ${((1 - tap) * g).toFixed(4)} ${(1 - tap) * b >= 0 ? '+' : '-'} j${Math.abs((1 - tap) * b).toFixed(4)}$</div>
                                 </div>
                             </div>` : ''}
                         </div>
@@ -4184,21 +4199,21 @@
                     const tap = ba.tap;
 
                     // Off-diagonals
-                    const g_ik = -ba.g / tap;
-                    const b_ik = -ba.b / tap;
+                    const g_ik = -ba.g * tap;
+                    const b_ik = -ba.b * tap;
 
                     yBusStepsHTML += `
                     <div class="text-[10px] font-mono py-1 border-b border-slate-100 last:border-0">
                         <span class="text-slate-400">Add branch ${ba.from}-${ba.to}:</span><br/>
-                        $Y_{${ba.from}${ba.to}} = Y_{${ba.to}${ba.from}} = -y_{${ba.from}${ba.to}}/a = ${g_ik.toFixed(4)} ${b_ik >= 0 ? '+' : '-'}$ j${Math.abs(b_ik).toFixed(4)}<br/>
-                        $Y_{${ba.from}${ba.from}} \\leftarrow Y_{${ba.from}${ba.from}} + y_{${ba.from}${ba.to}}/a^2$<br/>
+                        $Y_{${ba.from}${ba.to}} = Y_{${ba.to}${ba.from}} = -a \cdot y_{${ba.from}${ba.to}} = ${g_ik.toFixed(4)} ${b_ik >= 0 ? '+' : '-'}$ j${Math.abs(b_ik).toFixed(4)}<br/>
+                        $Y_{${ba.from}${ba.from}} \\leftarrow Y_{${ba.from}${ba.from}} + a^2 \cdot y_{${ba.from}${ba.to}}$<br/>
                         $Y_{${ba.to}${ba.to}} \\leftarrow Y_{${ba.to}${ba.to}} + y_{${ba.from}${ba.to}}$
                     </div>
                 `;
 
                     G[i][k] += g_ik; B[i][k] += b_ik;
                     G[k][i] += g_ik; B[k][i] += b_ik;
-                    G[i][i] += ba.g / (tap * tap); B[i][i] += ba.b / (tap * tap);
+                    G[i][i] += ba.g * (tap * tap); B[i][i] += ba.b * (tap * tap);
                     G[k][k] += ba.g; B[k][k] += ba.b;
                 });
 
@@ -4522,7 +4537,7 @@
                             const toV = toBus.mag;
                             const isXfmr = branch.type === 'transformer';
                             const tap = isXfmr ? (branch.tap || 1.0) : 1.0;
-                            const r_br = isXfmr ? 0.001 : (parseFloat(branch.r) || 0.02);
+                            const r_br = isXfmr ? 0 : (parseFloat(branch.r) || 0.02);
                             const x_br = isXfmr ? ((branch.z_pct || 10) / 100) : (parseFloat(branch.x) || 0.1);
                             const den_z = r_br * r_br + x_br * x_br;
                             const g_br = r_br / den_z;
@@ -4531,12 +4546,12 @@
                             const a2 = toBus.ang * Math.PI / 180;
                             const da = a1 - a2;
 
-                            const p_pu = Math.pow(fromV / tap, 2) * g_br - (fromV / tap) * toV * (g_br * Math.cos(da) + b_br * Math.sin(da));
-                            const q_pu = -Math.pow(fromV / tap, 2) * b_br - (fromV / tap) * toV * (g_br * Math.sin(da) - b_br * Math.cos(da));
+                            const p_pu = Math.pow(fromV * tap, 2) * g_br - (fromV * tap) * toV * (g_br * Math.cos(da) + b_br * Math.sin(da));
+                            const q_pu = -Math.pow(fromV * tap, 2) * b_br - (fromV * tap) * toV * (g_br * Math.sin(da) - b_br * Math.cos(da));
                             const s_mva_val = Math.sqrt(p_pu * p_pu + q_pu * q_pu);
                             const busBaseKV = fromBus.baseKV || 230;
                             const baseAmps = (baseMVA * 1000) / (Math.sqrt(3) * busBaseKV);
-                            const current = (s_mva_val / fromV) * baseAmps;
+                            const current = (s_mva_val / (fromV * tap)) * baseAmps;
 
                             if (current > maxCurrent) {
                                 maxCurrent = current;
@@ -4645,15 +4660,15 @@
                                                     
                                                     <div class="space-y-6 text-[10px] font-mono bg-white p-6 rounded-xl border border-slate-100 shadow-sm overflow-x-auto">
                                                         <div class="space-y-4">
-                                                            <div class="text-blue-600 font-bold border-b border-blue-50 pb-1">1. Complex Power Flow Calculation ($S_{ij}$)</div>
-                                                            $P_{${branch.from}${branch.to}} = |\\frac{V_i}{a}|^2 g_{ij} - |\\frac{V_i}{a}||V_j|(g_{ij}\\cos\\delta_{ij} + b_{ij}\\sin\\delta_{ij})$<br/>
-                                                            $P = |\\frac{${fromV.toFixed(4)}}{${tap.toFixed(2)}}|^2(${g_br.toFixed(4)}) - |\\frac{${fromV.toFixed(4)}}{${tap.toFixed(2)}}|(${toV.toFixed(4)})(${g_br.toFixed(4)}\\cos(${(da * 180 / Math.PI).toFixed(2)}^\\circ) + ${b_br.toFixed(4)}\\sin(${(da * 180 / Math.PI).toFixed(2)}^\\circ)) = ${p_pu.toFixed(6)}$ p.u.<br/>
-                                                            <span class="text-emerald-600 font-bold">$P_{Actual} = ${p_pu.toFixed(6)} \\times ${baseMVA} = ${(p_pu * baseMVA).toFixed(2)}$ MW</span><br/>
+                                                             <div class="text-blue-600 font-bold border-b border-blue-50 pb-1">1. Complex Power Flow Calculation ($S_{ij}$)</div>
+                                                            $P_{${branch.from}${branch.to}} = |a \cdot V_i|^2 g_{ij} - |a \cdot V_i||V_j|(g_{ij}\cos\delta_{ij} + b_{ij}\sin\delta_{ij})$<br/>
+                                                            $P = |${tap.toFixed(2)} \cdot ${fromV.toFixed(4)}|^2(${g_br.toFixed(4)}) - |${tap.toFixed(2)} \cdot ${fromV.toFixed(4)}|(${toV.toFixed(4)})(${g_br.toFixed(4)}\cos(${(da * 180 / Math.PI).toFixed(2)}^\circ) + ${b_br.toFixed(4)}\sin(${(da * 180 / Math.PI).toFixed(2)}^\circ)) = ${p_pu.toFixed(6)}$ p.u.<br/>
+                                                            <span class="text-emerald-600 font-bold">$P_{Actual} = ${p_pu.toFixed(6)} \times ${baseMVA} = ${(p_pu * baseMVA).toFixed(2)}$ MW</span><br/>
                                                             
                                                             <div class="pt-2">
-                                                                $Q_{${branch.from}${branch.to}} = -|\\frac{V_i}{a}|^2 b_{ij} - |\\frac{V_i}{a}||V_j|(g_{ij}\\sin\\delta_{ij} - b_{ij}\\cos\\delta_{ij})$<br/>
-                                                                $Q = -|\\frac{${fromV.toFixed(4)}}{${tap.toFixed(2)}}|^2(${b_br.toFixed(4)}) - |\\frac{${fromV.toFixed(4)}}{${tap.toFixed(2)}}|(${toV.toFixed(4)})(${g_br.toFixed(4)}\\sin(${(da * 180 / Math.PI).toFixed(2)}^\\circ) - ${b_br.toFixed(4)}\\cos(${(da * 180 / Math.PI).toFixed(2)}^\\circ)) = ${q_pu.toFixed(6)}$ p.u.<br/>
-                                                                <span class="text-amber-600 font-bold">$Q_{Actual} = ${q_pu.toFixed(6)} \\times ${baseMVA} = ${(q_pu * baseMVA).toFixed(2)}$ Mvar</span>
+                                                                $Q_{${branch.from}${branch.to}} = -|a \cdot V_i|^2 b_{ij} - |a \cdot V_i||V_j|(g_{ij}\sin\delta_{ij} - b_{ij}\cos\delta_{ij})$<br/>
+                                                                $Q = -|${tap.toFixed(2)} \cdot ${fromV.toFixed(4)}|^2(${b_br.toFixed(4)}) - |${tap.toFixed(2)} \cdot ${fromV.toFixed(4)}|(${toV.toFixed(4)})(${g_br.toFixed(4)}\sin(${(da * 180 / Math.PI).toFixed(2)}^\circ) - ${b_br.toFixed(4)}\cos(${(da * 180 / Math.PI).toFixed(2)}^\circ)) = ${q_pu.toFixed(6)}$ p.u.<br/>
+                                                                <span class="text-amber-600 font-bold">$Q_{Actual} = ${q_pu.toFixed(6)} \times ${baseMVA} = ${(q_pu * baseMVA).toFixed(2)}$ Mvar</span>
                                                                 
                                                                 <!-- Detailed Component Breakdown (Item 6) -->
                                                                 <div class="mt-3 bg-slate-50/50 p-2 rounded border border-slate-100 text-[8px] flex gap-4">
@@ -4736,7 +4751,7 @@
 
                             const isXfmr = branch.type === 'transformer';
                             const tap = isXfmr ? (branch.tap || 1.0) : 1.0;
-                            const r = isXfmr ? 0.001 : (parseFloat(branch.r) || 0.02);
+                            const r = isXfmr ? 0 : (parseFloat(branch.r) || 0.02);
                             const x = isXfmr ? ((branch.z_pct || 10) / 100) : (parseFloat(branch.x) || 0.1);
                             const b_sh = parseFloat(branch.b_charging) || 0;
 
@@ -4744,10 +4759,10 @@
                             const g = r / den;
                             const b = -x / den;
 
-                            const p_ft = Math.pow(v1 / tap, 2) * g - (v1 / tap) * v2 * (g * Math.cos(da) + b * Math.sin(da));
-                            const q_ft = -Math.pow(v1 / tap, 2) * (b + b_sh) - (v1 / tap) * v2 * (g * Math.sin(da) - b * Math.cos(da));
-                            const p_tf = v2 * v2 * g - (v2 * (v1 / tap)) * (g * Math.cos(-da) + b * Math.sin(-da));
-                            const q_tf = -v2 * v2 * (b + b_sh) - (v2 * (v1 / tap)) * (g * Math.sin(-da) - b * Math.cos(-da));
+                            const p_ft = Math.pow(v1 * tap, 2) * g - (v1 * tap) * v2 * (g * Math.cos(da) + b * Math.sin(da));
+                            const q_ft = -Math.pow(v1 * tap, 2) * (b + b_sh) - (v1 * tap) * v2 * (g * Math.sin(da) - b * Math.cos(da));
+                            const p_tf = v2 * v2 * g - (v2 * (v1 * tap)) * (g * Math.cos(-da) + b * Math.sin(-da));
+                            const q_tf = -v2 * v2 * (b + b_sh) - (v2 * (v1 * tap)) * (g * Math.sin(-da) - b * Math.cos(-da));
 
                             rows += `
                                             <tr class="hover:bg-slate-50 transition-colors">
@@ -5037,13 +5052,13 @@
                 const g_line = r / den;
                 const b_line = -x / den;
 
-                // Off-diagonals: Yik = Yki = -y / a
-                G[i][k] -= g_line / a; B[i][k] -= b_line / a;
-                G[k][i] -= g_line / a; B[k][i] -= b_line / a;
+                // Off-diagonals: Yik = Yki = -a * y
+                G[i][k] -= g_line * a; B[i][k] -= b_line * a;
+                G[k][i] -= g_line * a; B[k][i] -= b_line * a;
 
-                // Diagonals (using the standard pi-model with transformer tap)
-                G[i][i] += g_line / (a * a);
-                B[i][i] += b_line / (a * a) + b_sh;
+                // Diagonals (using the 1:a turns ratio model where a = Vs/Vp)
+                G[i][i] += g_line * (a * a);
+                B[i][i] += b_line * (a * a) + b_sh;
 
                 G[k][k] += g_line;
                 B[k][k] += b_line + b_sh;
@@ -5261,7 +5276,7 @@
                 updateSolverParametersDisplay();
 
                 const loadPercentage = totalLoadP / baseMVA;
-                prepareSolverData(loadPercentage);
+                prepareSolverData(solution);
                 resetSolverAnim();
 
                 document.getElementById('loadingState').classList.add('hidden');
@@ -5314,18 +5329,18 @@
                 const da = a1 - a2;
                 const b_sh = parseFloat(branch.b_charging) || 0;
 
-                // Power flow with tap ratio 'a' on 'from' bus
-                // Pft = (V1/a)^2 * g - (V1/a)*V2*(g*cos(da) + b*sin(da))
-                const p_ft = Math.pow(v1 / a, 2) * g - (v1 / a) * v2 * (g * Math.cos(da) + b * Math.sin(da));
-                const q_ft = -Math.pow(v1 / a, 2) * b - Math.pow(v1, 2) * b_sh - (v1 / a) * v2 * (g * Math.sin(da) - b * Math.cos(da));
+                // Power flow with tap ratio 'a' (Vs/Vp) on 'from' bus side
+                // Pft = (a*V1)^2 * g - (a*V1)*V2*(g*cos(da) + b*sin(da))
+                const p_ft = Math.pow(v1 * a, 2) * g - (v1 * a) * v2 * (g * Math.cos(da) + b * Math.sin(da));
+                const q_ft = -Math.pow(v1 * a, 2) * b - Math.pow(v1, 2) * b_sh - (v1 * a) * v2 * (g * Math.sin(da) - b * Math.cos(da));
 
-                // Ptf = V2^2 * g - (V2*(V1/a))*(g*cos(-da) + b*sin(-da))
-                const p_tf = v2 * v2 * g - (v2 * (v1 / a)) * (g * Math.cos(-da) + b * Math.sin(-da));
-                const q_tf = -v2 * v2 * b - Math.pow(v2, 2) * b_sh - (v2 * (v1 / a)) * (g * Math.sin(-da) - b * Math.cos(-da));
+                // Ptf = V2^2 * g - (V2*(a*V1))*(g*cos(-da) + b*sin(-da))
+                const p_tf = v2 * v2 * g - (v2 * (v1 * a)) * (g * Math.cos(-da) + b * Math.sin(-da));
+                const q_tf = -v2 * v2 * b - Math.pow(v2, 2) * b_sh - (v2 * (v1 * a)) * (g * Math.sin(-da) - b * Math.cos(-da));
 
-                // Current I = S*/V* => |I| = |S|/|V|
+                // Current I = S*/V* => |I| = |S|/|V_actual|
                 const s_ft_mag = Math.sqrt(p_ft * p_ft + q_ft * q_ft);
-                const i_pu = s_ft_mag / v1;
+                const i_pu = s_ft_mag / (v1 * a);
 
                 // Use local bus voltage base for Ibase calculation
                 const localBaseKV = busFrom.baseKV || baseKV;
