@@ -4175,9 +4175,9 @@
                             <div class="col-span-full border-t border-blue-100/50 pt-2 mt-1">
                                 <div class="text-[9px] font-bold text-amber-600 uppercase mb-1">$\pi$-Equivalent Transformer Model (Tap $a=V_s/V_p=${tap.toFixed(3)}$)</div>
                                 <div class="grid grid-cols-3 gap-2">
-                                    <div class="bg-white/50 p-1.5 rounded">$y_{series} = a \cdot y = ${(g * tap).toFixed(4)} ${b * tap >= 0 ? '+' : '-'} j${Math.abs(b * tap).toFixed(4)}$</div>
-                                    <div class="bg-white/50 p-1.5 rounded">$y_{from} = (a^2-a) y = ${((tap * tap - tap) * g).toFixed(4)} ${(tap * tap - tap) * b >= 0 ? '+' : '-'} j${Math.abs((tap * tap - tap) * b).toFixed(4)}$</div>
-                                    <div class="bg-white/50 p-1.5 rounded">$y_{to} = (1-a) y = ${((1 - tap) * g).toFixed(4)} ${(1 - tap) * b >= 0 ? '+' : '-'} j${Math.abs((1 - tap) * b).toFixed(4)}$</div>
+                                    <div class="bg-white/50 p-1.5 rounded">$y_{series} = y/a = ${(g / tap).toFixed(4)} ${b / tap >= 0 ? '+' : '-'} j${Math.abs(b / tap).toFixed(4)}$</div>
+                                    <div class="bg-white/50 p-1.5 rounded">$y_{from} = (\frac{1-a}{a^2}) y = ${(((1 - tap) / (tap * tap)) * g).toFixed(4)} ${((1 - tap) / (tap * tap)) * b >= 0 ? '+' : '-'} j${Math.abs(((1 - tap) / (tap * tap)) * b).toFixed(4)}$</div>
+                                    <div class="bg-white/50 p-1.5 rounded">$y_{to} = (\frac{a-1}{a}) y = ${(((tap - 1) / tap) * g).toFixed(4)} ${((tap - 1) / tap) * b >= 0 ? '+' : '-'} j${Math.abs(((tap - 1) / tap) * b).toFixed(4)}$</div>
                                 </div>
                             </div>` : ''}
                         </div>
@@ -4198,24 +4198,25 @@
                     const i = b2idx[ba.from];
                     const k = b2idx[ba.to];
                     const tap = ba.tap;
+                    const b_charging = parseFloat(activeBranches.find(br => br.id === ba.id)?.b_charging) || 0;
 
                     // Off-diagonals
-                    const g_ik = -ba.g * tap;
-                    const b_ik = -ba.b * tap;
+                    const g_ik = -ba.g / tap;
+                    const b_ik = -ba.b / tap;
 
                     yBusStepsHTML += `
                     <div class="text-[10px] font-mono py-1 border-b border-slate-100 last:border-0">
                         <span class="text-slate-400">Add branch ${ba.from}-${ba.to}:</span><br/>
-                        $Y_{${ba.from}${ba.to}} = Y_{${ba.to}${ba.from}} = -a \cdot y_{${ba.from}${ba.to}} = ${g_ik.toFixed(4)} ${b_ik >= 0 ? '+' : '-'}$ j${Math.abs(b_ik).toFixed(4)}<br/>
-                        $Y_{${ba.from}${ba.from}} \\leftarrow Y_{${ba.from}${ba.from}} + a^2 \cdot y_{${ba.from}${ba.to}}$<br/>
-                        $Y_{${ba.to}${ba.to}} \\leftarrow Y_{${ba.to}${ba.to}} + y_{${ba.from}${ba.to}}$
+                        $Y_{${ba.from}${ba.to}} = Y_{${ba.to}${ba.from}} = -y_{${ba.from}${ba.to}}/a = ${g_ik.toFixed(4)} ${b_ik >= 0 ? '+' : '-'}$ j${Math.abs(b_ik).toFixed(4)}<br/>
+                        $Y_{${ba.from}${ba.from}} \\leftarrow Y_{${ba.from}${ba.from}} + y_{${ba.from}${ba.to}}/a^2 ${b_charging !== 0 ? `+ j${b_charging.toFixed(4)}` : ''}$<br/>
+                        $Y_{${ba.to}${ba.to}} \\leftarrow Y_{${ba.to}${ba.to}} + y_{${ba.from}${ba.to}} ${b_charging !== 0 ? `+ j${b_charging.toFixed(4)}` : ''}$
                     </div>
                 `;
 
                     G[i][k] += g_ik; B[i][k] += b_ik;
                     G[k][i] += g_ik; B[k][i] += b_ik;
-                    G[i][i] += ba.g * (tap * tap); B[i][i] += ba.b * (tap * tap);
-                    G[k][k] += ba.g; B[k][k] += ba.b;
+                    G[i][i] += ba.g / (tap * tap); B[i][i] += ba.b / (tap * tap) + b_charging;
+                    G[k][k] += ba.g; B[k][k] += ba.b + b_charging;
                 });
 
                 // 3. MISMATCH EXPANSION (Show full summation for Bus 2)
@@ -4452,19 +4453,22 @@
                         <h3 class="text-2xl font-bold text-slate-800">Step 3: Power Equation Expansion (Full System)</h3>
                     </div>
                     <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-                        <p class="text-slate-600">Substituting $V, \delta$ and $Y_{bus}$ elements into the non-linear power flow summation for every bus:</p>
+                        <p class="text-slate-600">Substituting $V, \delta$ and $Y_{bus}$ elements into the non-linear power flow equations for every bus:</p>
                         ${currentData.filter(b => b.bus > 1).map(bus => {
                     const iIdx = b2idx[bus.bus];
                     const pi_sch = (bus.gp - bus.lp) / baseMVA;
-                    let pSumVal = 0;
-                    currentData.forEach((bj, jIdx) => { pSumVal += G[iIdx][jIdx]; });
+                    const qi_sch = (bus.gq - bus.lq + (bus.injQ || 0)) / baseMVA;
+
                     return `
                             <div class="p-4 bg-slate-50 border rounded-xl mb-4">
-                                <div class="font-bold text-slate-700 text-[10px] mb-2 uppercase tracking-tighter">Bus ${bus.bus} P-Equation Proof:</div>
-                                <div class="font-mono text-[9px] text-slate-600 overflow-x-auto">
-                                    $P_{${bus.bus},calc} = |V_{${bus.bus}}| \sum_{j=1}^{${n}} |V_j| (G_{${bus.bus}j} \cos \delta_{${bus.bus}j} + B_{${bus.bus}j} \sin \delta_{${bus.bus}j}) $<br/>
-                                    $P_{${bus.bus},calc} = (${bus.mag.toFixed(2)}) [ ${currentData.map((bj, jIdx) => `(${bj.mag.toFixed(2)} \\cdot ${G[iIdx][jIdx].toFixed(3)})`).join(' + ')} ] = ${pSumVal.toFixed(4)}$ p.u.<br/>
-                                    $\Delta P_{${bus.bus}} = P_{sch} - P_{calc} = ${pi_sch.toFixed(4)} - ${pSumVal.toFixed(4)} = ${(pi_sch - pSumVal).toFixed(4)}$
+                                <div class="font-bold text-slate-700 text-[10px] mb-2 uppercase tracking-tighter">Bus ${bus.bus} P/Q Equations:</div>
+                                <div class="font-mono text-[9px] text-slate-600 overflow-x-auto space-y-2">
+                                    <div>$P_{${bus.bus},calc} = |V_i| \sum_{j=1}^{n} |V_j| (G_{ij} \cos \delta_{ij} + B_{ij} \sin \delta_{ij})$</div>
+                                    <div>$Q_{${bus.bus},calc} = |V_i| \sum_{j=1}^{n} |V_j| (G_{ij} \sin \delta_{ij} - B_{ij} \cos \delta_{ij})$</div>
+                                    <div class="text-blue-600 mt-2">
+                                        $\Delta P_{${bus.bus}} = ${pi_sch.toFixed(4)} - P_{${bus.bus},calc}$<br/>
+                                        ${bus.type !== 'PV' ? `$\Delta Q_{${bus.bus}} = ${qi_sch.toFixed(4)} - Q_{${bus.bus},calc}$` : '<span class="italic text-slate-400">PV Bus: Reactive mismatch excluded from Jacobian</span>'}
+                                    </div>
                                 </div>
                             </div>`;
                 }).join('')}
@@ -4537,9 +4541,9 @@
                             const fromV = fromBus.mag;
                             const toV = toBus.mag;
                             const isXfmr = branch.type === 'transformer';
-                            const tap = isXfmr ? (branch.tap || 1.0) : 1.0;
-                            const r_br = isXfmr ? 0 : (parseFloat(branch.r) || 0.02);
-                            const x_br = isXfmr ? ((branch.z_pct || 10) / 100) : (parseFloat(branch.x) || 0.1);
+                            const tap = isXfmr ? (parseFloat(branch.tap) || 1.0) : 1.0;
+                            const r_br = parseFloat(branch.r) || 0;
+                            const x_br = parseFloat(branch.x) || 0.0001;
                             const den_z = r_br * r_br + x_br * x_br;
                             const g_br = r_br / den_z;
                             const b_br = -x_br / den_z;
@@ -4547,12 +4551,12 @@
                             const a2 = toBus.ang * Math.PI / 180;
                             const da = a1 - a2;
 
-                            const p_pu = Math.pow(fromV * tap, 2) * g_br - (fromV * tap) * toV * (g_br * Math.cos(da) + b_br * Math.sin(da));
-                            const q_pu = -Math.pow(fromV * tap, 2) * b_br - (fromV * tap) * toV * (g_br * Math.sin(da) - b_br * Math.cos(da));
+                            const p_pu = (g_br * (fromV * fromV / (tap * tap))) - (fromV * toV / tap) * (g_br * Math.cos(da) + b_br * Math.sin(da));
+                            const q_pu = -((b_br / (tap * tap)) * fromV * fromV) - (fromV * toV / tap) * (g_br * Math.sin(da) - b_br * Math.cos(da));
                             const s_mva_val = Math.sqrt(p_pu * p_pu + q_pu * q_pu);
                             const busBaseKV = fromBus.baseKV || 230;
                             const baseAmps = (baseMVA * 1000) / (Math.sqrt(3) * busBaseKV);
-                            const current = (s_mva_val / (fromV * tap)) * baseAmps;
+                            const current = (s_mva_val / fromV) * baseAmps;
 
                             if (current > maxCurrent) {
                                 maxCurrent = current;
@@ -4616,14 +4620,14 @@
                             const isXfmr = branch.type === 'transformer';
                             const tap = isXfmr ? (branch.tap || 1.0) : 1.0;
 
-                            const r_br = isXfmr ? 0.001 : (parseFloat(branch.r) || 0.02);
-                            const x_br = isXfmr ? ((branch.z_pct || 10) / 100) : (parseFloat(branch.x) || 0.1);
+                            const r_br = parseFloat(branch.r) || 0;
+                            const x_br = parseFloat(branch.x) || 0.0001;
                             const den_z = r_br * r_br + x_br * x_br;
                             const g_br = r_br / den_z;
                             const b_br = -x_br / den_z;
 
-                            const p_pu = Math.pow(fromV / tap, 2) * g_br - (fromV / tap) * toV * (g_br * Math.cos(da) + b_br * Math.sin(da));
-                            const q_pu = -Math.pow(fromV / tap, 2) * b_br - (fromV / tap) * toV * (g_br * Math.sin(da) - b_br * Math.cos(da));
+                            const p_pu = (g_br * (fromV * fromV / (tap * tap))) - (fromV * toV / tap) * (g_br * Math.cos(da) + b_br * Math.sin(da));
+                            const q_pu = -((b_br / (tap * tap)) * fromV * fromV) - (fromV * toV / tap) * (g_br * Math.sin(da) - b_br * Math.cos(da));
 
                             const s_mva_val = Math.sqrt(p_pu * p_pu + q_pu * q_pu);
                             const s_mva = s_mva_val * baseMVA;
@@ -4662,13 +4666,13 @@
                                                     <div class="space-y-6 text-[10px] font-mono bg-white p-6 rounded-xl border border-slate-100 shadow-sm overflow-x-auto">
                                                         <div class="space-y-4">
                                                              <div class="text-blue-600 font-bold border-b border-blue-50 pb-1">1. Complex Power Flow Calculation ($S_{ij}$)</div>
-                                                            $P_{${branch.from}${branch.to}} = |a \cdot V_i|^2 g_{ij} - |a \cdot V_i||V_j|(g_{ij}\cos\delta_{ij} + b_{ij}\sin\delta_{ij})$<br/>
-                                                            $P = |${tap.toFixed(2)} \cdot ${fromV.toFixed(4)}|^2(${g_br.toFixed(4)}) - |${tap.toFixed(2)} \cdot ${fromV.toFixed(4)}|(${toV.toFixed(4)})(${g_br.toFixed(4)}\cos(${(da * 180 / Math.PI).toFixed(2)}^\circ) + ${b_br.toFixed(4)}\sin(${(da * 180 / Math.PI).toFixed(2)}^\circ)) = ${p_pu.toFixed(6)}$ p.u.<br/>
+                                                            $P_{${branch.from}${branch.to}} = |V_i/a|^2 g_{ij} - |V_i/a||V_j|(g_{ij}\cos\delta_{ij} + b_{ij}\sin\delta_{ij})$<br/>
+                                                            $P = |${fromV.toFixed(4)}/${tap.toFixed(2)}|^2(${g_br.toFixed(4)}) - |${fromV.toFixed(4)}/${tap.toFixed(2)}|(${toV.toFixed(4)})(${g_br.toFixed(4)}\cos(${(da * 180 / Math.PI).toFixed(2)}^\circ) + ${b_br.toFixed(4)}\sin(${(da * 180 / Math.PI).toFixed(2)}^\circ)) = ${p_pu.toFixed(6)}$ p.u.<br/>
                                                             <span class="text-emerald-600 font-bold">$P_{Actual} = ${p_pu.toFixed(6)} \times ${baseMVA} = ${(p_pu * baseMVA).toFixed(2)}$ MW</span><br/>
                                                             
                                                             <div class="pt-2">
-                                                                $Q_{${branch.from}${branch.to}} = -|a \cdot V_i|^2 b_{ij} - |a \cdot V_i||V_j|(g_{ij}\sin\delta_{ij} - b_{ij}\cos\delta_{ij})$<br/>
-                                                                $Q = -|${tap.toFixed(2)} \cdot ${fromV.toFixed(4)}|^2(${b_br.toFixed(4)}) - |${tap.toFixed(2)} \cdot ${fromV.toFixed(4)}|(${toV.toFixed(4)})(${g_br.toFixed(4)}\sin(${(da * 180 / Math.PI).toFixed(2)}^\circ) - ${b_br.toFixed(4)}\cos(${(da * 180 / Math.PI).toFixed(2)}^\circ)) = ${q_pu.toFixed(6)}$ p.u.<br/>
+                                                                $Q_{${branch.from}${branch.to}} = -|V_i/a|^2 b_{ij} - |V_i/a||V_j|(g_{ij}\sin\delta_{ij} - b_{ij}\cos\delta_{ij})$<br/>
+                                                                $Q = -|${fromV.toFixed(4)}/${tap.toFixed(2)}|^2(${b_br.toFixed(4)}) - |${fromV.toFixed(4)}/${tap.toFixed(2)}|(${toV.toFixed(4)})(${g_br.toFixed(4)}\sin(${(da * 180 / Math.PI).toFixed(2)}^\circ) - ${b_br.toFixed(4)}\cos(${(da * 180 / Math.PI).toFixed(2)}^\circ)) = ${q_pu.toFixed(6)}$ p.u.<br/>
                                                                 <span class="text-amber-600 font-bold">$Q_{Actual} = ${q_pu.toFixed(6)} \times ${baseMVA} = ${(q_pu * baseMVA).toFixed(2)}$ Mvar</span>
                                                                 
                                                                 <!-- Detailed Component Breakdown (Item 6) -->
@@ -4751,19 +4755,19 @@
                             const da = a1 - a2;
 
                             const isXfmr = branch.type === 'transformer';
-                            const tap = isXfmr ? (branch.tap || 1.0) : 1.0;
-                            const r = isXfmr ? 0 : (parseFloat(branch.r) || 0.02);
-                            const x = isXfmr ? ((branch.z_pct || 10) / 100) : (parseFloat(branch.x) || 0.1);
+                            const tap = isXfmr ? (parseFloat(branch.tap) || 1.0) : 1.0;
+                            const r = parseFloat(branch.r) || 0;
+                            const x = parseFloat(branch.x) || 0.0001;
                             const b_sh = parseFloat(branch.b_charging) || 0;
 
                             const den = r * r + x * x;
                             const g = r / den;
                             const b = -x / den;
 
-                            const p_ft = Math.pow(v1 * tap, 2) * g - (v1 * tap) * v2 * (g * Math.cos(da) + b * Math.sin(da));
-                            const q_ft = -Math.pow(v1 * tap, 2) * (b + b_sh) - (v1 * tap) * v2 * (g * Math.sin(da) - b * Math.cos(da));
-                            const p_tf = v2 * v2 * g - (v2 * (v1 * tap)) * (g * Math.cos(-da) + b * Math.sin(-da));
-                            const q_tf = -v2 * v2 * (b + b_sh) - (v2 * (v1 * tap)) * (g * Math.sin(-da) - b * Math.cos(-da));
+                            const p_ft = (g * (v1 * v1 / (tap * tap))) - (v1 * v2 / tap) * (g * Math.cos(da) + b * Math.sin(da));
+                            const q_ft = -((b + b_sh) / (tap * tap) * v1 * v1) - (v1 * v2 / tap) * (g * Math.sin(da) - b * Math.cos(da));
+                            const p_tf = v2 * v2 * g - (v2 * (v1 / tap)) * (g * Math.cos(-da) + b * Math.sin(-da));
+                            const q_tf = -((b + b_sh) * v2 * v2) - (v2 * (v1 / tap)) * (g * Math.sin(-da) - b * Math.cos(-da));
 
                             rows += `
                                             <tr class="hover:bg-slate-50 transition-colors">
@@ -5015,7 +5019,7 @@
 
 
         // --- RIGOROUS NEWTON-RAPHSON SOLVER ---
-        function solvePowerFlow(busData, branchData, baseMVA = 100, maxIter = 20, tolerance = 0.0001) {
+        function solvePowerFlow(busData, branchData, baseMVA = 100, maxIter = 50, tolerance = 1e-6) {
             const n = busData.length;
             const busMap = new Map();
             busData.forEach((b, i) => busMap.set(b.bus, i));
@@ -5053,13 +5057,15 @@
                 const g_line = r / den;
                 const b_line = -x / den;
 
-                // Off-diagonals: Yik = Yki = -a * y
-                G[i][k] -= g_line * a; B[i][k] -= b_line * a;
-                G[k][i] -= g_line * a; B[k][i] -= b_line * a;
+                // Off-diagonals: Yik = Yki = -y / a
+                const g_mut = g_line / a;
+                const b_mut = b_line / a;
+                G[i][k] -= g_mut; B[i][k] -= b_mut;
+                G[k][i] -= g_mut; B[k][i] -= b_mut;
 
-                // Diagonals (using the 1:a turns ratio model where a = Vs/Vp)
-                G[i][i] += g_line * (a * a);
-                B[i][i] += b_line * (a * a) + b_sh;
+                // Diagonals (using the a:1 model where a is the tap ratio on the 'from' bus side)
+                G[i][i] += g_line / (a * a);
+                B[i][i] += b_line / (a * a) + b_sh;
 
                 G[k][k] += g_line;
                 B[k][k] += b_line + b_sh;
@@ -5330,18 +5336,19 @@
                 const da = a1 - a2;
                 const b_sh = parseFloat(branch.b_charging) || 0;
 
-                // Power flow with tap ratio 'a' (Vs/Vp) on 'from' bus side
-                // Pft = (a*V1)^2 * g - (a*V1)*V2*(g*cos(da) + b*sin(da))
-                const p_ft = Math.pow(v1 * a, 2) * g - (v1 * a) * v2 * (g * Math.cos(da) + b * Math.sin(da));
-                const q_ft = -Math.pow(v1 * a, 2) * b - Math.pow(v1, 2) * b_sh - (v1 * a) * v2 * (g * Math.sin(da) - b * Math.cos(da));
+                // Power flow with tap ratio 'a' (a:1 model where a is the tap ratio on the 'from' bus side)
+                // Sending end (leaving from-bus): Sij = Vi * Ii* = Vi^2*Yii* + Vi*Vj*Yij*
+                // This incorporates the transformer model and any line charging
+                const p_ft = (g * (v1 * v1 / (a * a))) - (v1 * v2 / a) * (g * Math.cos(da) + b * Math.sin(da));
+                const q_ft = -((b / (a * a) + b_sh) * v1 * v1) - (v1 * v2 / a) * (g * Math.sin(da) - b * Math.cos(da));
 
-                // Ptf = V2^2 * g - (V2*(a*V1))*(g*cos(-da) + b*sin(-da))
-                const p_tf = v2 * v2 * g - (v2 * (v1 * a)) * (g * Math.cos(-da) + b * Math.sin(-da));
-                const q_tf = -v2 * v2 * b - Math.pow(v2, 2) * b_sh - (v2 * (v1 * a)) * (g * Math.sin(-da) - b * Math.cos(-da));
+                // Receiving end (leaving to-bus): Sji = Vj * Ij* = Vj^2*Yjj* + Vj*Vi*Yji*
+                const p_tf = (g * (v2 * v2)) - (v1 * v2 / a) * (g * Math.cos(-da) + b * Math.sin(-da));
+                const q_tf = -((b + b_sh) * v2 * v2) - (v1 * v2 / a) * (g * Math.sin(-da) - b * Math.cos(-da));
 
                 // Current I = S*/V* => |I| = |S|/|V_actual|
                 const s_ft_mag = Math.sqrt(p_ft * p_ft + q_ft * q_ft);
-                const i_pu = s_ft_mag / (v1 * a);
+                const i_pu = s_ft_mag / v1;
 
                 // Use local bus voltage base for Ibase calculation
                 const localBaseKV = busFrom.baseKV || baseKV;
@@ -6269,7 +6276,7 @@
         // Newton-Raphson Solver for Analysis tasks
         function solveLoadFlowHeadless(busData, branchData) {
             const baseMVA = parseFloat(document.getElementById('baseMVAInput').value) || 100;
-            const res = solvePowerFlow(busData, branchData, baseMVA, 20, 0.001);
+            const res = solvePowerFlow(busData, branchData, baseMVA, 50, 1e-6);
 
             // Build the same structure back
             const buses = JSON.parse(JSON.stringify(busData));
@@ -6655,13 +6662,18 @@
                         const k = buses.indexOf(br.to);
                         if (i === -1 || k === -1) return;
 
-                        const denom = br.r ** 2 + br.x ** 2;
-                        const y_ik = new Complex(br.r / denom, -br.x / denom);
+                        const isTrans = br.type === 'transformer';
+                        const a = isTrans ? (parseFloat(br.tap) || 1.0) : 1.0;
 
-                        Y[i][k] = Y[i][k].sub(y_ik);
-                        Y[k][i] = Y[k][i].sub(y_ik);
-                        Y[i][i] = Y[i][i].add(y_ik);
-                        Y[k][k] = Y[k][k].add(y_ik);
+                        const denom = br.r ** 2 + br.x ** 2;
+                        const y_line = new Complex(br.r / denom, -br.x / denom);
+                        const y_mut = new Complex(y_line.r / a, y_line.i / a);
+                        const y_diag_i = new Complex(y_line.r / (a * a), y_line.i / (a * a));
+
+                        Y[i][k] = Y[i][k].sub(y_mut);
+                        Y[k][i] = Y[k][i].sub(y_mut);
+                        Y[i][i] = Y[i][i].add(y_diag_i);
+                        Y[k][k] = Y[k][k].add(y_line);
                     });
 
                     currentData.forEach((bus, i) => {
