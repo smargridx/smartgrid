@@ -794,21 +794,21 @@
 
                         <button onclick="playSound(); openAuthorModal()"
                             class="h-9 w-9 flex items-center justify-center text-slate-400 hover:bg-slate-800 hover:text-white rounded-md transition btn-click"
-                            title="About Authors">
-                            <i class="ph ph-info text-lg"></i>
+                            title="Project Report">
+                            <i class="ph ph-file-text text-lg"></i>
                         </button>
                     </div>
 
                     <!-- Primary Action -->
                     <div class="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
                         <button onclick="playSound(); showManualNRCalculation()" id="manualNRBtn"
-                            class="h-10 px-3 md:px-4 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-blue-500 dark:hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-300 font-black text-[10px] sm:text-xs uppercase tracking-tighter rounded-xl transition-all shadow-sm hover:shadow-blue-500/10 flex items-center justify-center gap-2 whitespace-nowrap group btn-click">
+                            class="hidden h-10 px-3 md:px-4 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-blue-500 dark:hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-300 font-black text-[10px] sm:text-xs uppercase tracking-tighter rounded-xl transition-all shadow-sm hover:shadow-blue-500/10 flex items-center justify-center gap-2 whitespace-nowrap group btn-click">
                             <div
                                 class="w-6 h-6 rounded bg-slate-50 dark:bg-slate-900 flex items-center justify-center group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 transition-colors">
                                 <i
                                     class="ph ph-math-operations text-blue-500 transition-transform group-hover:scale-110"></i>
                             </div>
-                            <span class="hidden lg:inline">Mechanical</span>
+                            <span class="hidden lg:inline">Report</span>
                         </button>
                         <button onclick="playSound(); runSimulation()" id="runBtn"
                             class="h-10 px-4 md:px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-[10px] sm:text-xs uppercase tracking-tighter rounded-xl transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 flex items-center justify-center gap-2 whitespace-nowrap active:scale-95 btn-click ring-2 ring-blue-500/20">
@@ -1312,7 +1312,7 @@
 
                             <button onclick="playSound(); switchTab('proof')" id="tab-proof"
                                 class="tab-inactive py-3 px-2 border-b-2 border-transparent font-medium text-[10px] md:text-xs whitespace-nowrap flex items-center gap-1 text-blue-600 hover:text-blue-700">
-                                <i class="ph ph-math-operations"></i> Mechanical
+                                <i class="ph ph-math-operations"></i> Report
                             </button>
 
                             <button onclick="playSound(); switchTab('pv-curve')" id="tab-pv-curve"
@@ -1464,7 +1464,7 @@
 
                                     <button onclick="playSound(); switchTab('proof')"
                                         class="mt-4 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-bold border border-blue-100 hover:bg-blue-100 transition flex items-center justify-center gap-2 w-full">
-                                        <i class="ph ph-math-operations"></i> View Newton-Raphson Mechanics
+                                        <i class="ph ph-math-operations"></i> View Technical Report
                                     </button>
                                 </div>
 
@@ -1508,7 +1508,7 @@
                     <div id="content-proof"
                         class="hidden bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden animate-fadeIn flex flex-col p-6 min-h-[800px]">
                         <div class="flex justify-between items-center mb-6">
-                            <h3 class="text-xl font-bold text-slate-800">Newton-Raphson Mechanical Analysis</h3>
+                            <h3 class="text-xl font-bold text-slate-800">Newton-Raphson Technical Report</h3>
                             <div class="flex gap-2">
                                 <button onclick="playSound(); showManualNRCalculation()" id="btnGenerateProof"
                                     class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition-all shadow-md flex items-center gap-2 text-sm">
@@ -1530,7 +1530,7 @@
                                 <i class="ph ph-math-operations text-6xl mb-4 opacity-20"></i>
                                 <p class="text-lg font-medium">Mathematical Model Ready</p>
                                 <p class="text-sm italic">Click "Generate Report" to expand the full Newton-Raphson
-                                    mechanics.</p>
+                                    technical report.</p>
                             </div>
                         </div>
                     </div>
@@ -2003,8 +2003,8 @@
                     class="absolute top-4 right-4 text-slate-400 hover:text-white transition">
                     <i class="ph ph-x text-xl"></i>
                 </button>
-                <h3 class="text-xl font-bold">Project Authors</h3>
-                <p class="text-xs text-slate-400 mt-1">Web-Based Smart Grid Simulator Design Team</p>
+                <h3 class="text-xl font-bold">Project Report & Design Team</h3>
+                <p class="text-xs text-slate-400 mt-1">Web-Based Smart Grid Simulator Architecture</p>
             </div>
             <div class="p-6">
                 <div class="space-y-4">
@@ -2043,6 +2043,14 @@
                     <p class="text-xs font-bold text-slate-800 uppercase tracking-wider">College of Engineering</p>
                     <p class="text-xs text-slate-500 mt-1">Batangas State University<br>The National Engineering
                         University</p>
+                </div>
+                <!-- Report Button in Authors Page -->
+                <div class="mt-6">
+                    <button onclick="playSound(); closeAuthorModal(); showManualNRCalculation()"
+                        class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 group">
+                        <i class="ph ph-file-text text-xl group-hover:scale-110 transition-transform"></i>
+                        Open Technical Report
+                    </button>
                 </div>
             </div>
         </div>
@@ -4125,7 +4133,7 @@
                 <div class="flex flex-col items-center justify-center h-full text-slate-500 py-32 space-y-4">
                     <div class="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                     <div class="text-center">
-                        <p class="text-xl font-bold">Constructing Mechanical Proof</p>
+                        <p class="text-xl font-bold">Generating Technical Report</p>
                         <p class="text-sm italic opacity-70">Applying Stevenson methodology across the grid topology...</p>
                     </div>
                 </div>
