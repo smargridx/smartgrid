@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -482,7 +481,172 @@
                 margin-bottom: 2rem !important;
             }
         }
+
+        /* Rich Input & Variation Styles */
+        .rich-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .rich-input-container {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        .rich-input-container:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .rich-input-field {
+            width: 100%;
+            padding: 2px 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            text-align: right;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: inherit;
+        }
+
+        .rich-input-stepper {
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+
+        .dark .rich-input-stepper {
+            border-left-color: #334155;
+            background: #0f172a;
+        }
+
+        .stepper-btn {
+            padding: 0 4px;
+            height: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        .stepper-btn:hover {
+            color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .dark .stepper-btn:hover {
+            background: #1e293b;
+        }
+
+        .rich-slider-overlay {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            right: 0;
+            background: #62a5f7;
+            padding: 6px;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+            display: none;
+            animation: slideInUp 0.2s ease-out;
+        }
+
+        .rich-input-container:focus-within .rich-slider-overlay {
+            display: block;
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(10px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .variation-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dark .variation-card {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        .variation-card:hover {
+            transform: translateY(-4px);
+            border-color: #3b82f6;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1);
+        }
+
+        .variation-card.active {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .dark .variation-card.active {
+            background: #1e3a8a;
+            border-color: #3b82f6;
+        }
+
+        .badge-pulse {
+            position: relative;
+        }
+
+        .badge-pulse::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
     </style>
+
 </head>
 
 <body class="text-gray-800 dark:text-gray-100 selection:bg-blue-200 transition-colors duration-300">
@@ -1003,7 +1167,111 @@
                         </div>
 
                         <!-- Bus Data Input Panel -->
-                        <div id="input-bus-data" class="overflow-x-auto h-[600px] scroll-custom p-6">
+                        <div id="input-bus-data" class="overflow-x-auto h-[700px] scroll-custom p-6">
+
+                            <!-- GLOBAL VARIATIONS & BULK UPDATE PANEL -->
+                            <div
+                                class="mb-8 p-6 bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-2xl shadow-sm">
+                                <div class="flex items-center justify-between mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+                                            <i class="ph ph-sliders-horizontal text-2xl"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-slate-800 dark:text-gray-100">Global Variations &
+                                                Bulk Update</h3>
+                                            <p class="text-xs text-slate-500 dark:text-gray-400">Experimental controls
+                                                for system-wide adjustments</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button onclick="resetGlobalScaling()"
+                                            class="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-600 dark:text-gray-300 hover:bg-slate-50 transition btn-click flex items-center gap-1">
+                                            <i class="ph ph-arrow-counter-clockwise"></i> Reset All
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <!-- Bulk Scaling -->
+                                    <div class="space-y-4">
+                                        <h4
+                                            class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                                            <i class="ph ph-chart-line-up"></i> System-Wide Scaling
+                                        </h4>
+                                        <div class="space-y-4">
+                                            <div>
+                                                <div class="flex justify-between mb-1">
+                                                    <span
+                                                        class="text-xs font-semibold text-slate-600 dark:text-gray-300">Total
+                                                        Load Scale</span>
+                                                    <span id="loadScaleLabel"
+                                                        class="text-xs font-mono font-bold text-blue-600">100%</span>
+                                                </div>
+                                                <input type="range" min="50" max="200" value="100"
+                                                    class="w-full h-1.5 bg-blue-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                                                    oninput="applyGlobalScale('load', this.value)">
+                                            </div>
+                                            <div>
+                                                <div class="flex justify-between mb-1">
+                                                    <span
+                                                        class="text-xs font-semibold text-slate-600 dark:text-gray-300">Total
+                                                        Generation Scale</span>
+                                                    <span id="genScaleLabel"
+                                                        class="text-xs font-mono font-bold text-green-600">100%</span>
+                                                </div>
+                                                <input type="range" min="50" max="150" value="100"
+                                                    class="w-full h-1.5 bg-green-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                                                    oninput="applyGlobalScale('gen', this.value)">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Quick Presets -->
+                                    <div class="space-y-4 md:col-span-2">
+                                        <h4
+                                            class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                                            <i class="ph ph-lightning"></i> Scenario Presets
+                                        </h4>
+                                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                                            <div onclick="applyScenarioPreset('baseline')"
+                                                class="variation-card active group" id="preset-baseline">
+                                                <div class="text-blue-600 dark:text-blue-400 mb-2"><i
+                                                        class="ph ph-activity text-xl"></i></div>
+                                                <div class="font-bold text-xs">Baseline</div>
+                                                <div class="text-[9px] text-slate-500 mt-1 opacity-70">Normal system
+                                                    state</div>
+                                            </div>
+                                            <div onclick="applyScenarioPreset('peak')" class="variation-card group"
+                                                id="preset-peak">
+                                                <div class="text-red-500 mb-2"><i
+                                                        class="ph ph-thermometer-hot text-xl"></i></div>
+                                                <div class="font-bold text-xs">Summer Peak</div>
+                                                <div class="text-[9px] text-slate-500 mt-1 opacity-70">130% Load demand
+                                                </div>
+                                            </div>
+                                            <div onclick="applyScenarioPreset('light')" class="variation-card group"
+                                                id="preset-light">
+                                                <div class="text-emerald-500 mb-2"><i class="ph ph-moon text-xl"></i>
+                                                </div>
+                                                <div class="font-bold text-xs">Off-Peak Night</div>
+                                                <div class="text-[9px] text-slate-500 mt-1 opacity-70">Minimum demand
+                                                </div>
+                                            </div>
+                                            <div onclick="applyScenarioPreset('contingency')"
+                                                class="variation-card group border-orange-200" id="preset-contingency">
+                                                <div class="text-orange-500 mb-2"><i
+                                                        class="ph ph-warning-diamond text-xl"></i></div>
+                                                <div class="font-bold text-xs">Gen. Trip</div>
+                                                <div class="text-[9px] text-slate-500 mt-1 opacity-70 italic">Bus 2 Gen
+                                                    Out</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="font-bold text-gray-700 dark:text-gray-200">System Bus Configuration</h3>
                                 <div class="flex gap-2">
@@ -2539,10 +2807,14 @@
 
         // Initial State: Empty
         let currentData = [];
+        let nominalData = []; // Store un-scaled values
         let activeBranches = [];
         let isSimulationSolved = false;
         let chartInstance = null;
         let network = null; // Vis.js instance
+
+        let loadScale = 1.0;
+        let genScale = 1.0;
 
         // --- APP FLOW ---
         function startApp() {
@@ -2626,6 +2898,7 @@
             }
             activeBranches = []; // Clear branches for new system
             isSimulationSolved = false;
+            syncNominalData();
 
             // Update UI Reflectors
             renderInputTable();
@@ -2755,6 +3028,7 @@
                         loads: bus.loads || (bus.lp > 0 || bus.lq > 0 ? [{ id: 1, name: "City Load", p: bus.lp || 0, q: bus.lq || 0 }] : [])
                     }));
                     activeBranches = scenario.topology;
+                    syncNominalData();
 
                     // Update User context if reasonable (optional)
                     // if(scenario.user) userName = scenario.user;
@@ -3290,27 +3564,27 @@
                         </td>
                         
                         <td class="px-4 py-2 border-l border-gray-100 dark:border-slate-700">
-                            <input type="${isPQ && !isSimulationSolved ? 'text' : 'number'}" step="0.01" 
-                                class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full focus:outline-none ${isPQ ? 'text-gray-400 font-normal italic' : 'font-bold'}" 
-                                value="${isPQ && !isSimulationSolved ? 'Unknown' : row.mag}" onchange="updateData(${index}, 'mag', this.value)" 
-                                ${isPQ ? 'readonly' : ''}
-                                title="${isPQ ? 'Voltage Magnitude is CALCULATED for PQ Bus' : 'Specified Parameter'}">
+                            ${renderRichInput(isPQ && !isSimulationSolved ? 'Unknown' : row.mag, `updateData(${index}, 'mag', this.value)`, {
+                        readonly: isPQ,
+                        colorClass: isPQ ? "bg-slate-50/50" : "bg-white",
+                        step: 0.01
+                    })}
                         </td>
                         <td class="px-4 py-2">
-                            <input type="${!isSlack && !isSimulationSolved ? 'text' : 'number'}" step="0.1" 
-                                class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full focus:outline-none ${!isSlack ? 'text-gray-400 font-normal italic' : 'font-bold'}" 
-                                value="${!isSlack && !isSimulationSolved ? 'Unknown' : row.ang}" onchange="updateData(${index}, 'ang', this.value)"
-                                ${!isSlack ? 'readonly' : ''}
-                                title="${!isSlack ? 'Phase Angle is CALCULATED for non-Slack Bus' : 'Fixed Reference'}">
+                             ${renderRichInput(!isSlack && !isSimulationSolved ? 'Unknown' : row.ang, `updateData(${index}, 'ang', this.value)`, {
+                        readonly: !isSlack,
+                        colorClass: !isSlack ? "bg-slate-50/50" : "bg-white",
+                        step: 0.1
+                    })}
                         </td>
 
                         <td class="px-4 py-2 border-l border-gray-100 dark:border-slate-700">
                             <div class="flex items-center gap-2">
-                                <input type="${isSlack && !isSimulationSolved ? 'text' : 'number'}" 
-                                    class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full focus:outline-none ${isSlack ? 'text-gray-400 font-normal italic' : 'font-bold'}" 
-                                    value="${isSlack && !isSimulationSolved ? 'Unknown' : (row.gp || 0).toFixed(2)}" 
-                                    onchange="updateData(${index}, 'gp', this.value)"
-                                    ${isSlack ? 'readonly' : ''}>
+                                ${renderRichInput(isSlack && !isSimulationSolved ? 'Unknown' : (row.gp || 0).toFixed(2), `updateData(${index}, 'gp', this.value)`, {
+                        readonly: isSlack,
+                        colorClass: isSlack ? "bg-slate-50/50" : "bg-blue-50/30",
+                        step: 1
+                    })}
                                 ${!isSlack ? `
                                 <button onclick="playSound(); openMultiUnitModal(${index}, 'gen')" 
                                     class="text-blue-500 hover:text-blue-700 p-1 rounded hover:bg-blue-50 transition" title="Manage Multiple Generators">
@@ -3319,18 +3593,19 @@
                             </div>
                         </td>
                         <td class="px-4 py-2">
-                            <input type="${(isSlack || isPV) && !isSimulationSolved ? 'text' : 'number'}" 
-                                class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full focus:outline-none ${isSlack || isPV ? 'text-gray-400 font-normal italic' : 'font-bold'}" 
-                                value="${(isSlack || isPV) && !isSimulationSolved ? 'Unknown' : (row.gq || 0).toFixed(2)}" 
-                                onchange="updateData(${index}, 'gq', this.value)"
-                                ${(isSlack || isPV) ? 'readonly' : ''}>
+                             ${renderRichInput((isSlack || isPV) && !isSimulationSolved ? 'Unknown' : (row.gq || 0).toFixed(2), `updateData(${index}, 'gq', this.value)`, {
+                        readonly: (isSlack || isPV),
+                        colorClass: (isSlack || isPV) ? "bg-slate-50/50" : "bg-blue-50/30",
+                        step: 1
+                    })}
                         </td>
 
                         <td class="px-4 py-2 border-l border-gray-100 dark:border-slate-700">
                             <div class="flex items-center gap-2">
-                                <input type="number" step="0.1" 
-                                    class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full focus:outline-none font-bold" 
-                                    value="${(row.lp || 0).toFixed(2)}" onchange="updateData(${index}, 'lp', this.value)">
+                                ${renderRichInput((row.lp || 0).toFixed(2), `updateData(${index}, 'lp', this.value)`, {
+                        colorClass: "bg-purple-50/30",
+                        step: 1
+                    })}
                                 <button onclick="playSound(); openMultiUnitModal(${index}, 'load')" 
                                     class="text-purple-500 hover:text-purple-700 p-1 rounded hover:bg-purple-50 transition" title="Manage Multiple Loads">
                                     <i class="ph ph-list-plus text-sm"></i>
@@ -3338,9 +3613,10 @@
                             </div>
                         </td>
                         <td class="px-4 py-2">
-                            <input type="number" step="0.1" 
-                                class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full focus:outline-none font-bold" 
-                                value="${(row.lq || 0).toFixed(2)}" onchange="updateData(${index}, 'lq', this.value)">
+                             ${renderRichInput((row.lq || 0).toFixed(2), `updateData(${index}, 'lq', this.value)`, {
+                        colorClass: "bg-purple-50/30",
+                        step: 1
+                    })}
                         </td>
 
                         <td class="px-4 py-2 text-right border-l border-gray-100 dark:border-slate-700">
@@ -3353,6 +3629,135 @@
                 `;
             });
         }
+
+        function syncNominalData() {
+            nominalData = JSON.parse(JSON.stringify(currentData));
+        }
+
+        function applyGlobalScale(type, value) {
+            const scale = parseFloat(value) / 100;
+
+            if (type === 'load') {
+                loadScale = scale;
+                const label = document.getElementById('loadScaleLabel');
+                if (label) label.innerText = value + '%';
+            } else {
+                genScale = scale;
+                const label = document.getElementById('genScaleLabel');
+                if (label) label.innerText = value + '%';
+            }
+
+            // Apply scaling from nominal data
+            currentData.forEach((bus, i) => {
+                const nominal = nominalData[i];
+                if (type === 'load') {
+                    bus.lp = nominal.lp * loadScale;
+                    bus.lq = nominal.lq * loadScale;
+                } else if (type === 'gen' && bus.type !== 'Slack') {
+                    bus.gp = nominal.gp * genScale;
+                    bus.gq = nominal.gq * genScale;
+                }
+            });
+
+            isSimulationSolved = false;
+            renderInputTable();
+        }
+
+        function resetGlobalScaling() {
+            loadScale = 1.0;
+            genScale = 1.0;
+            const loadLabel = document.getElementById('loadScaleLabel');
+            const genLabel = document.getElementById('genScaleLabel');
+            if (loadLabel) loadLabel.innerText = '100%';
+            if (genLabel) genLabel.innerText = '100%';
+
+            const loadSlider = document.querySelector('input[oninput*="load"]');
+            const genSlider = document.querySelector('input[oninput*="gen"]');
+            if (loadSlider) loadSlider.value = 100;
+            if (genSlider) genSlider.value = 100;
+
+            currentData = JSON.parse(JSON.stringify(nominalData));
+            isSimulationSolved = false;
+
+            // Reset active preset UI
+            document.querySelectorAll('.variation-card').forEach(c => c.classList.remove('active'));
+            const baselinePreset = document.getElementById('preset-baseline');
+            if (baselinePreset) baselinePreset.classList.add('active');
+
+            renderInputTable();
+        }
+
+        function applyScenarioPreset(preset) {
+            // Reset state first
+            resetGlobalScaling();
+
+            document.querySelectorAll('.variation-card').forEach(c => c.classList.remove('active'));
+            const presetEl = document.getElementById('preset-' + preset);
+            if (presetEl) presetEl.classList.add('active');
+
+            if (preset === 'peak') {
+                applyGlobalScale('load', 130);
+                applyGlobalScale('gen', 110);
+            } else if (preset === 'light') {
+                applyGlobalScale('load', 70);
+                applyGlobalScale('gen', 80);
+            } else if (preset === 'contingency') {
+                // Special case: Drop a specific generation unit
+                if (currentData.length > 1) {
+                    currentData[1].gp = 0; // Drop Bus 2 Gen
+                    currentData[1].gq = 0;
+                    showNotification("Generation Outage", "Bus 2 Generator has tripped. Slack bus must compensate for the loss.", "info");
+                }
+            }
+
+            renderInputTable();
+        }
+
+        function renderRichInput(val, onchangeFn, options = {}) {
+            const step = options.step || 0.1;
+            const isReadonly = options.readonly || false;
+            const isDisabled = options.disabled || false;
+            const placeholder = options.placeholder || "";
+            const colorClass = options.colorClass || "";
+            const id = options.id || "";
+
+            if (isReadonly) {
+                return `
+                    <div class="px-3 py-1 text-right text-gray-400 font-normal italic truncate">
+                        ${val}
+                    </div>
+                `;
+            }
+
+            const valNum = parseFloat(val) || 0;
+
+            return `
+                <div class="rich-input-container group ${colorClass}">
+                    <!-- Hover Slider Overlay (Experimental) -->
+                    <div class="rich-slider-overlay">
+                        <input type="range" min="0" max="${Math.max(200, valNum * 2)}" step="${step}" value="${valNum}" 
+                               class="w-full h-1 bg-white/30 rounded accent-white"
+                               oninput="const input = this.closest('.rich-input-container').querySelector('input.rich-input-field'); input.value = this.value; input.dispatchEvent(new Event('change'))">
+                    </div>
+
+                    <input type="number" step="${step}" value="${val}" 
+                           class="rich-input-field ${isDisabled ? 'opacity-50 pointer-events-none' : ''}" 
+                           onchange="${onchangeFn}; syncNominalData()"
+                           placeholder="${placeholder}">
+                    
+                    <div class="rich-input-stepper ${isDisabled ? 'hidden' : ''}">
+                        <div class="stepper-btn" onclick="const input = this.closest('.rich-input-container').querySelector('input.rich-input-field'); input.stepUp(); input.dispatchEvent(new Event('change')); syncNominalData()">
+                            <i class="ph ph-caret-up"></i>
+                        </div>
+                        <div class="stepper-btn border-t border-slate-100 dark:border-slate-800" 
+                             onclick="const input = this.closest('.rich-input-container').querySelector('input.rich-input-field'); input.stepDown(); input.dispatchEvent(new Event('change')); syncNominalData()">
+                            <i class="ph ph-caret-down"></i>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
 
         function renderTopologyInput() {
             const tbody = document.getElementById('topologyTableBody');
@@ -3387,57 +3792,57 @@
                         </td>
                         <td class="px-3 py-2 text-center">
                             <div class="flex flex-col gap-1 items-center">
-                                <span class="text-[9px] text-gray-400 uppercase font-bold">R (p.u)</span>
-                                <input type="number" step="0.0001" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full max-w-[80px] text-center focus:outline-none font-bold" 
-                                       value="${b.r || 0}" 
-                                       onchange="updateBranchData(${index}, 'r', this.value)">
+                                <span class="text-[9px] text-gray-400 uppercase font-bold">R / %Z</span>
+                                ${renderRichInput(b.r || 0, `updateBranchData(${index}, 'r', this.value)`, {
+                    step: 0.0001,
+                    colorClass: "max-w-[100px]"
+                })}
                             </div>
                         </td>
                         <td class="px-3 py-2 text-center">
                             <div class="flex flex-col gap-1 items-center">
-                                <span class="text-[9px] text-gray-400 uppercase font-bold">X (p.u)</span>
-                                <input type="number" step="0.0001" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full max-w-[80px] text-center focus:outline-none font-bold" 
-                                       value="${b.x || 0.1}" 
-                                       onchange="updateBranchData(${index}, 'x', this.value)">
+                                <span class="text-[9px] text-gray-400 uppercase font-bold">X / Tap (a)</span>
+                                ${renderRichInput(b.x || 0.1, `updateBranchData(${index}, 'x', this.value)`, {
+                    step: 0.0001,
+                    colorClass: "max-w-[100px]"
+                })}
                             </div>
                         </td>
                         <td class="px-3 py-2 text-center">
                             <div class="flex flex-col gap-1 items-center">
                                 ${isTransformer ? `
-                                    <span class="text-[9px] text-gray-400 uppercase font-bold">Vp / Vs / a</span>
-                                    <div class="flex items-center gap-1">
-                                        <input type="number" step="0.1" placeholder="Vp" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-10 text-center focus:outline-none font-bold text-[10px]" 
-                                               value="${b.v_prim || 138}" 
-                                               onchange="updateBranchData(${index}, 'v_prim', this.value)">
-                                        <span class="text-gray-400">/</span>
-                                        <input type="number" step="0.1" placeholder="Vs" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-10 text-center focus:outline-none font-bold text-[10px]" 
-                                               value="${b.v_sec || 69}" 
-                                               onchange="updateBranchData(${index}, 'v_sec', this.value)">
-                                        <span class="text-gray-400">/</span>
-                                        <input type="number" step="0.00001" placeholder="a" class="input-edit text-emerald-600 dark:text-emerald-400 dark:bg-transparent w-14 text-center focus:outline-none font-bold text-[10px]" 
-                                               value="${(b.tap || 1).toFixed(5)}" 
-                                               onchange="updateBranchData(${index}, 'tap', this.value)">
-                                    </div>
+                                    <span class="text-[9px] text-gray-400 uppercase font-bold">Ratio (a)</span>
+                                    ${renderRichInput((b.tap || 1).toFixed(5), `updateBranchData(${index}, 'tap', this.value)`, {
+                    step: 0.00001,
+                    colorClass: "max-w-[100px] text-emerald-600 font-bold"
+                })}
                                 ` : `
                                     <span class="text-[9px] text-gray-400 uppercase font-bold">B/2 (p.u)</span>
-                                    <input type="number" step="0.0001" class="input-edit text-gray-700 dark:text-gray-200 dark:bg-transparent w-full max-w-[80px] text-center focus:outline-none font-bold" 
-                                           value="${b.b_charging || 0}" 
-                                           onchange="updateBranchData(${index}, 'b_charging', this.value)">
+                                    ${renderRichInput(b.b_charging || 0, `updateBranchData(${index}, 'b_charging', this.value)`, {
+                    step: 0.0001,
+                    colorClass: "max-w-[100px]"
+                })}
                                 `}
                             </div>
                         </td>
-                        <td class="px-3 py-2 text-center font-mono text-[10px]">
-                            <div class="text-gray-600 font-bold">${(parseFloat(b.r) || 0).toFixed(4)} + ${(parseFloat(b.x) || 0.1).toFixed(4)}j</div>
-                            ${isTransformer ? `<div class="text-[8px] text-gray-400">a = ${(parseFloat(b.tap) || 1).toFixed(5)}</div>` : ''}
+                        <td class="px-3 py-2 text-center">
+                            <div class="flex flex-col gap-1 items-center">
+                                <span class="text-[9px] text-gray-400 uppercase font-bold">Z Mag (p.u)</span>
+                                <div class="text-[11px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-900 px-2 py-1 rounded">
+                                    ${Math.sqrt(Math.pow(parseFloat(b.r) || 0, 2) + Math.pow(parseFloat(b.x) || 0, 2)).toFixed(4)}
+                                </div>
+                            </div>
                         </td>
-
-                        <td class="px-3 py-2 text-right">
-                            <button onclick="playSound(); removeLine(${index})" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50"><i class="ph ph-trash"></i></button>
+                        <td class="px-4 py-2 text-right">
+                             <button onclick="playSound(); removeLine(${index})" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition btn-click" title="Remove Line">
+                                <i class="ph ph-trash"></i>
+                             </button>
                         </td>
                     </tr>
-            `;
+                `;
             });
         }
+
 
         function updateBranchData(index, field, val) {
             if (activeBranches[index]) {
@@ -3823,6 +4228,7 @@
             });
 
             renderInputTable();
+            syncNominalData();
             // Show toast or alert
             const btn = document.querySelector('button[title="Fill with random test data"]');
             if (btn) {
@@ -3879,6 +4285,7 @@
             calculateVoltageBases();
             renderTopologyInput();
             renderSidebarTopology();
+            syncNominalData();
 
             const btn = document.querySelector('button[title="Auto-connect buses"]');
             if (btn) {
